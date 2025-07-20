@@ -4,7 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kadzu/sukuk-poc-be/internal/logger"
+	"sukuk-be/internal/logger"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/postgres"
@@ -23,10 +24,10 @@ func (suite *ModelsTestSuite) SetupSuite() {
 
 	// Create test database connection
 	dsn := "host=localhost user=postgres password=postgres dbname=sukuk_poc_test port=5432 sslmode=disable TimeZone=UTC"
-	
+
 	// Create test database if it doesn't exist
 	suite.createTestDatabase()
-	
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
 	})
@@ -169,7 +170,7 @@ func (suite *ModelsTestSuite) TestInvestmentModel() {
 	err := suite.db.Create(company).Error
 	assert.NoError(suite.T(), err)
 	assert.NotZero(suite.T(), company.ID)
-	
+
 	sukukSeries := &SukukSeries{
 		CompanyID:         company.ID,
 		Name:              "Test Sukuk",
@@ -229,7 +230,7 @@ func (suite *ModelsTestSuite) TestYieldClaimModel() {
 	err := suite.db.Create(company).Error
 	assert.NoError(suite.T(), err)
 	assert.NotZero(suite.T(), company.ID)
-	
+
 	sukukSeries := &SukukSeries{
 		CompanyID:         company.ID,
 		Name:              "Test Sukuk",
@@ -249,7 +250,7 @@ func (suite *ModelsTestSuite) TestYieldClaimModel() {
 	err = suite.db.Create(sukukSeries).Error
 	assert.NoError(suite.T(), err)
 	assert.NotZero(suite.T(), sukukSeries.ID)
-	
+
 	investment := &Investment{
 		SukukSeriesID:   sukukSeries.ID,
 		InvestorAddress: "0xabc1234567890123456789012345678901234567",
@@ -303,7 +304,7 @@ func (suite *ModelsTestSuite) TestRedemptionModel() {
 	err := suite.db.Create(company).Error
 	assert.NoError(suite.T(), err)
 	assert.NotZero(suite.T(), company.ID)
-	
+
 	sukukSeries := &SukukSeries{
 		CompanyID:         company.ID,
 		Name:              "Test Sukuk",
@@ -323,7 +324,7 @@ func (suite *ModelsTestSuite) TestRedemptionModel() {
 	err = suite.db.Create(sukukSeries).Error
 	assert.NoError(suite.T(), err)
 	assert.NotZero(suite.T(), sukukSeries.ID)
-	
+
 	investment := &Investment{
 		SukukSeriesID:   sukukSeries.ID,
 		InvestorAddress: "0xabc1234567890123456789012345678901234567",

@@ -6,9 +6,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"sukuk-be/internal/models"
+	"sukuk-be/internal/testutil"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
-	"github.com/kadzu/sukuk-poc-be/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -22,7 +23,7 @@ type CompanyTestSuite struct {
 func (suite *CompanyTestSuite) SetupSuite() {
 	suite.testCfg = testutil.SetupTestEnvironment(suite.T())
 	suite.router = gin.New()
-	
+
 	// Setup routes
 	suite.router.GET("/api/v1/companies", ListCompanies)
 	suite.router.GET("/api/v1/companies/:id", GetCompany)
@@ -86,7 +87,7 @@ func (suite *CompanyTestSuite) TestListCompanies_WithData() {
 	assert.NoError(suite.T(), err)
 
 	assert.Equal(suite.T(), float64(2), response["count"])
-	
+
 	companies := response["data"].([]interface{})
 	assert.Len(suite.T(), companies, 2)
 
@@ -110,7 +111,7 @@ func (suite *CompanyTestSuite) TestListCompanies_OnlyActiveCompanies() {
 		IsActive:      true, // Create as active first
 	}
 	suite.testCfg.DB.Create(inactiveCompany)
-	
+
 	// Then update to inactive to bypass GORM default value issue
 	suite.testCfg.DB.Model(inactiveCompany).Update("is_active", false)
 
@@ -128,10 +129,10 @@ func (suite *CompanyTestSuite) TestListCompanies_OnlyActiveCompanies() {
 
 	// Should only return the active company
 	assert.Equal(suite.T(), float64(1), response["count"])
-	
+
 	companies := response["data"].([]interface{})
 	assert.Len(suite.T(), companies, 1)
-	
+
 	company := companies[0].(map[string]interface{})
 	assert.Equal(suite.T(), activeCompany.Name, company["name"])
 	assert.Equal(suite.T(), true, company["is_active"])
@@ -189,7 +190,7 @@ func (suite *CompanyTestSuite) TestGetCompany_InvalidID() {
 func (suite *CompanyTestSuite) TestGetCompanySukuks_Success() {
 	// Create test company
 	company := testutil.CreateTestCompany(suite.testCfg.DB)
-	
+
 	// Create test sukuk series
 	sukuk1 := testutil.CreateTestSukukSeries(suite.testCfg.DB, company.ID)
 	sukuk2 := &models.SukukSeries{
@@ -224,7 +225,7 @@ func (suite *CompanyTestSuite) TestGetCompanySukuks_Success() {
 	assert.NoError(suite.T(), err)
 
 	assert.Equal(suite.T(), float64(2), response["count"])
-	
+
 	sukuks := response["data"].([]interface{})
 	assert.Len(suite.T(), sukuks, 2)
 

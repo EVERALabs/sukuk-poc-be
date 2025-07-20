@@ -12,11 +12,12 @@ import (
 	"path/filepath"
 	"testing"
 
+	"sukuk-be/internal/config"
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/logger"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/config"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/logger"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -46,20 +47,20 @@ func SetupTestEnvironment(t *testing.T) *TestConfig {
 			Debug:       false,
 		},
 		Database: config.DatabaseConfig{
-			Host:              "localhost",
-			Port:              5432,
-			User:              "postgres",
-			Password:          "postgres",
-			DBName:            "sukuk_poc_test",
-			SSLMode:           "disable",
-			MaxOpenConns:      10,
-			MaxIdleConns:      5,
-			ConnMaxLifetime:   300000000000, // 5 minutes in nanoseconds
+			Host:            "localhost",
+			Port:            5432,
+			User:            "postgres",
+			Password:        "postgres",
+			DBName:          "sukuk_poc_test",
+			SSLMode:         "disable",
+			MaxOpenConns:    10,
+			MaxIdleConns:    5,
+			ConnMaxLifetime: 300000000000, // 5 minutes in nanoseconds
 		},
 		API: config.APIConfig{
-			APIKey:         "test-api-key",
+			APIKey:          "test-api-key",
 			RateLimitPerMin: 1000,
-			AllowedOrigins: []string{"*"},
+			AllowedOrigins:  []string{"*"},
 		},
 	}
 
@@ -253,10 +254,10 @@ func MakeTestMultipartRequest(url string, params map[string]string, filename, fi
 func CreateTestFile(t *testing.T, filename, content string) string {
 	tempDir := t.TempDir()
 	filePath := filepath.Join(tempDir, filename)
-	
+
 	err := os.WriteFile(filePath, []byte(content), 0644)
 	assert.NoError(t, err, "Failed to create test file")
-	
+
 	return filePath
 }
 

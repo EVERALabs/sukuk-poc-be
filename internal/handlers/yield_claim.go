@@ -5,9 +5,10 @@ import (
 	"strconv"
 	"strings"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
 // GetYieldClaims returns a list of all yield claims with optional filtering
@@ -23,7 +24,7 @@ import (
 // @Router /yield-claims [get]
 func GetYieldClaims(c *gin.Context) {
 	var yieldClaims []models.YieldClaim
-	
+
 	db := database.GetDB()
 	query := db.Preload("SukukSeries").Preload("SukukSeries.Company")
 
@@ -45,7 +46,7 @@ func GetYieldClaims(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": yieldClaims,
+		"data":  yieldClaims,
 		"count": len(yieldClaims),
 	})
 }
@@ -122,7 +123,7 @@ func GetYieldClaimsByInvestor(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": yieldClaims,
+		"data":  yieldClaims,
 		"count": len(yieldClaims),
 	})
 }
@@ -165,7 +166,7 @@ func GetYieldClaimsBySukuk(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": yieldClaims,
+		"data":  yieldClaims,
 		"count": len(yieldClaims),
 	})
 }

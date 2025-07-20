@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
 // ListSukukSeries returns a list of all Sukuk series (READ-ONLY)
@@ -22,7 +23,7 @@ import (
 // @Router /sukuks [get]
 func ListSukukSeries(c *gin.Context) {
 	var sukukSeries []models.SukukSeries
-	
+
 	db := database.GetDB()
 	query := db.Preload("Company")
 
@@ -44,7 +45,7 @@ func ListSukukSeries(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": sukukSeries,
+		"data":  sukukSeries,
 		"count": len(sukukSeries),
 		"meta": gin.H{
 			"total": len(sukukSeries),
@@ -106,26 +107,26 @@ func GetSukukMetrics(c *gin.Context) {
 	}
 
 	db := database.GetDB()
-	
+
 	// Get total investments
 	var totalInvestors int64
 	var totalInvestment string = "0"
-	
+
 	db.Model(&models.Investment{}).Where("sukuk_series_id = ? AND status = ?", uint(id), "active").Count(&totalInvestors)
-	
+
 	// Get pending yields
 	var pendingYields int64
 	db.Model(&models.YieldClaim{}).Where("sukuk_series_id = ? AND status = ?", uint(id), "pending").Count(&pendingYields)
-	
+
 	// Get pending redemptions
 	var pendingRedemptions int64
 	db.Model(&models.Redemption{}).Where("sukuk_series_id = ? AND status = ?", uint(id), "requested").Count(&pendingRedemptions)
 
 	c.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
-			"total_investors": totalInvestors,
-			"total_investment": totalInvestment,
-			"pending_yields": pendingYields,
+			"total_investors":     totalInvestors,
+			"total_investment":    totalInvestment,
+			"pending_yields":      pendingYields,
 			"pending_redemptions": pendingRedemptions,
 		},
 	})
@@ -161,8 +162,7 @@ func GetSukukHolders(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": investments,
+		"data":  investments,
 		"count": len(investments),
 	})
 }
-

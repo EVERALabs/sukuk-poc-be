@@ -5,8 +5,9 @@ import (
 	"io"
 	"time"
 
+	"sukuk-be/internal/logger"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/logger"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,7 +36,7 @@ func RequestLogger() gin.HandlerFunc {
 				requestBody = string(bodyBytes)
 				// Restore the body for the actual handler
 				c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-				
+
 				// Only log body for non-file uploads and keep it reasonably short
 				if len(requestBody) < 1000 && !isFileUpload(c) {
 					requestLogger = requestLogger.WithField("request_body", requestBody)
@@ -94,7 +95,7 @@ func RequestLogger() gin.HandlerFunc {
 // isFileUpload checks if the request is a file upload
 func isFileUpload(c *gin.Context) bool {
 	contentType := c.Request.Header.Get("Content-Type")
-	return contentType != "" && (contentType == "multipart/form-data" || 
+	return contentType != "" && (contentType == "multipart/form-data" ||
 		contentType[:19] == "multipart/form-data")
 }
 
@@ -120,7 +121,7 @@ func DatabaseLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
-		
+
 		// Check if this was a database-heavy operation
 		duration := time.Since(start)
 		if duration > 500*time.Millisecond {

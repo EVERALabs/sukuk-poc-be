@@ -7,8 +7,9 @@ import (
 	"os"
 	"testing"
 
+	"sukuk-be/internal/testutil"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -23,7 +24,7 @@ func (suite *HealthTestSuite) SetupSuite() {
 	suite.testCfg = testutil.SetupTestEnvironment(suite.T())
 	suite.router = gin.New()
 	suite.router.GET("/health", Health)
-	
+
 	// Create uploads directories for testing
 	os.MkdirAll("./uploads/logos", 0755)
 	os.MkdirAll("./uploads/prospectus", 0755)

@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
 // GetInvestments returns a list of all investments with optional filtering
@@ -22,7 +23,7 @@ import (
 // @Router /investments [get]
 func GetInvestments(c *gin.Context) {
 	var investments []models.Investment
-	
+
 	db := database.GetDB()
 	query := db.Preload("SukukSeries").Preload("SukukSeries.Company")
 
@@ -44,7 +45,7 @@ func GetInvestments(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": investments,
+		"data":  investments,
 		"count": len(investments),
 	})
 }
@@ -113,7 +114,7 @@ func GetInvestmentsByInvestor(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": investments,
+		"data":  investments,
 		"count": len(investments),
 	})
 }
@@ -148,7 +149,7 @@ func GetInvestmentsBySukuk(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": investments,
+		"data":  investments,
 		"count": len(investments),
 	})
 }

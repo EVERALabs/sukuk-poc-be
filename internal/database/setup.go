@@ -3,8 +3,9 @@ package database
 import (
 	"fmt"
 
-	"github.com/kadzu/sukuk-poc-be/internal/config"
-	"github.com/kadzu/sukuk-poc-be/internal/logger"
+	"sukuk-be/internal/config"
+	"sukuk-be/internal/logger"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
@@ -46,14 +47,14 @@ func CreateDatabaseIfNotExists(cfg *config.Config) error {
 
 	if !exists {
 		logger.WithField("database", cfg.Database.DBName).Info("Database does not exist, creating it...")
-		
+
 		// Create database
 		createSQL := fmt.Sprintf("CREATE DATABASE %s", cfg.Database.DBName)
 		if err := adminDB.Exec(createSQL).Error; err != nil {
 			logger.WithError(err).WithField("database", cfg.Database.DBName).Error("Failed to create database")
 			return fmt.Errorf("failed to create database '%s': %w", cfg.Database.DBName, err)
 		}
-		
+
 		logger.WithField("database", cfg.Database.DBName).Info("Database created successfully")
 	} else {
 		logger.WithField("database", cfg.Database.DBName).Info("Database already exists")

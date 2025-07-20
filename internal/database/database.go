@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kadzu/sukuk-poc-be/internal/config"
-	"github.com/kadzu/sukuk-poc-be/internal/logger"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
+	"sukuk-be/internal/config"
+	"sukuk-be/internal/logger"
+	"sukuk-be/internal/models"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
@@ -62,11 +63,11 @@ func Connect(cfg *config.Config) error {
 
 	DB = db
 	logger.WithFields(map[string]interface{}{
-		"host":            cfg.Database.Host,
-		"port":            cfg.Database.Port,
-		"database":        cfg.Database.DBName,
-		"max_open_conns":  cfg.Database.MaxOpenConns,
-		"max_idle_conns":  cfg.Database.MaxIdleConns,
+		"host":              cfg.Database.Host,
+		"port":              cfg.Database.Port,
+		"database":          cfg.Database.DBName,
+		"max_open_conns":    cfg.Database.MaxOpenConns,
+		"max_idle_conns":    cfg.Database.MaxIdleConns,
 		"conn_max_lifetime": cfg.Database.ConnMaxLifetime.String(),
 	}).Info("Database connection established successfully")
 	return nil
@@ -79,7 +80,7 @@ func Migrate() error {
 	}
 
 	logger.Info("Running database migrations...")
-	
+
 	// Auto-migrate all models
 	if err := DB.AutoMigrate(models.AllModels()...); err != nil {
 		logger.WithError(err).Error("Failed to run database migrations")

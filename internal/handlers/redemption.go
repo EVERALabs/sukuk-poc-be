@@ -6,19 +6,20 @@ import (
 	"strings"
 	"time"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
 // CreateRedemptionRequest represents the request body for creating a redemption request
 type CreateRedemptionRequest struct {
-	SukukSeriesID   uint   `json:"sukuk_series_id" binding:"required" swaggertype:"integer" example:"1"`
-	InvestmentID    uint   `json:"investment_id" binding:"required" swaggertype:"integer" example:"1"`
-	InvestorAddress string `json:"investor_address" binding:"required" swaggertype:"string" example:"0x1234567890123456789012345678901234567890"`
-	TokenAmount     string `json:"token_amount" binding:"required" swaggertype:"string" example:"500000000000000000000"`
+	SukukSeriesID    uint   `json:"sukuk_series_id" binding:"required" swaggertype:"integer" example:"1"`
+	InvestmentID     uint   `json:"investment_id" binding:"required" swaggertype:"integer" example:"1"`
+	InvestorAddress  string `json:"investor_address" binding:"required" swaggertype:"string" example:"0x1234567890123456789012345678901234567890"`
+	TokenAmount      string `json:"token_amount" binding:"required" swaggertype:"string" example:"500000000000000000000"`
 	RedemptionAmount string `json:"redemption_amount" binding:"required" swaggertype:"string" example:"500000000000000000000"`
-	RequestReason   string `json:"request_reason" swaggertype:"string" example:"Early redemption for emergency needs"`
+	RequestReason    string `json:"request_reason" swaggertype:"string" example:"Early redemption for emergency needs"`
 }
 
 // ApproveRedemptionRequest represents the request body for approving a redemption
@@ -44,7 +45,7 @@ type RejectRedemptionRequest struct {
 // @Router /redemptions [get]
 func GetRedemptions(c *gin.Context) {
 	var redemptions []models.Redemption
-	
+
 	db := database.GetDB()
 	query := db.Preload("SukukSeries").Preload("SukukSeries.Company").Preload("Investment")
 
@@ -66,7 +67,7 @@ func GetRedemptions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": redemptions,
+		"data":  redemptions,
 		"count": len(redemptions),
 	})
 }
@@ -143,7 +144,7 @@ func GetRedemptionsByInvestor(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": redemptions,
+		"data":  redemptions,
 		"count": len(redemptions),
 	})
 }
@@ -186,7 +187,7 @@ func GetRedemptionsBySukuk(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": redemptions,
+		"data":  redemptions,
 		"count": len(redemptions),
 	})
 }
@@ -212,7 +213,7 @@ func CreateRedemption(c *gin.Context) {
 	// Validate investment exists and belongs to investor
 	var investment models.Investment
 	db := database.GetDB()
-	if err := db.Where("id = ? AND investor_address = ? AND status = ?", 
+	if err := db.Where("id = ? AND investor_address = ? AND status = ?",
 		req.InvestmentID, strings.ToLower(req.InvestorAddress), "active").First(&investment).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Investment not found or not active",

@@ -81,7 +81,7 @@ sukuk-poc-be/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/kadzu/sukuk-poc-be.git
+git clone https://sukuk-be.git
 cd sukuk-poc-be
 ```
 

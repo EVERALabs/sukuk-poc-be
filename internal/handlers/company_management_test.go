@@ -9,9 +9,10 @@ import (
 	"os"
 	"testing"
 
+	"sukuk-be/internal/models"
+	"sukuk-be/internal/testutil"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
-	"github.com/kadzu/sukuk-poc-be/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -25,7 +26,7 @@ type CompanyManagementTestSuite struct {
 func (suite *CompanyManagementTestSuite) SetupSuite() {
 	suite.testCfg = testutil.SetupTestEnvironment(suite.T())
 	suite.router = gin.New()
-	
+
 	// Setup routes
 	suite.router.POST("/api/v1/admin/companies", CreateCompany)
 	suite.router.PUT("/api/v1/admin/companies/:id", UpdateCompany)
@@ -39,7 +40,7 @@ func (suite *CompanyManagementTestSuite) TearDownSuite() {
 func (suite *CompanyManagementTestSuite) SetupTest() {
 	// Clean database before each test
 	suite.testCfg.DB.Exec("TRUNCATE TABLE companies RESTART IDENTITY CASCADE")
-	
+
 	// Create test uploads directory
 	os.MkdirAll("./uploads/logos", 0755)
 }
@@ -74,7 +75,7 @@ func (suite *CompanyManagementTestSuite) TestCreateCompany_Success() {
 	assert.NoError(suite.T(), err)
 
 	assert.Equal(suite.T(), "Company created successfully", response["message"])
-	
+
 	companyData := response["data"].(map[string]interface{})
 	assert.Equal(suite.T(), requestBody.Name, companyData["name"])
 	assert.Equal(suite.T(), requestBody.Email, companyData["email"])
@@ -150,7 +151,7 @@ func (suite *CompanyManagementTestSuite) TestUpdateCompany_Success() {
 	assert.NoError(suite.T(), err)
 
 	assert.Equal(suite.T(), "Company updated successfully", response["message"])
-	
+
 	companyData := response["data"].(map[string]interface{})
 	assert.Equal(suite.T(), requestBody.Name, companyData["name"])
 	assert.Equal(suite.T(), requestBody.Description, companyData["description"])
@@ -187,7 +188,7 @@ func (suite *CompanyManagementTestSuite) TestUpdateCompany_PartialUpdate() {
 	var updatedCompany models.Company
 	err := suite.testCfg.DB.First(&updatedCompany, company.ID).Error
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), originalName, updatedCompany.Name) // Name unchanged
+	assert.Equal(suite.T(), originalName, updatedCompany.Name)                   // Name unchanged
 	assert.Equal(suite.T(), requestBody.Description, updatedCompany.Description) // Description updated
 }
 

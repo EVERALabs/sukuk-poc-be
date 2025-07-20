@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/kadzu/sukuk-poc-be/internal/config"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
+	"sukuk-be/internal/config"
+	"sukuk-be/internal/database"
 )
 
 func main() {

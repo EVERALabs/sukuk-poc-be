@@ -1830,473 +1830,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_kadzu_sukuk-poc-be_internal_models.Company": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "Leading Indonesian sukuk issuer"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "contact@sukukindonesia.com"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "industry": {
-                    "type": "string",
-                    "example": "Financial Services"
-                },
-                "is_active": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "legal_documents": {
-                    "description": "JSON array of document paths",
-                    "type": "string",
-                    "example": "[\"doc1.pdf\", \"doc2.pdf\"]"
-                },
-                "logo": {
-                    "description": "File path to company logo",
-                    "type": "string",
-                    "example": "/uploads/logos/company_1.png"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "PT Sukuk Indonesia"
-                },
-                "sukuk_series": {
-                    "description": "Relationships",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
-                    }
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "wallet_address": {
-                    "type": "string",
-                    "example": "0x1234567890123456789012345678901234567890"
-                },
-                "website": {
-                    "type": "string",
-                    "example": "https://sukukindonesia.com"
-                }
-            }
-        },
-        "github_com_kadzu_sukuk-poc-be_internal_models.Event": {
-            "type": "object",
-            "properties": {
-                "block_number": {
-                    "type": "integer"
-                },
-                "chain_id": {
-                    "description": "Base Testnet",
-                    "type": "integer"
-                },
-                "contract_address": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.JSON"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "event_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "processed": {
-                    "type": "boolean"
-                },
-                "processed_at": {
-                    "type": "string"
-                },
-                "tx_hash": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_kadzu_sukuk-poc-be_internal_models.Investment": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "description": "Investment amount in IDRX",
-                    "type": "string",
-                    "example": "1000000000000000000000"
-                },
-                "block_number": {
-                    "type": "integer",
-                    "example": 12345678
-                },
-                "created_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "investment_date": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "investor_address": {
-                    "type": "string",
-                    "example": "0x1234567890123456789012345678901234567890"
-                },
-                "investor_email": {
-                    "type": "string",
-                    "example": "investor@example.com"
-                },
-                "redemptions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
-                    }
-                },
-                "status": {
-                    "type": "string",
-                    "example": "active"
-                },
-                "sukuk_series": {
-                    "description": "Relationships",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
-                        }
-                    ]
-                },
-                "sukuk_series_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "token_amount": {
-                    "description": "Equivalent Sukuk tokens received",
-                    "type": "string",
-                    "example": "1000000000000000000000"
-                },
-                "transaction_hash": {
-                    "type": "string",
-                    "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "yield_claims": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
-                    }
-                }
-            }
-        },
-        "github_com_kadzu_sukuk-poc-be_internal_models.JSON": {
-            "type": "object",
-            "additionalProperties": true
-        },
-        "github_com_kadzu_sukuk-poc-be_internal_models.Redemption": {
-            "type": "object",
-            "properties": {
-                "approval_notes": {
-                    "description": "Company's approval/rejection notes",
-                    "type": "string"
-                },
-                "approved_at": {
-                    "type": "string"
-                },
-                "block_number": {
-                    "description": "Set when completed",
-                    "type": "integer"
-                },
-                "completed_at": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "investment": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
-                },
-                "investment_id": {
-                    "type": "integer"
-                },
-                "investor_address": {
-                    "type": "string"
-                },
-                "redemption_amount": {
-                    "description": "IDRX amount to be returned",
-                    "type": "string"
-                },
-                "rejected_at": {
-                    "type": "string"
-                },
-                "rejection_reason": {
-                    "type": "string"
-                },
-                "request_reason": {
-                    "description": "Why investor wants to redeem",
-                    "type": "string"
-                },
-                "requested_at": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.RedemptionStatus"
-                },
-                "sukuk_series": {
-                    "description": "Relationships",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
-                        }
-                    ]
-                },
-                "sukuk_series_id": {
-                    "type": "integer"
-                },
-                "token_amount": {
-                    "description": "Amount of tokens to redeem",
-                    "type": "string"
-                },
-                "transaction_hash": {
-                    "description": "Set when completed",
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_kadzu_sukuk-poc-be_internal_models.RedemptionStatus": {
-            "type": "string",
-            "enum": [
-                "requested",
-                "approved",
-                "rejected",
-                "completed",
-                "cancelled"
-            ],
-            "x-enum-varnames": [
-                "RedemptionStatusRequested",
-                "RedemptionStatusApproved",
-                "RedemptionStatusRejected",
-                "RedemptionStatusCompleted",
-                "RedemptionStatusCancelled"
-            ]
-        },
-        "github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries": {
-            "type": "object",
-            "properties": {
-                "company": {
-                    "description": "Relationships",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Company"
-                        }
-                    ]
-                },
-                "company_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "created_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "Sustainable infrastructure financing sukuk"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "investments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
-                    }
-                },
-                "is_redeemable": {
-                    "description": "Can investors redeem early",
-                    "type": "boolean",
-                    "example": true
-                },
-                "legal_documents": {
-                    "description": "JSON array of document paths",
-                    "type": "string",
-                    "example": "[\"legal1.pdf\", \"legal2.pdf\"]"
-                },
-                "maturity_date": {
-                    "type": "string",
-                    "example": "2027-12-31T00:00:00Z"
-                },
-                "max_investment": {
-                    "description": "Maximum investment amount (optional)",
-                    "type": "string",
-                    "example": "100000000000000000000"
-                },
-                "min_investment": {
-                    "description": "Minimum investment amount",
-                    "type": "string",
-                    "example": "1000000000000000000"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Green Sukuk Series A"
-                },
-                "outstanding_supply": {
-                    "description": "Currently issued",
-                    "type": "string",
-                    "example": "500000000000000000000000"
-                },
-                "payment_frequency": {
-                    "description": "Payments per year (quarterly = 4)",
-                    "type": "integer",
-                    "example": 4
-                },
-                "prospectus": {
-                    "description": "PDF file path",
-                    "type": "string",
-                    "example": "/uploads/prospectus/sukuk_1.pdf"
-                },
-                "redemptions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
-                    }
-                },
-                "status": {
-                    "type": "string",
-                    "example": "active"
-                },
-                "symbol": {
-                    "type": "string",
-                    "example": "GSA"
-                },
-                "token_address": {
-                    "type": "string",
-                    "example": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
-                },
-                "total_supply": {
-                    "description": "Use string for big numbers",
-                    "type": "string",
-                    "example": "1000000000000000000000000"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "yield_claims": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
-                    }
-                },
-                "yield_rate": {
-                    "description": "Annual yield rate (e.g., 0.0850 for 8.5%)",
-                    "type": "number",
-                    "example": 0.085
-                }
-            }
-        },
-        "github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim": {
-            "type": "object",
-            "properties": {
-                "block_number": {
-                    "description": "Set when claimed",
-                    "type": "integer"
-                },
-                "claimed_at": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "expires_at": {
-                    "description": "Yield claims can expire",
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "investment": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
-                },
-                "investment_id": {
-                    "type": "integer"
-                },
-                "investor_address": {
-                    "type": "string"
-                },
-                "period_end": {
-                    "type": "string"
-                },
-                "period_start": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaimStatus"
-                },
-                "sukuk_series": {
-                    "description": "Relationships",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
-                        }
-                    ]
-                },
-                "sukuk_series_id": {
-                    "type": "integer"
-                },
-                "transaction_hash": {
-                    "description": "Set when claimed",
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "yield_amount": {
-                    "description": "Yield amount in IDRX",
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_kadzu_sukuk-poc-be_internal_models.YieldClaimStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "claimed",
-                "expired"
-            ],
-            "x-enum-varnames": [
-                "YieldClaimStatusPending",
-                "YieldClaimStatusClaimed",
-                "YieldClaimStatusExpired"
-            ]
-        },
         "internal_handlers.APIResponse": {
             "type": "object",
             "properties": {
@@ -2358,7 +1891,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Company"
+                        "$ref": "#/definitions/sukuk-be_internal_models.Company"
                     }
                 }
             }
@@ -2367,7 +1900,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Company"
+                    "$ref": "#/definitions/sukuk-be_internal_models.Company"
                 }
             }
         },
@@ -2381,7 +1914,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                        "$ref": "#/definitions/sukuk-be_internal_models.SukukSeries"
                     }
                 }
             }
@@ -2550,7 +2083,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Event"
+                        "$ref": "#/definitions/sukuk-be_internal_models.Event"
                     }
                 }
             }
@@ -2627,7 +2160,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                        "$ref": "#/definitions/sukuk-be_internal_models.Investment"
                     }
                 }
             }
@@ -2636,7 +2169,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                    "$ref": "#/definitions/sukuk-be_internal_models.Investment"
                 }
             }
         },
@@ -2713,19 +2246,19 @@ const docTemplate = `{
                 "investments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                        "$ref": "#/definitions/sukuk-be_internal_models.Investment"
                     }
                 },
                 "pending_yields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
+                        "$ref": "#/definitions/sukuk-be_internal_models.YieldClaim"
                     }
                 },
                 "redemptions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
+                        "$ref": "#/definitions/sukuk-be_internal_models.Redemption"
                     }
                 },
                 "summary": {
@@ -2768,7 +2301,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
+                        "$ref": "#/definitions/sukuk-be_internal_models.Redemption"
                     }
                 }
             }
@@ -2777,7 +2310,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
+                    "$ref": "#/definitions/sukuk-be_internal_models.Redemption"
                 }
             }
         },
@@ -2803,7 +2336,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                        "$ref": "#/definitions/sukuk-be_internal_models.Investment"
                     }
                 }
             }
@@ -2847,7 +2380,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                        "$ref": "#/definitions/sukuk-be_internal_models.SukukSeries"
                     }
                 },
                 "meta": {
@@ -2859,7 +2392,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                    "$ref": "#/definitions/sukuk-be_internal_models.SukukSeries"
                 }
             }
         },
@@ -2984,7 +2517,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
+                        "$ref": "#/definitions/sukuk-be_internal_models.YieldClaim"
                     }
                 }
             }
@@ -2993,9 +2526,476 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
+                    "$ref": "#/definitions/sukuk-be_internal_models.YieldClaim"
                 }
             }
+        },
+        "sukuk-be_internal_models.Company": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Leading Indonesian sukuk issuer"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "contact@sukukindonesia.com"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "Financial Services"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "legal_documents": {
+                    "description": "JSON array of document paths",
+                    "type": "string",
+                    "example": "[\"doc1.pdf\", \"doc2.pdf\"]"
+                },
+                "logo": {
+                    "description": "File path to company logo",
+                    "type": "string",
+                    "example": "/uploads/logos/company_1.png"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "PT Sukuk Indonesia"
+                },
+                "sukuk_series": {
+                    "description": "Relationships",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sukuk-be_internal_models.SukukSeries"
+                    }
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "wallet_address": {
+                    "type": "string",
+                    "example": "0x1234567890123456789012345678901234567890"
+                },
+                "website": {
+                    "type": "string",
+                    "example": "https://sukukindonesia.com"
+                }
+            }
+        },
+        "sukuk-be_internal_models.Event": {
+            "type": "object",
+            "properties": {
+                "block_number": {
+                    "type": "integer"
+                },
+                "chain_id": {
+                    "description": "Base Testnet",
+                    "type": "integer"
+                },
+                "contract_address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/sukuk-be_internal_models.JSON"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "event_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "processed": {
+                    "type": "boolean"
+                },
+                "processed_at": {
+                    "type": "string"
+                },
+                "tx_hash": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "sukuk-be_internal_models.Investment": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Investment amount in IDRX",
+                    "type": "string",
+                    "example": "1000000000000000000000"
+                },
+                "block_number": {
+                    "type": "integer",
+                    "example": 12345678
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "investment_date": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "investor_address": {
+                    "type": "string",
+                    "example": "0x1234567890123456789012345678901234567890"
+                },
+                "investor_email": {
+                    "type": "string",
+                    "example": "investor@example.com"
+                },
+                "redemptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sukuk-be_internal_models.Redemption"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "sukuk_series": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sukuk-be_internal_models.SukukSeries"
+                        }
+                    ]
+                },
+                "sukuk_series_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "token_amount": {
+                    "description": "Equivalent Sukuk tokens received",
+                    "type": "string",
+                    "example": "1000000000000000000000"
+                },
+                "transaction_hash": {
+                    "type": "string",
+                    "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "yield_claims": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sukuk-be_internal_models.YieldClaim"
+                    }
+                }
+            }
+        },
+        "sukuk-be_internal_models.JSON": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "sukuk-be_internal_models.Redemption": {
+            "type": "object",
+            "properties": {
+                "approval_notes": {
+                    "description": "Company's approval/rejection notes",
+                    "type": "string"
+                },
+                "approved_at": {
+                    "type": "string"
+                },
+                "block_number": {
+                    "description": "Set when completed",
+                    "type": "integer"
+                },
+                "completed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "investment": {
+                    "$ref": "#/definitions/sukuk-be_internal_models.Investment"
+                },
+                "investment_id": {
+                    "type": "integer"
+                },
+                "investor_address": {
+                    "type": "string"
+                },
+                "redemption_amount": {
+                    "description": "IDRX amount to be returned",
+                    "type": "string"
+                },
+                "rejected_at": {
+                    "type": "string"
+                },
+                "rejection_reason": {
+                    "type": "string"
+                },
+                "request_reason": {
+                    "description": "Why investor wants to redeem",
+                    "type": "string"
+                },
+                "requested_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/sukuk-be_internal_models.RedemptionStatus"
+                },
+                "sukuk_series": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sukuk-be_internal_models.SukukSeries"
+                        }
+                    ]
+                },
+                "sukuk_series_id": {
+                    "type": "integer"
+                },
+                "token_amount": {
+                    "description": "Amount of tokens to redeem",
+                    "type": "string"
+                },
+                "transaction_hash": {
+                    "description": "Set when completed",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "sukuk-be_internal_models.RedemptionStatus": {
+            "type": "string",
+            "enum": [
+                "requested",
+                "approved",
+                "rejected",
+                "completed",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "RedemptionStatusRequested",
+                "RedemptionStatusApproved",
+                "RedemptionStatusRejected",
+                "RedemptionStatusCompleted",
+                "RedemptionStatusCancelled"
+            ]
+        },
+        "sukuk-be_internal_models.SukukSeries": {
+            "type": "object",
+            "properties": {
+                "company": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sukuk-be_internal_models.Company"
+                        }
+                    ]
+                },
+                "company_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Sustainable infrastructure financing sukuk"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "investments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sukuk-be_internal_models.Investment"
+                    }
+                },
+                "is_redeemable": {
+                    "description": "Can investors redeem early",
+                    "type": "boolean",
+                    "example": true
+                },
+                "legal_documents": {
+                    "description": "JSON array of document paths",
+                    "type": "string",
+                    "example": "[\"legal1.pdf\", \"legal2.pdf\"]"
+                },
+                "maturity_date": {
+                    "type": "string",
+                    "example": "2027-12-31T00:00:00Z"
+                },
+                "max_investment": {
+                    "description": "Maximum investment amount (optional)",
+                    "type": "string",
+                    "example": "100000000000000000000"
+                },
+                "min_investment": {
+                    "description": "Minimum investment amount",
+                    "type": "string",
+                    "example": "1000000000000000000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Green Sukuk Series A"
+                },
+                "outstanding_supply": {
+                    "description": "Currently issued",
+                    "type": "string",
+                    "example": "500000000000000000000000"
+                },
+                "payment_frequency": {
+                    "description": "Payments per year (quarterly = 4)",
+                    "type": "integer",
+                    "example": 4
+                },
+                "prospectus": {
+                    "description": "PDF file path",
+                    "type": "string",
+                    "example": "/uploads/prospectus/sukuk_1.pdf"
+                },
+                "redemptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sukuk-be_internal_models.Redemption"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "symbol": {
+                    "type": "string",
+                    "example": "GSA"
+                },
+                "token_address": {
+                    "type": "string",
+                    "example": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
+                },
+                "total_supply": {
+                    "description": "Use string for big numbers",
+                    "type": "string",
+                    "example": "1000000000000000000000000"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "yield_claims": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sukuk-be_internal_models.YieldClaim"
+                    }
+                },
+                "yield_rate": {
+                    "description": "Annual yield rate (e.g., 0.0850 for 8.5%)",
+                    "type": "number",
+                    "example": 0.085
+                }
+            }
+        },
+        "sukuk-be_internal_models.YieldClaim": {
+            "type": "object",
+            "properties": {
+                "block_number": {
+                    "description": "Set when claimed",
+                    "type": "integer"
+                },
+                "claimed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "description": "Yield claims can expire",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "investment": {
+                    "$ref": "#/definitions/sukuk-be_internal_models.Investment"
+                },
+                "investment_id": {
+                    "type": "integer"
+                },
+                "investor_address": {
+                    "type": "string"
+                },
+                "period_end": {
+                    "type": "string"
+                },
+                "period_start": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/sukuk-be_internal_models.YieldClaimStatus"
+                },
+                "sukuk_series": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sukuk-be_internal_models.SukukSeries"
+                        }
+                    ]
+                },
+                "sukuk_series_id": {
+                    "type": "integer"
+                },
+                "transaction_hash": {
+                    "description": "Set when claimed",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "yield_amount": {
+                    "description": "Yield amount in IDRX",
+                    "type": "string"
+                }
+            }
+        },
+        "sukuk-be_internal_models.YieldClaimStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "claimed",
+                "expired"
+            ],
+            "x-enum-varnames": [
+                "YieldClaimStatusPending",
+                "YieldClaimStatusClaimed",
+                "YieldClaimStatusExpired"
+            ]
         },
         "time.Duration": {
             "type": "integer",

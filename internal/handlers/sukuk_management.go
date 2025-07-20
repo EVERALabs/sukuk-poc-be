@@ -5,35 +5,36 @@ import (
 	"strconv"
 	"time"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+	"sukuk-be/internal/utils"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
-	"github.com/kadzu/sukuk-poc-be/internal/utils"
 )
 
 // CreateSukukSeriesRequest represents the request body for creating a new Sukuk series
 type CreateSukukSeriesRequest struct {
-	CompanyID              uint      `json:"company_id" binding:"required" swaggertype:"integer" example:"1"`
-	Name                   string    `json:"name" binding:"required" swaggertype:"string" example:"Green Sukuk Series A"`
-	Symbol                 string    `json:"symbol" binding:"required" swaggertype:"string" example:"GSA"`
-	Description            string    `json:"description" swaggertype:"string" example:"Sustainable infrastructure financing sukuk"`
-	TotalSupply            string    `json:"total_supply" binding:"required" swaggertype:"string" example:"1000000000000000000000000"`
-	YieldRate              float64   `json:"yield_rate" binding:"required" swaggertype:"number" example:"0.085"`
-	MaturityDate           time.Time `json:"maturity_date" binding:"required" swaggertype:"string" example:"2027-12-31T00:00:00Z"`
-	PaymentFrequency       int       `json:"payment_frequency" swaggertype:"integer" example:"4"`
-	MinInvestment          string    `json:"min_investment" binding:"required" swaggertype:"string" example:"1000000000000000000"`
-	MaxInvestment          string    `json:"max_investment" swaggertype:"string" example:"100000000000000000000"`
-	IsRedeemable           bool      `json:"is_redeemable" swaggertype:"boolean" example:"true"`
+	CompanyID        uint      `json:"company_id" binding:"required" swaggertype:"integer" example:"1"`
+	Name             string    `json:"name" binding:"required" swaggertype:"string" example:"Green Sukuk Series A"`
+	Symbol           string    `json:"symbol" binding:"required" swaggertype:"string" example:"GSA"`
+	Description      string    `json:"description" swaggertype:"string" example:"Sustainable infrastructure financing sukuk"`
+	TotalSupply      string    `json:"total_supply" binding:"required" swaggertype:"string" example:"1000000000000000000000000"`
+	YieldRate        float64   `json:"yield_rate" binding:"required" swaggertype:"number" example:"0.085"`
+	MaturityDate     time.Time `json:"maturity_date" binding:"required" swaggertype:"string" example:"2027-12-31T00:00:00Z"`
+	PaymentFrequency int       `json:"payment_frequency" swaggertype:"integer" example:"4"`
+	MinInvestment    string    `json:"min_investment" binding:"required" swaggertype:"string" example:"1000000000000000000"`
+	MaxInvestment    string    `json:"max_investment" swaggertype:"string" example:"100000000000000000000"`
+	IsRedeemable     bool      `json:"is_redeemable" swaggertype:"boolean" example:"true"`
 }
 
 // UpdateSukukSeriesRequest represents the request body for updating a Sukuk series
 type UpdateSukukSeriesRequest struct {
-	Name                   string    `json:"name,omitempty" swaggertype:"string" example:"Updated Green Sukuk Series A"`
-	Description            string    `json:"description,omitempty" swaggertype:"string" example:"Updated description"`
-	TokenAddress           string    `json:"token_address,omitempty" swaggertype:"string" example:"0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"`
-	Status                 string    `json:"status,omitempty" swaggertype:"string" example:"active"`
-	TotalSupply            string    `json:"total_supply,omitempty" swaggertype:"string" example:"2000000000000000000000000"`
-	OutstandingSupply      string    `json:"outstanding_supply,omitempty" swaggertype:"string" example:"1000000000000000000000000"`
+	Name              string `json:"name,omitempty" swaggertype:"string" example:"Updated Green Sukuk Series A"`
+	Description       string `json:"description,omitempty" swaggertype:"string" example:"Updated description"`
+	TokenAddress      string `json:"token_address,omitempty" swaggertype:"string" example:"0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"`
+	Status            string `json:"status,omitempty" swaggertype:"string" example:"active"`
+	TotalSupply       string `json:"total_supply,omitempty" swaggertype:"string" example:"2000000000000000000000000"`
+	OutstandingSupply string `json:"outstanding_supply,omitempty" swaggertype:"string" example:"1000000000000000000000000"`
 }
 
 // CreateSukukSeries creates a new Sukuk series with off-chain data
@@ -124,7 +125,7 @@ func UpdateSukukSeries(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	var req UpdateSukukSeriesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -198,7 +199,7 @@ func UploadProspectus(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No file provided"})
@@ -217,7 +218,7 @@ func UploadProspectus(c *gin.Context) {
 
 	// Configure file upload
 	config := utils.DefaultPDFConfig("./uploads/prospectus")
-	
+
 	// Save file with validation
 	filename, url, err := utils.SaveFile(file, config, strconv.FormatUint(id, 10))
 	if err != nil {
@@ -240,7 +241,7 @@ func UploadProspectus(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "Prospectus uploaded successfully",
 		"filename": filename,

@@ -6,10 +6,11 @@ import (
 	"runtime"
 	"time"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/logger"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/logger"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
 type HealthStatus struct {
@@ -24,29 +25,29 @@ type HealthStatus struct {
 }
 
 type DatabaseHealth struct {
-	Status        string        `json:"status"`
-	ResponseTime  time.Duration `json:"response_time_ms"`
-	Connections   int           `json:"active_connections"`
-	Error         string        `json:"error,omitempty"`
+	Status       string        `json:"status"`
+	ResponseTime time.Duration `json:"response_time_ms"`
+	Connections  int           `json:"active_connections"`
+	Error        string        `json:"error,omitempty"`
 }
 
 type SystemHealth struct {
-	Memory      MemoryStats `json:"memory"`
-	Goroutines  int         `json:"goroutines"`
-	CPUCores    int         `json:"cpu_cores"`
-	Uptime      string      `json:"uptime"`
+	Memory     MemoryStats `json:"memory"`
+	Goroutines int         `json:"goroutines"`
+	CPUCores   int         `json:"cpu_cores"`
+	Uptime     string      `json:"uptime"`
 }
 
 type MemoryStats struct {
-	Allocated     uint64 `json:"allocated_mb"`
-	TotalAlloc    uint64 `json:"total_alloc_mb"`
-	SystemMemory  uint64 `json:"system_mb"`
-	GCRuns        uint32 `json:"gc_runs"`
+	Allocated    uint64 `json:"allocated_mb"`
+	TotalAlloc   uint64 `json:"total_alloc_mb"`
+	SystemMemory uint64 `json:"system_mb"`
+	GCRuns       uint32 `json:"gc_runs"`
 }
 
 type ApplicationHealth struct {
-	CompaniesCount int `json:"companies_count"`
-	SukukCount     int `json:"sukuk_series_count"`
+	CompaniesCount int  `json:"companies_count"`
+	SukukCount     int  `json:"sukuk_series_count"`
 	UploadsDir     bool `json:"uploads_directory_writable"`
 }
 
@@ -69,7 +70,7 @@ var startTime = time.Now()
 // @Router /health [get]
 func Health(c *gin.Context) {
 	start := time.Now()
-	
+
 	// Initialize health status
 	health := HealthStatus{
 		Status:    "healthy",
@@ -116,7 +117,7 @@ func Health(c *gin.Context) {
 	// Determine overall status
 	overallStatus := "healthy"
 	httpStatus := http.StatusOK
-	
+
 	if health.Database.Status != "healthy" {
 		overallStatus = "unhealthy"
 		httpStatus = http.StatusServiceUnavailable
@@ -143,7 +144,7 @@ func checkDatabaseHealth() DatabaseHealth {
 	}
 
 	start := time.Now()
-	
+
 	// Check basic connectivity
 	if err := database.Health(); err != nil {
 		dbHealth.Status = "unhealthy"
@@ -183,34 +184,34 @@ func getSystemHealth() SystemHealth {
 
 func checkApplicationHealth() ApplicationHealth {
 	appHealth := ApplicationHealth{}
-	
+
 	db := database.GetDB()
-	
+
 	// Count companies
 	var companyCount int64
 	db.Model(&models.Company{}).Count(&companyCount)
 	appHealth.CompaniesCount = int(companyCount)
-	
+
 	// Count sukuk series
 	var sukukCount int64
 	db.Model(&models.SukukSeries{}).Count(&sukukCount)
 	appHealth.SukukCount = int(sukukCount)
-	
+
 	// Check uploads directory
 	appHealth.UploadsDir = checkUploadsDirectory()
-	
+
 	return appHealth
 }
 
 func checkUploadsDirectory() bool {
 	// Check if uploads directories exist and are writable
 	dirs := []string{"./uploads/logos", "./uploads/prospectus"}
-	
+
 	for _, dir := range dirs {
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			return false
 		}
-		
+
 		// Try to create a temporary file to test write permissions
 		testFile := dir + "/.health_check"
 		if file, err := os.Create(testFile); err != nil {
@@ -220,6 +221,6 @@ func checkUploadsDirectory() bool {
 			os.Remove(testFile)
 		}
 	}
-	
+
 	return true
 }

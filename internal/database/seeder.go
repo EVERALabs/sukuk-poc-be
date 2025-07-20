@@ -4,7 +4,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/kadzu/sukuk-poc-be/internal/models"
+	"sukuk-be/internal/models"
+
 	"gorm.io/gorm"
 )
 
@@ -70,8 +71,8 @@ func SeedData(db *gorm.DB) error {
 			OutstandingSupply: "500000000000000000000000000",  // 500M tokens
 			YieldRate:         8.5,
 			MaturityDate:      time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC),
-			PaymentFrequency:  4, // Quarterly
-			MinInvestment:     "1000000000000000000000000", // 1M IDRX
+			PaymentFrequency:  4,                             // Quarterly
+			MinInvestment:     "1000000000000000000000000",   // 1M IDRX
 			MaxInvestment:     "100000000000000000000000000", // 100M IDRX
 			Status:            "active",
 			Prospectus:        "/uploads/prospectus/pln_green_energy_2024.pdf",
@@ -87,8 +88,8 @@ func SeedData(db *gorm.DB) error {
 			OutstandingSupply: "250000000000000000000000000", // 250M tokens
 			YieldRate:         9.0,
 			MaturityDate:      time.Date(2026, 6, 30, 0, 0, 0, 0, time.UTC),
-			PaymentFrequency:  4, // Quarterly
-			MinInvestment:     "5000000000000000000000000", // 5M IDRX
+			PaymentFrequency:  4,                            // Quarterly
+			MinInvestment:     "5000000000000000000000000",  // 5M IDRX
 			MaxInvestment:     "50000000000000000000000000", // 50M IDRX
 			Status:            "active",
 			Prospectus:        "/uploads/prospectus/antam_gold_mining_2024.pdf",
@@ -99,15 +100,15 @@ func SeedData(db *gorm.DB) error {
 			Name:              "Telkom Digital Infrastructure Sukuk 2024-C",
 			Symbol:            "TLKM24C",
 			Description:       "Islamic financing for 5G network expansion and digital infrastructure development",
-			TokenAddress:      "", // Not deployed yet
+			TokenAddress:      "",                            // Not deployed yet
 			TotalSupply:       "750000000000000000000000000", // 750M tokens
-			OutstandingSupply: "0",                          // Not issued yet
+			OutstandingSupply: "0",                           // Not issued yet
 			YieldRate:         7.5,
 			MaturityDate:      time.Date(2028, 3, 31, 0, 0, 0, 0, time.UTC),
-			PaymentFrequency:  4, // Quarterly
-			MinInvestment:     "2000000000000000000000000", // 2M IDRX
+			PaymentFrequency:  4,                            // Quarterly
+			MinInvestment:     "2000000000000000000000000",  // 2M IDRX
 			MaxInvestment:     "75000000000000000000000000", // 75M IDRX
-			Status:            "planned", // Not active yet
+			Status:            "planned",                    // Not active yet
 			Prospectus:        "",
 			IsRedeemable:      true,
 		},
@@ -201,14 +202,14 @@ func SeedData(db *gorm.DB) error {
 	// Create sample redemption requests
 	redemptions := []models.Redemption{
 		{
-			SukukSeriesID:   sukukSeries[0].ID, // PLN
-			InvestmentID:    investments[1].ID,
-			InvestorAddress: "0xbcd2345678901234567890123456789012345678",
-			TokenAmount:     "5000000000000000000000000", // 5M tokens
+			SukukSeriesID:    sukukSeries[0].ID, // PLN
+			InvestmentID:     investments[1].ID,
+			InvestorAddress:  "0xbcd2345678901234567890123456789012345678",
+			TokenAmount:      "5000000000000000000000000", // 5M tokens
 			RedemptionAmount: "5000000000000000000000000", // 5M IDRX
-			Status:          "requested",
-			RequestReason:   "Need liquidity for other investments",
-			RequestedAt:     time.Date(2024, 4, 10, 16, 45, 0, 0, time.UTC),
+			Status:           "requested",
+			RequestReason:    "Need liquidity for other investments",
+			RequestedAt:      time.Date(2024, 4, 10, 16, 45, 0, 0, time.UTC),
 		},
 		{
 			SukukSeriesID:    sukukSeries[1].ID, // Antam

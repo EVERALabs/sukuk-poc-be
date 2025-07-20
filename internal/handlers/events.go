@@ -3,9 +3,10 @@ package handlers
 import (
 	"net/http"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 	"gorm.io/gorm"
 )
 
@@ -78,7 +79,7 @@ func ProcessEventWebhook(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Event processed successfully",
+		"message":  "Event processed successfully",
 		"event_id": event.ID,
 	})
 }
@@ -121,7 +122,7 @@ func GetEventByTxHash(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": events,
+		"data":  events,
 		"count": len(events),
 	})
 }

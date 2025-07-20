@@ -4,19 +4,20 @@ import (
 	"net/http"
 	"strconv"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+	"sukuk-be/internal/utils"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
-	"github.com/kadzu/sukuk-poc-be/internal/utils"
 )
 
 // CreateCompanyRequest represents the request body for creating a new company
 type CreateCompanyRequest struct {
-	Name        string `json:"name" binding:"required" swaggertype:"string" example:"PT Sukuk Indonesia"`
-	Description string `json:"description" swaggertype:"string" example:"Leading Indonesian sukuk issuer"`
-	Website     string `json:"website" swaggertype:"string" example:"https://sukukindonesia.com"`
-	Industry    string `json:"industry" swaggertype:"string" example:"Financial Services"`
-	Email       string `json:"email" binding:"required,email" swaggertype:"string" example:"contact@sukukindonesia.com"`
+	Name          string `json:"name" binding:"required" swaggertype:"string" example:"PT Sukuk Indonesia"`
+	Description   string `json:"description" swaggertype:"string" example:"Leading Indonesian sukuk issuer"`
+	Website       string `json:"website" swaggertype:"string" example:"https://sukukindonesia.com"`
+	Industry      string `json:"industry" swaggertype:"string" example:"Financial Services"`
+	Email         string `json:"email" binding:"required,email" swaggertype:"string" example:"contact@sukukindonesia.com"`
 	WalletAddress string `json:"wallet_address" binding:"required" swaggertype:"string" example:"0x1234567890123456789012345678901234567890"`
 }
 
@@ -95,7 +96,7 @@ func UpdateCompany(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	var req UpdateCompanyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -166,7 +167,7 @@ func UploadCompanyLogo(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No file provided"})
@@ -185,7 +186,7 @@ func UploadCompanyLogo(c *gin.Context) {
 
 	// Configure file upload
 	config := utils.DefaultImageConfig("./uploads/logos")
-	
+
 	// Save file with validation
 	filename, url, err := utils.SaveFile(file, config, strconv.FormatUint(id, 10))
 	if err != nil {
@@ -208,7 +209,7 @@ func UploadCompanyLogo(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "Company logo uploaded successfully",
 		"filename": filename,

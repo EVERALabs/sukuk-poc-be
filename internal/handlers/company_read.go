@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
 // ListCompanies godoc
@@ -21,15 +22,15 @@ import (
 // @Router /companies [get]
 func ListCompanies(c *gin.Context) {
 	var companies []models.Company
-	
+
 	db := database.GetDB()
 	query := db.Where("is_active = ?", true)
-	
+
 	// Filter by sector if provided
 	if sector := c.Query("sector"); sector != "" {
 		query = query.Where("industry = ?", sector)
 	}
-	
+
 	if err := query.Find(&companies).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to fetch companies",
@@ -38,11 +39,11 @@ func ListCompanies(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": companies,
+		"data":  companies,
 		"count": len(companies),
 		"meta": gin.H{
 			"total": len(companies),
-			"page": 1,
+			"page":  1,
 		},
 	})
 }
@@ -111,7 +112,7 @@ func GetCompanySukuks(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": sukukSeries,
+		"data":  sukukSeries,
 		"count": len(sukukSeries),
 	})
 }

@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"time"
 
+	"sukuk-be/internal/config"
+	"sukuk-be/internal/handlers"
+	"sukuk-be/internal/logger"
+	"sukuk-be/internal/middleware"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/config"
-	"github.com/kadzu/sukuk-poc-be/internal/handlers"
-	"github.com/kadzu/sukuk-poc-be/internal/logger"
-	"github.com/kadzu/sukuk-poc-be/internal/middleware"
-	
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -53,10 +54,10 @@ func New(cfg *config.Config) *Server {
 func (s *Server) setupRoutes() {
 	// Static file serving for uploads
 	s.router.Static("/uploads", "./uploads")
-	
+
 	// Swagger documentation
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	
+
 	// Health check endpoint (no auth required)
 	s.router.GET("/health", handlers.Health)
 
@@ -64,7 +65,7 @@ func (s *Server) setupRoutes() {
 	v1 := s.router.Group("/api/v1")
 	v1.Use(middleware.RateLimit(s.cfg.API.RateLimitPerMin))
 	{
-		// Company endpoints  
+		// Company endpoints
 		companies := v1.Group("/companies")
 		{
 			companies.GET("", handlers.ListCompanies)
@@ -87,7 +88,7 @@ func (s *Server) setupRoutes() {
 		v1.GET("/portfolio/:address/yields", handlers.GetYieldHistory)
 		v1.GET("/portfolio/:address/yields/pending", handlers.GetPendingYields)
 		v1.GET("/portfolio/:address/redemptions", handlers.GetRedemptionHistory)
-		
+
 		// Investment endpoints (read-only from blockchain events)
 		investments := v1.Group("/investments")
 		{
@@ -117,14 +118,14 @@ func (s *Server) setupRoutes() {
 			redemptions.PUT("/:id/approve", handlers.ApproveRedemption)
 			redemptions.PUT("/:id/reject", handlers.RejectRedemption)
 		}
-		
+
 		// Analytics endpoints
 		v1.GET("/analytics/overview", handlers.GetPlatformStats)
 		v1.GET("/analytics/vault/:seriesId", handlers.GetVaultBalance)
-		
+
 		// Event endpoints
 		v1.GET("/events/:txHash", handlers.GetEventByTxHash)
-		
+
 		// Protected endpoints (require API key)
 		protected := v1.Group("/admin")
 		protected.Use(middleware.APIKeyAuth(s.cfg.API.APIKey))
@@ -133,12 +134,12 @@ func (s *Server) setupRoutes() {
 			protected.POST("/companies", handlers.CreateCompany)
 			protected.PUT("/companies/:id", handlers.UpdateCompany)
 			protected.POST("/companies/:id/upload-logo", handlers.UploadCompanyLogo)
-			
-			// Sukuk management  
+
+			// Sukuk management
 			protected.POST("/sukuks", handlers.CreateSukukSeries)
 			protected.PUT("/sukuks/:id", handlers.UpdateSukukSeries)
 			protected.POST("/sukuks/:id/upload-prospectus", handlers.UploadProspectus)
-			
+
 			// Webhook for indexer
 			protected.POST("/events/webhook", handlers.ProcessEventWebhook)
 		}
@@ -148,10 +149,10 @@ func (s *Server) setupRoutes() {
 func (s *Server) Start() error {
 	// Setup routes
 	s.setupRoutes()
-	
+
 	// Start server
 	addr := fmt.Sprintf(":%d", s.cfg.App.Port)
 	logger.WithField("address", addr).Info("Server listening and serving HTTP")
-	
+
 	return s.router.Run(addr)
 }

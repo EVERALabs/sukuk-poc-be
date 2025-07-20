@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"strings"
 
+	"sukuk-be/internal/database"
+	"sukuk-be/internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/kadzu/sukuk-poc-be/internal/database"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
 // GetPortfolio returns user's complete portfolio (READ-ONLY)
@@ -30,7 +31,7 @@ func GetPortfolio(c *gin.Context) {
 	}
 
 	db := database.GetDB()
-	
+
 	// Get all active investments
 	var investments []models.Investment
 	if err := db.Preload("SukukSeries").Preload("SukukSeries.Company").Where("investor_address = ? AND status = ?", address, "active").Find(&investments).Error; err != nil {
@@ -68,12 +69,12 @@ func GetPortfolio(c *gin.Context) {
 			"address": address,
 			"summary": gin.H{
 				"total_investments": totalInvestments,
-				"pending_yields": totalPendingYields,
+				"pending_yields":    totalPendingYields,
 				"total_redemptions": totalRedemptions,
 			},
-			"investments": investments,
+			"investments":    investments,
 			"pending_yields": pendingYields,
-			"redemptions": redemptions,
+			"redemptions":    redemptions,
 		},
 	})
 }
@@ -116,7 +117,7 @@ func GetInvestmentHistory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": investments,
+		"data":  investments,
 		"count": len(investments),
 	})
 }
@@ -159,7 +160,7 @@ func GetYieldHistory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": yieldClaims,
+		"data":  yieldClaims,
 		"count": len(yieldClaims),
 	})
 }
@@ -194,7 +195,7 @@ func GetPendingYields(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": pendingYields,
+		"data":  pendingYields,
 		"count": len(pendingYields),
 	})
 }
@@ -237,7 +238,7 @@ func GetRedemptionHistory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": redemptions,
+		"data":  redemptions,
 		"count": len(redemptions),
 	})
 }

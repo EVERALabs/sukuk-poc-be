@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"sukuk-be/internal/models"
 	"time"
-	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
 // Standard API response wrapper
@@ -56,10 +56,10 @@ type SukukMetricsResponse struct {
 }
 
 type SukukMetrics struct {
-	TotalInvestors      int64  `json:"total_investors" example:"150"`
-	TotalInvestment     string `json:"total_investment" example:"1000000000000000000000000"`
-	PendingYields       int64  `json:"pending_yields" example:"25"`
-	PendingRedemptions  int64  `json:"pending_redemptions" example:"5"`
+	TotalInvestors     int64  `json:"total_investors" example:"150"`
+	TotalInvestment    string `json:"total_investment" example:"1000000000000000000000000"`
+	PendingYields      int64  `json:"pending_yields" example:"25"`
+	PendingRedemptions int64  `json:"pending_redemptions" example:"5"`
 }
 
 type SukukHoldersResponse struct {
@@ -83,17 +83,17 @@ type PortfolioResponse struct {
 }
 
 type PortfolioData struct {
-	Address        string                `json:"address" example:"0x1234567890123456789012345678901234567890"`
-	Summary        PortfolioSummary      `json:"summary"`
-	Investments    []models.Investment   `json:"investments"`
-	PendingYields  []models.YieldClaim   `json:"pending_yields"`
-	Redemptions    []models.Redemption   `json:"redemptions"`
+	Address       string              `json:"address" example:"0x1234567890123456789012345678901234567890"`
+	Summary       PortfolioSummary    `json:"summary"`
+	Investments   []models.Investment `json:"investments"`
+	PendingYields []models.YieldClaim `json:"pending_yields"`
+	Redemptions   []models.Redemption `json:"redemptions"`
 }
 
 type PortfolioSummary struct {
-	TotalInvestments   int `json:"total_investments" example:"5"`
-	PendingYields      int `json:"pending_yields" example:"3"`
-	TotalRedemptions   int `json:"total_redemptions" example:"2"`
+	TotalInvestments int `json:"total_investments" example:"5"`
+	PendingYields    int `json:"pending_yields" example:"3"`
+	TotalRedemptions int `json:"total_redemptions" example:"2"`
 }
 
 // Yield claim responses
@@ -167,10 +167,9 @@ type ErrorResponse struct {
 
 // Health check responses
 type HealthResponse struct {
-	Status      string          `json:"status" example:"healthy"`
-	Timestamp   time.Time       `json:"timestamp" example:"2024-01-15T10:30:00Z"`
-	Version     string          `json:"version" example:"1.0.0"`
-	Environment string          `json:"environment" example:"development"`
-	Checks      []CheckResult   `json:"checks"`
+	Status      string        `json:"status" example:"healthy"`
+	Timestamp   time.Time     `json:"timestamp" example:"2024-01-15T10:30:00Z"`
+	Version     string        `json:"version" example:"1.0.0"`
+	Environment string        `json:"environment" example:"development"`
+	Checks      []CheckResult `json:"checks"`
 }
-
