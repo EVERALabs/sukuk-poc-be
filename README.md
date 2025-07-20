@@ -131,6 +131,8 @@ make lint                   # Run linter (if available)
 make clean                  # Clean build artifacts
 make migrate                # Run database migrations
 make seed                   # Seed database with sample data
+make swag                   # Generate Swagger documentation
+make docs                   # Generate docs and show access info
 ```
 
 ## 🧪 Testing
@@ -169,7 +171,33 @@ Tests are co-located with source code following Go conventions:
 
 ## 📚 API Documentation
 
-API documentation is currently under development. The API follows RESTful principles with JSON responses.
+Interactive API documentation is available via Swagger UI.
+
+### Generate Documentation
+```bash
+# Generate Swagger documentation
+make swag
+
+# Or manually
+$(HOME)/go/bin/swag init -g cmd/server/main.go -o docs --parseDependency --parseInternal
+```
+
+### Access Documentation
+1. Start the server:
+   ```bash
+   make run
+   ```
+2. Open your browser and go to:
+   ```
+   http://localhost:8080/swagger/index.html
+   ```
+
+### Available Documentation
+The Swagger UI provides:
+- **Interactive API Testing**: Test endpoints directly from the browser
+- **Request/Response Examples**: See actual request and response formats
+- **Authentication Guide**: Learn how to use API keys for admin endpoints
+- **Complete Endpoint Coverage**: All public and admin endpoints documented
 
 ## 🔐 API Security
 

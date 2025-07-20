@@ -1,6 +1,6 @@
 # Sukuk POC Backend - Makefile
 
-.PHONY: help build run test test-coverage lint clean
+.PHONY: help build run test test-coverage lint clean swag docs
 
 # Default target
 .DEFAULT_GOAL := help
@@ -61,3 +61,12 @@ migrate: ## Run database migrations
 seed: ## Seed database with sample data
 	@echo "Seeding database..."
 	@go run cmd/seed/main.go
+
+# Documentation commands
+swag: ## Generate Swagger documentation
+	@echo "Generating Swagger documentation..."
+	@$(HOME)/go/bin/swag init -g cmd/server/main.go -o docs --parseDependency --parseInternal
+	@echo "Swagger documentation generated in docs/"
+
+docs: swag ## Generate and serve documentation locally
+	@echo "Documentation available at http://localhost:8080/swagger/index.html"

@@ -9,7 +9,16 @@ import (
 	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
-// ListCompanies returns a list of all active companies (READ-ONLY)
+// ListCompanies godoc
+// @Summary List all companies
+// @Description Get a list of all active companies
+// @Tags companies
+// @Accept json
+// @Produce json
+// @Param sector query string false "Filter by industry sector"
+// @Success 200 {object} map[string]interface{} "List of companies"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /companies [get]
 func ListCompanies(c *gin.Context) {
 	var companies []models.Company
 	
@@ -38,7 +47,17 @@ func ListCompanies(c *gin.Context) {
 	})
 }
 
-// GetCompany returns details of a specific company (READ-ONLY)
+// GetCompany godoc
+// @Summary Get company details
+// @Description Get details of a specific company including its Sukuk series
+// @Tags companies
+// @Accept json
+// @Produce json
+// @Param id path int true "Company ID"
+// @Success 200 {object} map[string]interface{} "Company details"
+// @Failure 400 {object} map[string]interface{} "Invalid company ID"
+// @Failure 404 {object} map[string]interface{} "Company not found"
+// @Router /companies/{id} [get]
 func GetCompany(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -62,7 +81,17 @@ func GetCompany(c *gin.Context) {
 	})
 }
 
-// GetCompanySukuks returns all Sukuk series for a specific company (READ-ONLY)
+// GetCompanySukuks godoc
+// @Summary Get company's Sukuk series
+// @Description Get all Sukuk series for a specific company
+// @Tags companies
+// @Accept json
+// @Produce json
+// @Param id path int true "Company ID"
+// @Success 200 {object} map[string]interface{} "List of company's Sukuk series"
+// @Failure 400 {object} map[string]interface{} "Invalid company ID"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /companies/{id}/sukuks [get]
 func GetCompanySukuks(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {

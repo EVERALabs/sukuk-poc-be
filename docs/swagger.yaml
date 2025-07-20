@@ -1,0 +1,281 @@
+basePath: /api/v1
+definitions:
+  internal_handlers.ApplicationHealth:
+    properties:
+      companies_count:
+        type: integer
+      sukuk_series_count:
+        type: integer
+      uploads_directory_writable:
+        type: boolean
+    type: object
+  internal_handlers.CheckResult:
+    properties:
+      duration_ms:
+        type: integer
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  internal_handlers.CreateCompanyRequest:
+    properties:
+      description:
+        type: string
+      email:
+        type: string
+      industry:
+        type: string
+      name:
+        type: string
+      wallet_address:
+        type: string
+      website:
+        type: string
+    required:
+    - email
+    - name
+    - wallet_address
+    type: object
+  internal_handlers.DatabaseHealth:
+    properties:
+      active_connections:
+        type: integer
+      error:
+        type: string
+      response_time_ms:
+        $ref: '#/definitions/time.Duration'
+      status:
+        type: string
+    type: object
+  internal_handlers.HealthStatus:
+    properties:
+      application:
+        $ref: '#/definitions/internal_handlers.ApplicationHealth'
+      checks:
+        additionalProperties:
+          $ref: '#/definitions/internal_handlers.CheckResult'
+        type: object
+      database:
+        $ref: '#/definitions/internal_handlers.DatabaseHealth'
+      service:
+        type: string
+      status:
+        type: string
+      system:
+        $ref: '#/definitions/internal_handlers.SystemHealth'
+      timestamp:
+        type: string
+      version:
+        type: string
+    type: object
+  internal_handlers.MemoryStats:
+    properties:
+      allocated_mb:
+        type: integer
+      gc_runs:
+        type: integer
+      system_mb:
+        type: integer
+      total_alloc_mb:
+        type: integer
+    type: object
+  internal_handlers.SystemHealth:
+    properties:
+      cpu_cores:
+        type: integer
+      goroutines:
+        type: integer
+      memory:
+        $ref: '#/definitions/internal_handlers.MemoryStats'
+      uptime:
+        type: string
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    format: int64
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+host: localhost:8080
+info:
+  contact:
+    email: support@sukuk-poc.com
+    name: API Support
+    url: http://www.sukuk-poc.com/support
+  description: A Web3 backend for Sukuk (Islamic bonds) on Base Testnet, providing
+    APIs for dApps and frontends while processing blockchain events from an indexer.
+  license:
+    name: MIT
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Sukuk POC Backend API
+  version: "1.0"
+paths:
+  /admin/companies:
+    post:
+      consumes:
+      - application/json
+      description: Create a new partner company (Admin only)
+      parameters:
+      - description: Company data
+        in: body
+        name: company
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.CreateCompanyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Company created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new company
+      tags:
+      - admin
+  /companies:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all active companies
+      parameters:
+      - description: Filter by industry sector
+        in: query
+        name: sector
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of companies
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all companies
+      tags:
+      - companies
+  /companies/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific company including its Sukuk series
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid company ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Company not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get company details
+      tags:
+      - companies
+  /companies/{id}/sukuks:
+    get:
+      consumes:
+      - application/json
+      description: Get all Sukuk series for a specific company
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of company's Sukuk series
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid company ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get company's Sukuk series
+      tags:
+      - companies
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Get the health status of the API including database, system, and
+        application metrics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            $ref: '#/definitions/internal_handlers.HealthStatus'
+        "503":
+          description: Service is unhealthy
+          schema:
+            $ref: '#/definitions/internal_handlers.HealthStatus'
+      summary: Health Check
+      tags:
+      - health
+securityDefinitions:
+  ApiKeyAuth:
+    description: API key for accessing protected admin endpoints
+    in: header
+    name: X-API-Key
+    type: apiKey
+swagger: "2.0"

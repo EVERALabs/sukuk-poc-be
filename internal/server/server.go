@@ -10,6 +10,9 @@ import (
 	"github.com/kadzu/sukuk-poc-be/internal/handlers"
 	"github.com/kadzu/sukuk-poc-be/internal/logger"
 	"github.com/kadzu/sukuk-poc-be/internal/middleware"
+	
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Server struct {
@@ -50,6 +53,9 @@ func New(cfg *config.Config) *Server {
 func (s *Server) setupRoutes() {
 	// Static file serving for uploads
 	s.router.Static("/uploads", "./uploads")
+	
+	// Swagger documentation
+	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	
 	// Health check endpoint (no auth required)
 	s.router.GET("/health", handlers.Health)

@@ -28,7 +28,18 @@ type UpdateCompanyRequest struct {
 	IsActive    *bool  `json:"is_active,omitempty"`
 }
 
-// CreateCompany creates a new partner company
+// CreateCompany godoc
+// @Summary Create a new company
+// @Description Create a new partner company (Admin only)
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Param company body CreateCompanyRequest true "Company data"
+// @Success 201 {object} map[string]interface{} "Company created successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid request data"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Security ApiKeyAuth
+// @Router /admin/companies [post]
 func CreateCompany(c *gin.Context) {
 	var req CreateCompanyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

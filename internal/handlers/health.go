@@ -58,6 +58,15 @@ type CheckResult struct {
 
 var startTime = time.Now()
 
+// Health godoc
+// @Summary Health Check
+// @Description Get the health status of the API including database, system, and application metrics
+// @Tags health
+// @Accept json
+// @Produce json
+// @Success 200 {object} HealthStatus "Service is healthy"
+// @Success 503 {object} HealthStatus "Service is unhealthy"
+// @Router /health [get]
 func Health(c *gin.Context) {
 	start := time.Now()
 	
