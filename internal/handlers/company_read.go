@@ -16,8 +16,8 @@ import (
 // @Accept json
 // @Produce json
 // @Param sector query string false "Filter by industry sector"
-// @Success 200 {object} map[string]interface{} "List of companies"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Success 200 {object} CompanyListResponse "List of companies"
+// @Failure 500 {object} ErrorResponse "Internal server error"
 // @Router /companies [get]
 func ListCompanies(c *gin.Context) {
 	var companies []models.Company
@@ -54,9 +54,9 @@ func ListCompanies(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Company ID"
-// @Success 200 {object} map[string]interface{} "Company details"
-// @Failure 400 {object} map[string]interface{} "Invalid company ID"
-// @Failure 404 {object} map[string]interface{} "Company not found"
+// @Success 200 {object} CompanyResponse "Company details"
+// @Failure 400 {object} ErrorResponse "Invalid company ID"
+// @Failure 404 {object} ErrorResponse "Company not found"
 // @Router /companies/{id} [get]
 func GetCompany(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -88,9 +88,9 @@ func GetCompany(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Company ID"
-// @Success 200 {object} map[string]interface{} "List of company's Sukuk series"
-// @Failure 400 {object} map[string]interface{} "Invalid company ID"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Success 200 {object} CompanySukuksResponse "List of company's Sukuk series"
+// @Failure 400 {object} ErrorResponse "Invalid company ID"
+// @Failure 500 {object} ErrorResponse "Internal server error"
 // @Router /companies/{id}/sukuks [get]
 func GetCompanySukuks(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)

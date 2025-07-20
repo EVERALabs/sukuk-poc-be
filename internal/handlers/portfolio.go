@@ -10,6 +10,16 @@ import (
 )
 
 // GetPortfolio returns user's complete portfolio (READ-ONLY)
+// @Summary Get user portfolio
+// @Description Get complete portfolio overview for a wallet address including investments, pending yields, and redemptions
+// @Tags Portfolio
+// @Accept json
+// @Produce json
+// @Param address path string true "Wallet address"
+// @Success 200 {object} PortfolioResponse "Portfolio data"
+// @Failure 400 {object} ErrorResponse "Invalid address"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /portfolio/{address} [get]
 func GetPortfolio(c *gin.Context) {
 	address := strings.ToLower(c.Param("address"))
 	if address == "" {
@@ -69,6 +79,17 @@ func GetPortfolio(c *gin.Context) {
 }
 
 // GetInvestmentHistory returns user's investment history (READ-ONLY)
+// @Summary Get investment history
+// @Description Get investment history for a wallet address with optional status filtering
+// @Tags Portfolio
+// @Accept json
+// @Produce json
+// @Param address path string true "Wallet address"
+// @Param status query string false "Investment status filter (active, redeemed)"
+// @Success 200 {object} InvestmentListResponse "Investment history"
+// @Failure 400 {object} ErrorResponse "Invalid address"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /portfolio/{address}/investments [get]
 func GetInvestmentHistory(c *gin.Context) {
 	address := strings.ToLower(c.Param("address"))
 	if address == "" {
@@ -101,6 +122,17 @@ func GetInvestmentHistory(c *gin.Context) {
 }
 
 // GetYieldHistory returns user's yield claim history (READ-ONLY)
+// @Summary Get yield history
+// @Description Get yield claim history for a wallet address with optional status filtering
+// @Tags Portfolio
+// @Accept json
+// @Produce json
+// @Param address path string true "Wallet address"
+// @Param status query string false "Yield status filter (pending, claimed)"
+// @Success 200 {object} YieldClaimListResponse "Yield history"
+// @Failure 400 {object} ErrorResponse "Invalid address"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /portfolio/{address}/yields [get]
 func GetYieldHistory(c *gin.Context) {
 	address := strings.ToLower(c.Param("address"))
 	if address == "" {
@@ -133,6 +165,16 @@ func GetYieldHistory(c *gin.Context) {
 }
 
 // GetPendingYields returns user's pending yield claims (READ-ONLY)
+// @Summary Get pending yields
+// @Description Get all pending yield claims for a wallet address
+// @Tags Portfolio
+// @Accept json
+// @Produce json
+// @Param address path string true "Wallet address"
+// @Success 200 {object} YieldClaimListResponse "Pending yields"
+// @Failure 400 {object} ErrorResponse "Invalid address"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /portfolio/{address}/yields/pending [get]
 func GetPendingYields(c *gin.Context) {
 	address := strings.ToLower(c.Param("address"))
 	if address == "" {
@@ -158,6 +200,17 @@ func GetPendingYields(c *gin.Context) {
 }
 
 // GetRedemptionHistory returns user's redemption history (READ-ONLY)
+// @Summary Get redemption history
+// @Description Get redemption history for a wallet address with optional status filtering
+// @Tags Portfolio
+// @Accept json
+// @Produce json
+// @Param address path string true "Wallet address"
+// @Param status query string false "Redemption status filter (requested, approved, rejected, completed)"
+// @Success 200 {object} RedemptionListResponse "Redemption history"
+// @Failure 400 {object} ErrorResponse "Invalid address"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /portfolio/{address}/redemptions [get]
 func GetRedemptionHistory(c *gin.Context) {
 	address := strings.ToLower(c.Param("address"))
 	if address == "" {

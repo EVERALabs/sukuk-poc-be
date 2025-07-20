@@ -9,16 +9,28 @@ import (
 	"gorm.io/gorm"
 )
 
+// WebhookEventRequest represents the request body for processing blockchain events
 type WebhookEventRequest struct {
-	EventName       string                 `json:"event_name" binding:"required"`
-	BlockNumber     int64                  `json:"block_number" binding:"required"`
-	TxHash          string                 `json:"tx_hash" binding:"required"`
-	ContractAddress string                 `json:"contract_address" binding:"required"`
-	Data            map[string]interface{} `json:"data" binding:"required"`
-	ChainID         int64                  `json:"chain_id"`
+	EventName       string                 `json:"event_name" binding:"required" swaggertype:"string" example:"Investment"`
+	BlockNumber     int64                  `json:"block_number" binding:"required" swaggertype:"integer" example:"12345678"`
+	TxHash          string                 `json:"tx_hash" binding:"required" swaggertype:"string" example:"0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"`
+	ContractAddress string                 `json:"contract_address" binding:"required" swaggertype:"string" example:"0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"`
+	Data            map[string]interface{} `json:"data" binding:"required" swaggertype:"object" example:"{\"investor\":\"0x123...\",\"amount\":\"1000\"}"`
+	ChainID         int64                  `json:"chain_id" swaggertype:"integer" example:"84532"`
 }
 
 // ProcessEventWebhook processes blockchain events from indexer (WEBHOOK)
+// @Summary Process blockchain event webhook
+// @Description Process blockchain events from external indexer (admin only)
+// @Tags Events
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body WebhookEventRequest true "Event data from blockchain indexer"
+// @Success 200 {object} EventWebhookResponse "Event processed successfully"
+// @Failure 400 {object} ErrorResponse "Bad request"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /admin/events/webhook [post]
 func ProcessEventWebhook(c *gin.Context) {
 	var req WebhookEventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -72,6 +84,17 @@ func ProcessEventWebhook(c *gin.Context) {
 }
 
 // GetEventByTxHash returns event details by transaction hash (READ-ONLY)
+// @Summary Get events by transaction hash
+// @Description Get all blockchain events associated with a specific transaction hash
+// @Tags Events
+// @Accept json
+// @Produce json
+// @Param txHash path string true "Transaction hash"
+// @Success 200 {object} EventListResponse "List of events for transaction"
+// @Failure 400 {object} ErrorResponse "Invalid transaction hash"
+// @Failure 404 {object} ErrorResponse "No events found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /events/{txHash} [get]
 func GetEventByTxHash(c *gin.Context) {
 	txHash := c.Param("txHash")
 	if txHash == "" {

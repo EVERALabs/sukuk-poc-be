@@ -10,6 +10,16 @@ import (
 )
 
 // ListSukukSeries returns a list of all Sukuk series (READ-ONLY)
+// @Summary List all Sukuk series
+// @Description Get a list of all Sukuk series with optional filtering by company and status
+// @Tags Sukuk Series
+// @Accept json
+// @Produce json
+// @Param company_id query string false "Company ID to filter by"
+// @Param status query string false "Status to filter by (active, paused, matured)"
+// @Success 200 {object} SukukSeriesListResponse "List of Sukuk series"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /sukuks [get]
 func ListSukukSeries(c *gin.Context) {
 	var sukukSeries []models.SukukSeries
 	
@@ -43,6 +53,16 @@ func ListSukukSeries(c *gin.Context) {
 }
 
 // GetSukukSeries returns details of a specific Sukuk series (READ-ONLY)
+// @Summary Get Sukuk series details
+// @Description Get detailed information about a specific Sukuk series including company, investments, yield claims, and redemptions
+// @Tags Sukuk Series
+// @Accept json
+// @Produce json
+// @Param id path int true "Sukuk Series ID"
+// @Success 200 {object} SukukSeriesResponse "Sukuk series details"
+// @Failure 400 {object} ErrorResponse "Invalid ID"
+// @Failure 404 {object} ErrorResponse "Sukuk series not found"
+// @Router /sukuks/{id} [get]
 func GetSukukSeries(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -67,6 +87,15 @@ func GetSukukSeries(c *gin.Context) {
 }
 
 // GetSukukMetrics returns performance metrics for a specific Sukuk series
+// @Summary Get Sukuk series metrics
+// @Description Get performance metrics including total investors, investment amount, pending yields, and redemptions
+// @Tags Sukuk Series
+// @Accept json
+// @Produce json
+// @Param id path int true "Sukuk Series ID"
+// @Success 200 {object} SukukMetricsResponse "Sukuk series metrics"
+// @Failure 400 {object} ErrorResponse "Invalid ID"
+// @Router /sukuks/{id}/metrics [get]
 func GetSukukMetrics(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -103,6 +132,16 @@ func GetSukukMetrics(c *gin.Context) {
 }
 
 // GetSukukHolders returns current holders of a specific Sukuk
+// @Summary Get Sukuk holders
+// @Description Get a list of current active investors holding the specified Sukuk series
+// @Tags Sukuk Series
+// @Accept json
+// @Produce json
+// @Param id path int true "Sukuk Series ID"
+// @Success 200 {object} SukukHoldersResponse "List of active investments"
+// @Failure 400 {object} ErrorResponse "Invalid ID"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /sukuks/{id}/holders [get]
 func GetSukukHolders(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {

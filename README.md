@@ -17,6 +17,7 @@ A production-ready Web3 backend for Sukuk (Islamic bonds) on Base Testnet, provi
 ## 📋 Features
 
 ### Web3 Integration
+
 - Blockchain event processing via webhooks
 - Wallet address management and validation
 - Ethereum signature verification
@@ -24,6 +25,7 @@ A production-ready Web3 backend for Sukuk (Islamic bonds) on Base Testnet, provi
 - Sukuk token lifecycle management
 
 ### API Features
+
 - RESTful API for dApps/frontends
 - Real-time blockchain data queries
 - Wallet portfolio endpoints
@@ -31,6 +33,7 @@ A production-ready Web3 backend for Sukuk (Islamic bonds) on Base Testnet, provi
 - Event status tracking
 
 ### Infrastructure
+
 - Shared database with blockchain indexer
 - Request validation and error handling
 - Structured logging with blockchain context
@@ -160,11 +163,13 @@ go test -v -run TestHealthTestSuite ./internal/handlers
 ### Test Coverage
 
 Current test coverage by package:
+
 - `internal/config`: 86.0% coverage
 - `internal/models`: 61.5% coverage
 - `internal/handlers`: Comprehensive test suites for all endpoints
 
 Tests are co-located with source code following Go conventions:
+
 - `internal/config/config_test.go`
 - `internal/models/models_test.go`
 - `internal/handlers/*_test.go`
@@ -174,6 +179,7 @@ Tests are co-located with source code following Go conventions:
 Interactive API documentation is available via Swagger UI.
 
 ### Generate Documentation
+
 ```bash
 # Generate Swagger documentation
 make swag
@@ -183,6 +189,7 @@ $(HOME)/go/bin/swag init -g cmd/server/main.go -o docs --parseDependency --parse
 ```
 
 ### Access Documentation
+
 1. Start the server:
    ```bash
    make run
@@ -193,7 +200,9 @@ $(HOME)/go/bin/swag init -g cmd/server/main.go -o docs --parseDependency --parse
    ```
 
 ### Available Documentation
+
 The Swagger UI provides:
+
 - **Interactive API Testing**: Test endpoints directly from the browser
 - **Request/Response Examples**: See actual request and response formats
 - **Authentication Guide**: Learn how to use API keys for admin endpoints
@@ -204,6 +213,7 @@ The Swagger UI provides:
 The API uses rate limiting and API key authentication for admin operations.
 
 ### Public Endpoints (No Authentication)
+
 - `/health` - Health check endpoint
 - `/api/v1/companies` - List all companies
 - `/api/v1/companies/:id` - Get company details
@@ -216,11 +226,13 @@ The API uses rate limiting and API key authentication for admin operations.
 - `/api/v1/redemptions` - List redemptions
 
 ### Protected Admin Endpoints (API Key Required)
+
 - `/api/v1/admin/companies` - Create/update companies
 - `/api/v1/admin/sukuks` - Create/update Sukuk series
 - `/api/v1/admin/events/webhook` - Process blockchain events from indexer
 
 Include API key in headers for admin endpoints:
+
 ```
 X-API-Key: <your-api-key>
 ```
@@ -230,6 +242,7 @@ X-API-Key: <your-api-key>
 See `.env.example` for all available configuration options. Key variables include:
 
 ### Application
+
 - `APP_NAME` - Application name
 - `APP_ENV` - Application environment (development, staging, production)
 - `APP_PORT` - Server port (default: 8080)
@@ -237,6 +250,7 @@ See `.env.example` for all available configuration options. Key variables includ
 - `APP_UPLOAD_DIR` - File upload directory
 
 ### Database
+
 - `DB_HOST` - PostgreSQL host
 - `DB_PORT` - PostgreSQL port
 - `DB_NAME` - Database name
@@ -244,16 +258,19 @@ See `.env.example` for all available configuration options. Key variables includ
 - `DB_PASSWORD` - Database password
 
 ### Blockchain (Base Testnet)
+
 - `BLOCKCHAIN_CHAIN_ID` - Chain ID (84532 for Base Testnet)
 - `BLOCKCHAIN_RPC_ENDPOINT` - Base Testnet RPC endpoint
 - `BLOCKCHAIN_CONTRACT_ADDRESS` - Your Sukuk contract address
 
 ### API Security
+
 - `API_API_KEY` - API key for protected admin endpoints
 - `API_RATE_LIMIT_PER_MIN` - Rate limit per minute
 - `API_ALLOWED_ORIGINS` - CORS allowed origins
 
 ### Logging
+
 - `LOGGER_LEVEL` - Log level (debug, info, warn, error)
 - `LOGGER_FORMAT` - Log format (json, text)
 
@@ -276,6 +293,7 @@ The application provides a comprehensive health check endpoint:
 5. Open a Pull Request
 
 Please ensure:
+
 - All tests pass (`make test`)
 - No linting errors (`make lint`)
 - Update documentation if needed
@@ -295,5 +313,3 @@ This project is currently unlicensed.
 For questions or support, please open an issue in the GitHub repository.
 
 ---
-
-For detailed implementation instructions, see [TODO.md](TODO.md)

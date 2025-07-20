@@ -10,6 +10,13 @@ import (
 )
 
 // GetPlatformStats returns platform-wide statistics (READ-ONLY)
+// @Summary Get platform statistics
+// @Description Get platform-wide statistics including companies, Sukuk series, investments, and pending operations
+// @Tags Analytics
+// @Accept json
+// @Produce json
+// @Success 200 {object} PlatformStatsResponse "Platform statistics"
+// @Router /analytics/overview [get]
 func GetPlatformStats(c *gin.Context) {
 	db := database.GetDB()
 	
@@ -50,6 +57,16 @@ func GetPlatformStats(c *gin.Context) {
 }
 
 // GetVaultBalance returns IDRX vault balance for a specific series (READ-ONLY)
+// @Summary Get vault balance
+// @Description Get IDRX vault balance and utilization metrics for a specific Sukuk series
+// @Tags Analytics
+// @Accept json
+// @Produce json
+// @Param seriesId path int true "Sukuk Series ID"
+// @Success 200 {object} VaultBalanceResponse "Vault balance data"
+// @Failure 400 {object} ErrorResponse "Invalid series ID"
+// @Failure 404 {object} ErrorResponse "Sukuk series not found"
+// @Router /analytics/vault/{seriesId} [get]
 func GetVaultBalance(c *gin.Context) {
 	seriesID, err := strconv.ParseUint(c.Param("seriesId"), 10, 32)
 	if err != nil {

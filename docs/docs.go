@@ -57,22 +57,440 @@ const docTemplate = `{
                     "201": {
                         "description": "Company created successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid request data",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/companies/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update existing company information (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Management"
+                ],
+                "summary": "Update company",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Company ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.UpdateCompanyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Company updated",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Company not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/companies/{id}/upload-logo": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Upload logo image file for a company (admin only)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Management"
+                ],
+                "summary": "Upload company logo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Company ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Logo image file (jpg, png, gif)",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logo uploaded",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.FileUploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Company not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/events/webhook": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Process blockchain events from external indexer (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Process blockchain event webhook",
+                "parameters": [
+                    {
+                        "description": "Event data from blockchain indexer",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.WebhookEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Event processed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.EventWebhookResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/sukuks": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new Sukuk series with off-chain data (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sukuk Management"
+                ],
+                "summary": "Create new Sukuk series",
+                "parameters": [
+                    {
+                        "description": "Sukuk series data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.CreateSukukSeriesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Sukuk series created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/sukuks/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update existing Sukuk series off-chain data (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sukuk Management"
+                ],
+                "summary": "Update Sukuk series",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.UpdateSukukSeriesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk series updated",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk series not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/sukuks/{id}/upload-prospectus": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Upload PDF prospectus file for a Sukuk series (admin only)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sukuk Management"
+                ],
+                "summary": "Upload Sukuk prospectus",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "PDF prospectus file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Prospectus uploaded",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.FileUploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk series not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/analytics/overview": {
+            "get": {
+                "description": "Get platform-wide statistics including companies, Sukuk series, investments, and pending operations",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Get platform statistics",
+                "responses": {
+                    "200": {
+                        "description": "Platform statistics",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.PlatformStatsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/analytics/vault/{seriesId}": {
+            "get": {
+                "description": "Get IDRX vault balance and utilization metrics for a specific Sukuk series",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Get vault balance",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "seriesId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Vault balance data",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.VaultBalanceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid series ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk series not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -103,15 +521,13 @@ const docTemplate = `{
                     "200": {
                         "description": "List of companies",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.CompanyListResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -143,22 +559,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Company details",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.CompanyResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid company ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Company not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -190,22 +603,69 @@ const docTemplate = `{
                     "200": {
                         "description": "List of company's Sukuk series",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.CompanySukuksResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid company ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/events/{txHash}": {
+            "get": {
+                "description": "Get all blockchain events associated with a specific transaction hash",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get events by transaction hash",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Transaction hash",
+                        "name": "txHash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of events for transaction",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.EventListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid transaction hash",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No events found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -239,9 +699,1618 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/investments": {
+            "get": {
+                "description": "Get a list of all investments with optional filtering by investor address and status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Investments"
+                ],
+                "summary": "List all investments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Investor wallet address to filter by",
+                        "name": "investor_address",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Investment status to filter by (active, redeemed)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of investments",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.InvestmentListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/investments/investor/{address}": {
+            "get": {
+                "description": "Get all investments made by a specific wallet address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Investments"
+                ],
+                "summary": "Get investments by investor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Investor wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Investor's investments",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.InvestmentListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/investments/sukuk/{sukukId}": {
+            "get": {
+                "description": "Get all investments made in a specific Sukuk series",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Investments"
+                ],
+                "summary": "Get investments by Sukuk series",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "sukukId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk series investments",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.InvestmentListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/investments/{id}": {
+            "get": {
+                "description": "Get detailed information about a specific investment including Sukuk series and company data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Investments"
+                ],
+                "summary": "Get investment details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Investment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Investment details",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.InvestmentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Investment not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio/{address}": {
+            "get": {
+                "description": "Get complete portfolio overview for a wallet address including investments, pending yields, and redemptions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Portfolio"
+                ],
+                "summary": "Get user portfolio",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Portfolio data",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.PortfolioResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio/{address}/investments": {
+            "get": {
+                "description": "Get investment history for a wallet address with optional status filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Portfolio"
+                ],
+                "summary": "Get investment history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Investment status filter (active, redeemed)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Investment history",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.InvestmentListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio/{address}/redemptions": {
+            "get": {
+                "description": "Get redemption history for a wallet address with optional status filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Portfolio"
+                ],
+                "summary": "Get redemption history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Redemption status filter (requested, approved, rejected, completed)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redemption history",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.RedemptionListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio/{address}/yields": {
+            "get": {
+                "description": "Get yield claim history for a wallet address with optional status filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Portfolio"
+                ],
+                "summary": "Get yield history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Yield status filter (pending, claimed)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Yield history",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.YieldClaimListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio/{address}/yields/pending": {
+            "get": {
+                "description": "Get all pending yield claims for a wallet address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Portfolio"
+                ],
+                "summary": "Get pending yields",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pending yields",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.YieldClaimListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions": {
+            "get": {
+                "description": "Get a list of all redemptions with optional filtering by status and investor address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redemptions"
+                ],
+                "summary": "List all redemptions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Redemption status to filter by (requested, approved, rejected, completed)",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Investor wallet address to filter by",
+                        "name": "investor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of redemptions",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.RedemptionListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new redemption request for an active investment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redemptions"
+                ],
+                "summary": "Create redemption request",
+                "parameters": [
+                    {
+                        "description": "Redemption request data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.CreateRedemptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Redemption request created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/investor/{address}": {
+            "get": {
+                "description": "Get all redemptions made by a specific wallet address with optional status filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redemptions"
+                ],
+                "summary": "Get redemptions by investor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Investor wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Redemption status to filter by (requested, approved, rejected, completed)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Investor's redemptions",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.RedemptionListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/sukuk/{sukukId}": {
+            "get": {
+                "description": "Get all redemptions for a specific Sukuk series with optional status filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redemptions"
+                ],
+                "summary": "Get redemptions by Sukuk series",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "sukukId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Redemption status to filter by (requested, approved, rejected, completed)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk series redemptions",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.RedemptionListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/{id}": {
+            "get": {
+                "description": "Get detailed information about a specific redemption including Sukuk series, company, and investment data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redemptions"
+                ],
+                "summary": "Get redemption details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Redemption ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redemption details",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.RedemptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Redemption not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/{id}/approve": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Approve a redemption request (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redemptions"
+                ],
+                "summary": "Approve redemption",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Redemption ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Approval data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ApproveRedemptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redemption approved",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Redemption not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/{id}/reject": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Reject a redemption request (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redemptions"
+                ],
+                "summary": "Reject redemption",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Redemption ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Rejection data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.RejectRedemptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redemption rejected",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Redemption not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sukuks": {
+            "get": {
+                "description": "Get a list of all Sukuk series with optional filtering by company and status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sukuk Series"
+                ],
+                "summary": "List all Sukuk series",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Company ID to filter by",
+                        "name": "company_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status to filter by (active, paused, matured)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of Sukuk series",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.SukukSeriesListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sukuks/{id}": {
+            "get": {
+                "description": "Get detailed information about a specific Sukuk series including company, investments, yield claims, and redemptions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sukuk Series"
+                ],
+                "summary": "Get Sukuk series details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk series details",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.SukukSeriesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk series not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sukuks/{id}/holders": {
+            "get": {
+                "description": "Get a list of current active investors holding the specified Sukuk series",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sukuk Series"
+                ],
+                "summary": "Get Sukuk holders",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of active investments",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.SukukHoldersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sukuks/{id}/metrics": {
+            "get": {
+                "description": "Get performance metrics including total investors, investment amount, pending yields, and redemptions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sukuk Series"
+                ],
+                "summary": "Get Sukuk series metrics",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk series metrics",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.SukukMetricsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/yield-claims": {
+            "get": {
+                "description": "Get a list of all yield claims with optional filtering by status and investor address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Yield Claims"
+                ],
+                "summary": "List all yield claims",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Yield claim status to filter by (pending, claimed)",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Investor wallet address to filter by",
+                        "name": "investor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of yield claims",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.YieldClaimListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/yield-claims/investor/{address}": {
+            "get": {
+                "description": "Get all yield claims made by a specific wallet address with optional status filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Yield Claims"
+                ],
+                "summary": "Get yield claims by investor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Investor wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Yield claim status to filter by (pending, claimed)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Investor's yield claims",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.YieldClaimListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/yield-claims/sukuk/{sukukId}": {
+            "get": {
+                "description": "Get all yield claims for a specific Sukuk series with optional status filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Yield Claims"
+                ],
+                "summary": "Get yield claims by Sukuk series",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk Series ID",
+                        "name": "sukukId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Yield claim status to filter by (pending, claimed)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk series yield claims",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.YieldClaimListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/yield-claims/{id}": {
+            "get": {
+                "description": "Get detailed information about a specific yield claim including Sukuk series, company, and investment data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Yield Claims"
+                ],
+                "summary": "Get yield claim details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Yield Claim ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Yield claim details",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.YieldClaimResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Yield claim not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "github_com_kadzu_sukuk-poc-be_internal_models.Company": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Leading Indonesian sukuk issuer"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "contact@sukukindonesia.com"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "Financial Services"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "legal_documents": {
+                    "description": "JSON array of document paths",
+                    "type": "string",
+                    "example": "[\"doc1.pdf\", \"doc2.pdf\"]"
+                },
+                "logo": {
+                    "description": "File path to company logo",
+                    "type": "string",
+                    "example": "/uploads/logos/company_1.png"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "PT Sukuk Indonesia"
+                },
+                "sukuk_series": {
+                    "description": "Relationships",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                    }
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "wallet_address": {
+                    "type": "string",
+                    "example": "0x1234567890123456789012345678901234567890"
+                },
+                "website": {
+                    "type": "string",
+                    "example": "https://sukukindonesia.com"
+                }
+            }
+        },
+        "github_com_kadzu_sukuk-poc-be_internal_models.Event": {
+            "type": "object",
+            "properties": {
+                "block_number": {
+                    "type": "integer"
+                },
+                "chain_id": {
+                    "description": "Base Testnet",
+                    "type": "integer"
+                },
+                "contract_address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.JSON"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "event_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "processed": {
+                    "type": "boolean"
+                },
+                "processed_at": {
+                    "type": "string"
+                },
+                "tx_hash": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_kadzu_sukuk-poc-be_internal_models.Investment": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Investment amount in IDRX",
+                    "type": "string",
+                    "example": "1000000000000000000000"
+                },
+                "block_number": {
+                    "type": "integer",
+                    "example": 12345678
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "investment_date": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "investor_address": {
+                    "type": "string",
+                    "example": "0x1234567890123456789012345678901234567890"
+                },
+                "investor_email": {
+                    "type": "string",
+                    "example": "investor@example.com"
+                },
+                "redemptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "sukuk_series": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                        }
+                    ]
+                },
+                "sukuk_series_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "token_amount": {
+                    "description": "Equivalent Sukuk tokens received",
+                    "type": "string",
+                    "example": "1000000000000000000000"
+                },
+                "transaction_hash": {
+                    "type": "string",
+                    "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "yield_claims": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
+                    }
+                }
+            }
+        },
+        "github_com_kadzu_sukuk-poc-be_internal_models.JSON": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "github_com_kadzu_sukuk-poc-be_internal_models.Redemption": {
+            "type": "object",
+            "properties": {
+                "approval_notes": {
+                    "description": "Company's approval/rejection notes",
+                    "type": "string"
+                },
+                "approved_at": {
+                    "type": "string"
+                },
+                "block_number": {
+                    "description": "Set when completed",
+                    "type": "integer"
+                },
+                "completed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "investment": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                },
+                "investment_id": {
+                    "type": "integer"
+                },
+                "investor_address": {
+                    "type": "string"
+                },
+                "redemption_amount": {
+                    "description": "IDRX amount to be returned",
+                    "type": "string"
+                },
+                "rejected_at": {
+                    "type": "string"
+                },
+                "rejection_reason": {
+                    "type": "string"
+                },
+                "request_reason": {
+                    "description": "Why investor wants to redeem",
+                    "type": "string"
+                },
+                "requested_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.RedemptionStatus"
+                },
+                "sukuk_series": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                        }
+                    ]
+                },
+                "sukuk_series_id": {
+                    "type": "integer"
+                },
+                "token_amount": {
+                    "description": "Amount of tokens to redeem",
+                    "type": "string"
+                },
+                "transaction_hash": {
+                    "description": "Set when completed",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_kadzu_sukuk-poc-be_internal_models.RedemptionStatus": {
+            "type": "string",
+            "enum": [
+                "requested",
+                "approved",
+                "rejected",
+                "completed",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "RedemptionStatusRequested",
+                "RedemptionStatusApproved",
+                "RedemptionStatusRejected",
+                "RedemptionStatusCompleted",
+                "RedemptionStatusCancelled"
+            ]
+        },
+        "github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries": {
+            "type": "object",
+            "properties": {
+                "company": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Company"
+                        }
+                    ]
+                },
+                "company_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Sustainable infrastructure financing sukuk"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "investments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                    }
+                },
+                "is_redeemable": {
+                    "description": "Can investors redeem early",
+                    "type": "boolean",
+                    "example": true
+                },
+                "legal_documents": {
+                    "description": "JSON array of document paths",
+                    "type": "string",
+                    "example": "[\"legal1.pdf\", \"legal2.pdf\"]"
+                },
+                "maturity_date": {
+                    "type": "string",
+                    "example": "2027-12-31T00:00:00Z"
+                },
+                "max_investment": {
+                    "description": "Maximum investment amount (optional)",
+                    "type": "string",
+                    "example": "100000000000000000000"
+                },
+                "min_investment": {
+                    "description": "Minimum investment amount",
+                    "type": "string",
+                    "example": "1000000000000000000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Green Sukuk Series A"
+                },
+                "outstanding_supply": {
+                    "description": "Currently issued",
+                    "type": "string",
+                    "example": "500000000000000000000000"
+                },
+                "payment_frequency": {
+                    "description": "Payments per year (quarterly = 4)",
+                    "type": "integer",
+                    "example": 4
+                },
+                "prospectus": {
+                    "description": "PDF file path",
+                    "type": "string",
+                    "example": "/uploads/prospectus/sukuk_1.pdf"
+                },
+                "redemptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "symbol": {
+                    "type": "string",
+                    "example": "GSA"
+                },
+                "token_address": {
+                    "type": "string",
+                    "example": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
+                },
+                "total_supply": {
+                    "description": "Use string for big numbers",
+                    "type": "string",
+                    "example": "1000000000000000000000000"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "yield_claims": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
+                    }
+                },
+                "yield_rate": {
+                    "description": "Annual yield rate (e.g., 0.0850 for 8.5%)",
+                    "type": "number",
+                    "example": 0.085
+                }
+            }
+        },
+        "github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim": {
+            "type": "object",
+            "properties": {
+                "block_number": {
+                    "description": "Set when claimed",
+                    "type": "integer"
+                },
+                "claimed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "description": "Yield claims can expire",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "investment": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                },
+                "investment_id": {
+                    "type": "integer"
+                },
+                "investor_address": {
+                    "type": "string"
+                },
+                "period_end": {
+                    "type": "string"
+                },
+                "period_start": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaimStatus"
+                },
+                "sukuk_series": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                        }
+                    ]
+                },
+                "sukuk_series_id": {
+                    "type": "integer"
+                },
+                "transaction_hash": {
+                    "description": "Set when claimed",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "yield_amount": {
+                    "description": "Yield amount in IDRX",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_kadzu_sukuk-poc-be_internal_models.YieldClaimStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "claimed",
+                "expired"
+            ],
+            "x-enum-varnames": [
+                "YieldClaimStatusPending",
+                "YieldClaimStatusClaimed",
+                "YieldClaimStatusExpired"
+            ]
+        },
+        "internal_handlers.APIResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string",
+                    "example": "Validation failed"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Operation completed successfully"
+                }
+            }
+        },
         "internal_handlers.ApplicationHealth": {
             "type": "object",
             "properties": {
@@ -253,6 +2322,15 @@ const docTemplate = `{
                 },
                 "uploads_directory_writable": {
                     "type": "boolean"
+                }
+            }
+        },
+        "internal_handlers.ApproveRedemptionRequest": {
+            "type": "object",
+            "properties": {
+                "approval_notes": {
+                    "type": "string",
+                    "example": "Redemption approved after verification"
                 }
             }
         },
@@ -270,6 +2348,44 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_handlers.CompanyListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Company"
+                    }
+                }
+            }
+        },
+        "internal_handlers.CompanyResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Company"
+                }
+            }
+        },
+        "internal_handlers.CompanySukuksResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                    }
+                }
+            }
+        },
         "internal_handlers.CreateCompanyRequest": {
             "type": "object",
             "required": [
@@ -279,22 +2395,122 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Leading Indonesian sukuk issuer"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "contact@sukukindonesia.com"
                 },
                 "industry": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Financial Services"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "PT Sukuk Indonesia"
                 },
                 "wallet_address": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0x1234567890123456789012345678901234567890"
                 },
                 "website": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "https://sukukindonesia.com"
+                }
+            }
+        },
+        "internal_handlers.CreateRedemptionRequest": {
+            "type": "object",
+            "required": [
+                "investment_id",
+                "investor_address",
+                "redemption_amount",
+                "sukuk_series_id",
+                "token_amount"
+            ],
+            "properties": {
+                "investment_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "investor_address": {
+                    "type": "string",
+                    "example": "0x1234567890123456789012345678901234567890"
+                },
+                "redemption_amount": {
+                    "type": "string",
+                    "example": "500000000000000000000"
+                },
+                "request_reason": {
+                    "type": "string",
+                    "example": "Early redemption for emergency needs"
+                },
+                "sukuk_series_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "token_amount": {
+                    "type": "string",
+                    "example": "500000000000000000000"
+                }
+            }
+        },
+        "internal_handlers.CreateSukukSeriesRequest": {
+            "type": "object",
+            "required": [
+                "company_id",
+                "maturity_date",
+                "min_investment",
+                "name",
+                "symbol",
+                "total_supply",
+                "yield_rate"
+            ],
+            "properties": {
+                "company_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Sustainable infrastructure financing sukuk"
+                },
+                "is_redeemable": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "maturity_date": {
+                    "type": "string",
+                    "example": "2027-12-31T00:00:00Z"
+                },
+                "max_investment": {
+                    "type": "string",
+                    "example": "100000000000000000000"
+                },
+                "min_investment": {
+                    "type": "string",
+                    "example": "1000000000000000000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Green Sukuk Series A"
+                },
+                "payment_frequency": {
+                    "type": "integer",
+                    "example": 4
+                },
+                "symbol": {
+                    "type": "string",
+                    "example": "GSA"
+                },
+                "total_supply": {
+                    "type": "string",
+                    "example": "1000000000000000000000000"
+                },
+                "yield_rate": {
+                    "type": "number",
+                    "example": 0.085
                 }
             }
         },
@@ -312,6 +2528,60 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid request data"
+                }
+            }
+        },
+        "internal_handlers.EventListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Event"
+                    }
+                }
+            }
+        },
+        "internal_handlers.EventWebhookResponse": {
+            "type": "object",
+            "properties": {
+                "event_id": {
+                    "type": "integer",
+                    "example": 123
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Event processed successfully"
+                }
+            }
+        },
+        "internal_handlers.FileUploadResponse": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string",
+                    "example": "company_logo_1.png"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "File uploaded successfully"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "/uploads/logos/company_logo_1.png"
                 }
             }
         },
@@ -347,6 +2617,29 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_handlers.InvestmentListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                    }
+                }
+            }
+        },
+        "internal_handlers.InvestmentResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                }
+            }
+        },
         "internal_handlers.MemoryStats": {
             "type": "object",
             "properties": {
@@ -364,6 +2657,212 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_handlers.MetaInfo": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "internal_handlers.PlatformStats": {
+            "type": "object",
+            "properties": {
+                "pending_redemptions": {
+                    "type": "integer",
+                    "example": 15
+                },
+                "pending_yields": {
+                    "type": "integer",
+                    "example": 50
+                },
+                "total_companies": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "total_investments": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "total_sukuk_series": {
+                    "type": "integer",
+                    "example": 25
+                },
+                "unique_investors": {
+                    "type": "integer",
+                    "example": 250
+                }
+            }
+        },
+        "internal_handlers.PlatformStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_handlers.PlatformStats"
+                }
+            }
+        },
+        "internal_handlers.PortfolioData": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x1234567890123456789012345678901234567890"
+                },
+                "investments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                    }
+                },
+                "pending_yields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
+                    }
+                },
+                "redemptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
+                    }
+                },
+                "summary": {
+                    "$ref": "#/definitions/internal_handlers.PortfolioSummary"
+                }
+            }
+        },
+        "internal_handlers.PortfolioResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_handlers.PortfolioData"
+                }
+            }
+        },
+        "internal_handlers.PortfolioSummary": {
+            "type": "object",
+            "properties": {
+                "pending_yields": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "total_investments": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "total_redemptions": {
+                    "type": "integer",
+                    "example": 2
+                }
+            }
+        },
+        "internal_handlers.RedemptionListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
+                    }
+                }
+            }
+        },
+        "internal_handlers.RedemptionResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Redemption"
+                }
+            }
+        },
+        "internal_handlers.RejectRedemptionRequest": {
+            "type": "object",
+            "required": [
+                "rejection_reason"
+            ],
+            "properties": {
+                "rejection_reason": {
+                    "type": "string",
+                    "example": "Insufficient documentation provided"
+                }
+            }
+        },
+        "internal_handlers.SukukHoldersResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 150
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.Investment"
+                    }
+                }
+            }
+        },
+        "internal_handlers.SukukMetrics": {
+            "type": "object",
+            "properties": {
+                "pending_redemptions": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "pending_yields": {
+                    "type": "integer",
+                    "example": 25
+                },
+                "total_investment": {
+                    "type": "string",
+                    "example": "1000000000000000000000000"
+                },
+                "total_investors": {
+                    "type": "integer",
+                    "example": 150
+                }
+            }
+        },
+        "internal_handlers.SukukMetricsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_handlers.SukukMetrics"
+                }
+            }
+        },
+        "internal_handlers.SukukSeriesListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/internal_handlers.MetaInfo"
+                }
+            }
+        },
+        "internal_handlers.SukukSeriesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.SukukSeries"
+                }
+            }
+        },
         "internal_handlers.SystemHealth": {
             "type": "object",
             "properties": {
@@ -378,6 +2877,123 @@ const docTemplate = `{
                 },
                 "uptime": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_handlers.UpdateCompanyRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Updated description"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "newcontact@sukukindonesia.com"
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "Financial Technology"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "PT Sukuk Indonesia Updated"
+                },
+                "website": {
+                    "type": "string",
+                    "example": "https://newsukukindonesia.com"
+                }
+            }
+        },
+        "internal_handlers.UpdateSukukSeriesRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Updated description"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Updated Green Sukuk Series A"
+                },
+                "outstanding_supply": {
+                    "type": "string",
+                    "example": "1000000000000000000000000"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "token_address": {
+                    "type": "string",
+                    "example": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
+                },
+                "total_supply": {
+                    "type": "string",
+                    "example": "2000000000000000000000000"
+                }
+            }
+        },
+        "internal_handlers.VaultBalance": {
+            "type": "object",
+            "properties": {
+                "series_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "series_name": {
+                    "type": "string",
+                    "example": "Green Sukuk Series A"
+                },
+                "total_supply": {
+                    "type": "string",
+                    "example": "1000000000000000000000000"
+                },
+                "utilization_rate": {
+                    "type": "string",
+                    "example": "0.5"
+                },
+                "vault_balance": {
+                    "type": "string",
+                    "example": "500000000000000000000000"
+                }
+            }
+        },
+        "internal_handlers.VaultBalanceResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_handlers.VaultBalance"
+                }
+            }
+        },
+        "internal_handlers.WebhookEventRequest": {
+            "type": "object"
+        },
+        "internal_handlers.YieldClaimListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 50
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
+                    }
+                }
+            }
+        },
+        "internal_handlers.YieldClaimResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_kadzu_sukuk-poc-be_internal_models.YieldClaim"
                 }
             }
         },

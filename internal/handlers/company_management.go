@@ -10,22 +10,24 @@ import (
 	"github.com/kadzu/sukuk-poc-be/internal/utils"
 )
 
+// CreateCompanyRequest represents the request body for creating a new company
 type CreateCompanyRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description"`
-	Website     string `json:"website"`
-	Industry    string `json:"industry"`
-	Email       string `json:"email" binding:"required,email"`
-	WalletAddress string `json:"wallet_address" binding:"required"`
+	Name        string `json:"name" binding:"required" swaggertype:"string" example:"PT Sukuk Indonesia"`
+	Description string `json:"description" swaggertype:"string" example:"Leading Indonesian sukuk issuer"`
+	Website     string `json:"website" swaggertype:"string" example:"https://sukukindonesia.com"`
+	Industry    string `json:"industry" swaggertype:"string" example:"Financial Services"`
+	Email       string `json:"email" binding:"required,email" swaggertype:"string" example:"contact@sukukindonesia.com"`
+	WalletAddress string `json:"wallet_address" binding:"required" swaggertype:"string" example:"0x1234567890123456789012345678901234567890"`
 }
 
+// UpdateCompanyRequest represents the request body for updating a company
 type UpdateCompanyRequest struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Website     string `json:"website,omitempty"`
-	Industry    string `json:"industry,omitempty"`
-	Email       string `json:"email,omitempty"`
-	IsActive    *bool  `json:"is_active,omitempty"`
+	Name        string `json:"name,omitempty" swaggertype:"string" example:"PT Sukuk Indonesia Updated"`
+	Description string `json:"description,omitempty" swaggertype:"string" example:"Updated description"`
+	Website     string `json:"website,omitempty" swaggertype:"string" example:"https://newsukukindonesia.com"`
+	Industry    string `json:"industry,omitempty" swaggertype:"string" example:"Financial Technology"`
+	Email       string `json:"email,omitempty" swaggertype:"string" example:"newcontact@sukukindonesia.com"`
+	IsActive    *bool  `json:"is_active,omitempty" swaggertype:"boolean" example:"true"`
 }
 
 // CreateCompany godoc
@@ -35,9 +37,9 @@ type UpdateCompanyRequest struct {
 // @Accept json
 // @Produce json
 // @Param company body CreateCompanyRequest true "Company data"
-// @Success 201 {object} map[string]interface{} "Company created successfully"
-// @Failure 400 {object} map[string]interface{} "Invalid request data"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Success 201 {object} APIResponse "Company created successfully"
+// @Failure 400 {object} ErrorResponse "Invalid request data"
+// @Failure 500 {object} ErrorResponse "Internal server error"
 // @Security ApiKeyAuth
 // @Router /admin/companies [post]
 func CreateCompany(c *gin.Context) {
@@ -72,6 +74,19 @@ func CreateCompany(c *gin.Context) {
 }
 
 // UpdateCompany updates existing company information
+// @Summary Update company
+// @Description Update existing company information (admin only)
+// @Tags Company Management
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path int true "Company ID"
+// @Param request body UpdateCompanyRequest true "Update data"
+// @Success 200 {object} APIResponse "Company updated"
+// @Failure 400 {object} ErrorResponse "Bad request"
+// @Failure 404 {object} ErrorResponse "Company not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /admin/companies/{id} [put]
 func UpdateCompany(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -130,6 +145,19 @@ func UpdateCompany(c *gin.Context) {
 }
 
 // UploadCompanyLogo handles company logo file upload
+// @Summary Upload company logo
+// @Description Upload logo image file for a company (admin only)
+// @Tags Company Management
+// @Accept multipart/form-data
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path int true "Company ID"
+// @Param file formData file true "Logo image file (jpg, png, gif)"
+// @Success 200 {object} FileUploadResponse "Logo uploaded"
+// @Failure 400 {object} ErrorResponse "Bad request"
+// @Failure 404 {object} ErrorResponse "Company not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /admin/companies/{id}/upload-logo [post]
 func UploadCompanyLogo(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {

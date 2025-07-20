@@ -9,6 +9,17 @@ import (
 	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
+// GetInvestments returns a list of all investments with optional filtering
+// @Summary List all investments
+// @Description Get a list of all investments with optional filtering by investor address and status
+// @Tags Investments
+// @Accept json
+// @Produce json
+// @Param investor_address query string false "Investor wallet address to filter by"
+// @Param status query string false "Investment status to filter by (active, redeemed)"
+// @Success 200 {object} InvestmentListResponse "List of investments"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /investments [get]
 func GetInvestments(c *gin.Context) {
 	var investments []models.Investment
 	
@@ -38,6 +49,17 @@ func GetInvestments(c *gin.Context) {
 	})
 }
 
+// GetInvestment returns details of a specific investment
+// @Summary Get investment details
+// @Description Get detailed information about a specific investment including Sukuk series and company data
+// @Tags Investments
+// @Accept json
+// @Produce json
+// @Param id path int true "Investment ID"
+// @Success 200 {object} InvestmentResponse "Investment details"
+// @Failure 400 {object} ErrorResponse "Invalid ID"
+// @Failure 404 {object} ErrorResponse "Investment not found"
+// @Router /investments/{id} [get]
 func GetInvestment(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -61,6 +83,17 @@ func GetInvestment(c *gin.Context) {
 	})
 }
 
+// GetInvestmentsByInvestor returns all investments for a specific investor
+// @Summary Get investments by investor
+// @Description Get all investments made by a specific wallet address
+// @Tags Investments
+// @Accept json
+// @Produce json
+// @Param address path string true "Investor wallet address"
+// @Success 200 {object} InvestmentListResponse "Investor's investments"
+// @Failure 400 {object} ErrorResponse "Invalid address"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /investments/investor/{address} [get]
 func GetInvestmentsByInvestor(c *gin.Context) {
 	address := c.Param("address")
 	if address == "" {
@@ -85,6 +118,17 @@ func GetInvestmentsByInvestor(c *gin.Context) {
 	})
 }
 
+// GetInvestmentsBySukuk returns all investments for a specific Sukuk series
+// @Summary Get investments by Sukuk series
+// @Description Get all investments made in a specific Sukuk series
+// @Tags Investments
+// @Accept json
+// @Produce json
+// @Param sukukId path int true "Sukuk Series ID"
+// @Success 200 {object} InvestmentListResponse "Sukuk series investments"
+// @Failure 400 {object} ErrorResponse "Invalid ID"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /investments/sukuk/{sukukId} [get]
 func GetInvestmentsBySukuk(c *gin.Context) {
 	sukukID, err := strconv.ParseUint(c.Param("sukukId"), 10, 32)
 	if err != nil {

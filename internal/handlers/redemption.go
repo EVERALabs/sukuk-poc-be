@@ -11,23 +11,37 @@ import (
 	"github.com/kadzu/sukuk-poc-be/internal/models"
 )
 
+// CreateRedemptionRequest represents the request body for creating a redemption request
 type CreateRedemptionRequest struct {
-	SukukSeriesID   uint   `json:"sukuk_series_id" binding:"required"`
-	InvestmentID    uint   `json:"investment_id" binding:"required"`
-	InvestorAddress string `json:"investor_address" binding:"required"`
-	TokenAmount     string `json:"token_amount" binding:"required"`
-	RedemptionAmount string `json:"redemption_amount" binding:"required"`
-	RequestReason   string `json:"request_reason"`
+	SukukSeriesID   uint   `json:"sukuk_series_id" binding:"required" swaggertype:"integer" example:"1"`
+	InvestmentID    uint   `json:"investment_id" binding:"required" swaggertype:"integer" example:"1"`
+	InvestorAddress string `json:"investor_address" binding:"required" swaggertype:"string" example:"0x1234567890123456789012345678901234567890"`
+	TokenAmount     string `json:"token_amount" binding:"required" swaggertype:"string" example:"500000000000000000000"`
+	RedemptionAmount string `json:"redemption_amount" binding:"required" swaggertype:"string" example:"500000000000000000000"`
+	RequestReason   string `json:"request_reason" swaggertype:"string" example:"Early redemption for emergency needs"`
 }
 
+// ApproveRedemptionRequest represents the request body for approving a redemption
 type ApproveRedemptionRequest struct {
-	ApprovalNotes string `json:"approval_notes"`
+	ApprovalNotes string `json:"approval_notes" swaggertype:"string" example:"Redemption approved after verification"`
 }
 
+// RejectRedemptionRequest represents the request body for rejecting a redemption
 type RejectRedemptionRequest struct {
-	RejectionReason string `json:"rejection_reason" binding:"required"`
+	RejectionReason string `json:"rejection_reason" binding:"required" swaggertype:"string" example:"Insufficient documentation provided"`
 }
 
+// GetRedemptions returns a list of all redemptions with optional filtering
+// @Summary List all redemptions
+// @Description Get a list of all redemptions with optional filtering by status and investor address
+// @Tags Redemptions
+// @Accept json
+// @Produce json
+// @Param status query string false "Redemption status to filter by (requested, approved, rejected, completed)"
+// @Param investor query string false "Investor wallet address to filter by"
+// @Success 200 {object} RedemptionListResponse "List of redemptions"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /redemptions [get]
 func GetRedemptions(c *gin.Context) {
 	var redemptions []models.Redemption
 	
@@ -57,6 +71,17 @@ func GetRedemptions(c *gin.Context) {
 	})
 }
 
+// GetRedemption returns details of a specific redemption
+// @Summary Get redemption details
+// @Description Get detailed information about a specific redemption including Sukuk series, company, and investment data
+// @Tags Redemptions
+// @Accept json
+// @Produce json
+// @Param id path int true "Redemption ID"
+// @Success 200 {object} RedemptionResponse "Redemption details"
+// @Failure 400 {object} ErrorResponse "Invalid ID"
+// @Failure 404 {object} ErrorResponse "Redemption not found"
+// @Router /redemptions/{id} [get]
 func GetRedemption(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -80,6 +105,18 @@ func GetRedemption(c *gin.Context) {
 	})
 }
 
+// GetRedemptionsByInvestor returns all redemptions for a specific investor
+// @Summary Get redemptions by investor
+// @Description Get all redemptions made by a specific wallet address with optional status filtering
+// @Tags Redemptions
+// @Accept json
+// @Produce json
+// @Param address path string true "Investor wallet address"
+// @Param status query string false "Redemption status to filter by (requested, approved, rejected, completed)"
+// @Success 200 {object} RedemptionListResponse "Investor's redemptions"
+// @Failure 400 {object} ErrorResponse "Invalid address"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /redemptions/investor/{address} [get]
 func GetRedemptionsByInvestor(c *gin.Context) {
 	address := strings.ToLower(c.Param("address"))
 	if address == "" {
@@ -111,6 +148,18 @@ func GetRedemptionsByInvestor(c *gin.Context) {
 	})
 }
 
+// GetRedemptionsBySukuk returns all redemptions for a specific Sukuk series
+// @Summary Get redemptions by Sukuk series
+// @Description Get all redemptions for a specific Sukuk series with optional status filtering
+// @Tags Redemptions
+// @Accept json
+// @Produce json
+// @Param sukukId path int true "Sukuk Series ID"
+// @Param status query string false "Redemption status to filter by (requested, approved, rejected, completed)"
+// @Success 200 {object} RedemptionListResponse "Sukuk series redemptions"
+// @Failure 400 {object} ErrorResponse "Invalid ID"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /redemptions/sukuk/{sukukId} [get]
 func GetRedemptionsBySukuk(c *gin.Context) {
 	sukukID, err := strconv.ParseUint(c.Param("sukukId"), 10, 32)
 	if err != nil {
@@ -142,6 +191,17 @@ func GetRedemptionsBySukuk(c *gin.Context) {
 	})
 }
 
+// CreateRedemption creates a new redemption request
+// @Summary Create redemption request
+// @Description Create a new redemption request for an active investment
+// @Tags Redemptions
+// @Accept json
+// @Produce json
+// @Param request body CreateRedemptionRequest true "Redemption request data"
+// @Success 201 {object} APIResponse "Redemption request created"
+// @Failure 400 {object} ErrorResponse "Bad request"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /redemptions [post]
 func CreateRedemption(c *gin.Context) {
 	var req CreateRedemptionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -187,6 +247,20 @@ func CreateRedemption(c *gin.Context) {
 	})
 }
 
+// ApproveRedemption approves a redemption request (admin only)
+// @Summary Approve redemption
+// @Description Approve a redemption request (admin only)
+// @Tags Redemptions
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path int true "Redemption ID"
+// @Param request body ApproveRedemptionRequest true "Approval data"
+// @Success 200 {object} APIResponse "Redemption approved"
+// @Failure 400 {object} ErrorResponse "Bad request"
+// @Failure 404 {object} ErrorResponse "Redemption not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /redemptions/{id}/approve [put]
 func ApproveRedemption(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -236,6 +310,20 @@ func ApproveRedemption(c *gin.Context) {
 	})
 }
 
+// RejectRedemption rejects a redemption request (admin only)
+// @Summary Reject redemption
+// @Description Reject a redemption request (admin only)
+// @Tags Redemptions
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path int true "Redemption ID"
+// @Param request body RejectRedemptionRequest true "Rejection data"
+// @Success 200 {object} APIResponse "Redemption rejected"
+// @Failure 400 {object} ErrorResponse "Bad request"
+// @Failure 404 {object} ErrorResponse "Redemption not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /redemptions/{id}/reject [put]
 func RejectRedemption(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
