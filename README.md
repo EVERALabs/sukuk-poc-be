@@ -1,24 +1,18 @@
 # Sukuk POC Backend - Web3 API
 
-A production-ready Web3 backend for Sukuk (Islamic bonds) on blockchain, providing APIs for dApps and frontends while processing blockchain events from an indexer.
+A production-ready Web3 backend for Sukuk (Islamic bonds) on Base Testnet, providing APIs for dApps and frontends while processing blockchain events from an indexer.
 
 ## 🚀 Technology Stack
 
-- **Language**: Go 1.21+
+- **Language**: Go 1.24+
 - **Web Framework**: [Gin](https://gin-gonic.com/) - High-performance HTTP web framework
 - **Database**: PostgreSQL with [GORM](https://gorm.io/) ORM
-- **Database Migrations**: [golang-migrate](https://github.com/golang-migrate/migrate)
+- **Configuration**: [godotenv](https://github.com/joho/godotenv) - Environment configuration
 - **Validation**: [go-playground/validator](https://github.com/go-playground/validator) - Struct and field validation
-- **Logging**: [Logrus](https://github.com/sirupsen/logrus) + Gin's built-in logger
-- **Testing**: [Testify](https://github.com/stretchr/testify) with [gotestsum](https://github.com/gotestyourself/gotestsum)
-- **API Documentation**: [Swag](https://github.com/swaggo/swag) - Swagger for Go
-- **Email**: [Gomail](https://github.com/go-gomail/gomail) - Simple and efficient email sending
-- **Configuration**: [Viper](https://github.com/spf13/viper) - Complete configuration solution
-- **Security**: Custom middleware for security headers
-- **CORS**: [gin-contrib/cors](https://github.com/gin-contrib/cors)
-- **Compression**: [gin-contrib/gzip](https://github.com/gin-contrib/gzip)
-- **Containerization**: Docker & Docker Compose
-- **Code Quality**: [golangci-lint](https://golangci-lint.run/)
+- **Logging**: [Logrus](https://github.com/sirupsen/logrus) - Structured logging
+- **Testing**: [Testify](https://github.com/stretchr/testify) - Testing framework
+- **Security**: Custom middleware for authentication and CORS
+- **File Uploads**: Built-in multipart form handling with validation
 
 ## 📋 Features
 
@@ -41,53 +35,42 @@ A production-ready Web3 backend for Sukuk (Islamic bonds) on blockchain, providi
 - Request validation and error handling
 - Structured logging with blockchain context
 - Comprehensive testing (unit & integration)
-- API documentation with Swagger UI
 - Environment-based configuration
 - Security best practices (API keys, rate limiting)
-- Docker support for easy deployment
 - Health checks and monitoring
-- Email notifications (optional)
+- File upload management (logos, PDFs)
 
 ## 🏗️ Project Structure
 
 ```
 sukuk-poc-be/
-├── cmd/
-│   └── api/
-│       └── main.go              # Application entry point
-├── internal/
-│   ├── config/                  # Configuration management
-│   ├── database/                # Database connection and migrations
-│   ├── handlers/                # HTTP request handlers
-│   ├── middleware/              # HTTP middleware
-│   ├── models/                  # Database models (Wallet, Sukuk, Event, etc.)
-│   ├── routes/                  # Route definitions
-│   ├── services/                # Business logic
-│   │   ├── blockchain/          # Blockchain-related services
-│   │   ├── events/              # Event processing
-│   │   └── wallet/              # Wallet management
-│   ├── utils/                   # Utility functions
-│   └── validators/              # Custom validators (addresses, signatures)
-├── tests/                       # Test files
-├── docs/                        # API documentation
-├── scripts/                     # Utility scripts
-├── .env.example                 # Environment variables example
-├── .gitignore
-├── .golangci.yml               # Linter configuration
-├── Dockerfile
-├── docker-compose.yml
-├── go.mod
-├── go.sum
-├── Makefile                    # Build commands
-├── README.md
-└── TODO.md                     # Detailed implementation guide
+├── cmd/                         # Application entry points
+│   ├── migrate/                 # Database migration command
+│   ├── seed/                    # Database seeding command
+│   └── server/                  # Main API server
+├── internal/                    # Internal packages (Go convention)
+│   ├── config/                  # Configuration management (godotenv)
+│   ├── database/                # Database connection and setup
+│   ├── handlers/                # HTTP request handlers with tests
+│   ├── logger/                  # Structured logging (logrus)
+│   ├── middleware/              # HTTP middleware (CORS, auth, logging)
+│   ├── models/                  # Database models with tests
+│   ├── server/                  # Server setup and routes
+│   ├── testutil/                # Test utilities and helpers
+│   └── utils/                   # Utility functions (file upload, etc.)
+├── coverage/                    # Test coverage reports
+├── uploads/                     # File upload storage
+│   ├── logos/                   # Company logos
+│   └── prospectus/              # Sukuk prospectus PDFs
+├── Makefile                     # Build automation
+├── go.mod & go.sum             # Go dependency management
+└── README.md                   # This file
 ```
 
 ## 🔧 Prerequisites
 
-- Go 1.21 or higher
+- Go 1.24 or higher
 - PostgreSQL 15 or higher
-- Docker and Docker Compose (optional)
 - Make (optional, for using Makefile commands)
 
 ## 🚀 Getting Started
@@ -120,7 +103,7 @@ go mod download
 createdb sukuk_poc
 
 # Run migrations
-make migrate-up
+make migrate
 ```
 
 ### 5. Run the application
@@ -130,54 +113,29 @@ make migrate-up
 make run
 
 # Or directly
-go run cmd/api/main.go
+go run cmd/server/main.go
 ```
 
 The API will be available at `http://localhost:8080`
 
-## 🐳 Docker Setup
-
-### Using Docker Compose (Recommended)
-
-```bash
-# Build and start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop all services
-docker-compose down
-```
-
-### Using Docker directly
-
-```bash
-# Build image
-docker build -t sukuk-poc-api .
-
-# Run container
-docker run -p 8080:8080 --env-file .env sukuk-poc-api
-```
-
 ## 📝 Available Commands
 
 ```bash
-make help          # Show available commands
-make run           # Run the application
-make build         # Build binary
-make test          # Run all tests
-make test-coverage # Run tests with coverage report
-make lint          # Run linter
-make fmt           # Format code
-make migrate-up    # Run database migrations
-make migrate-down  # Rollback database migrations
-make swag          # Generate API documentation
-make docker-build  # Build Docker image
-make docker-up     # Start Docker containers
+make help                   # Show available commands
+make run                    # Run the application
+make build                  # Build binary
+make test                   # Run all tests
+make test-coverage          # Run tests with coverage report
+make test-coverage-profile  # Generate detailed coverage profile
+make lint                   # Run linter (if available)
+make clean                  # Clean build artifacts
+make migrate                # Run database migrations
+make seed                   # Seed database with sample data
 ```
 
 ## 🧪 Testing
+
+The project uses Go's built-in testing framework with testify for assertions:
 
 ```bash
 # Run all tests
@@ -186,39 +144,55 @@ make test
 # Run tests with coverage
 make test-coverage
 
+# Generate detailed coverage profile
+make test-coverage-profile
+
+# Run specific package tests
+go test -v ./internal/config
+go test -cover ./internal/models
+
 # Run specific test
-go test -v ./internal/handlers/...
+go test -v -run TestHealthTestSuite ./internal/handlers
 ```
+
+### Test Coverage
+
+Current test coverage by package:
+- `internal/config`: 86.0% coverage
+- `internal/models`: 61.5% coverage
+- `internal/handlers`: Comprehensive test suites for all endpoints
+
+Tests are co-located with source code following Go conventions:
+- `internal/config/config_test.go`
+- `internal/models/models_test.go`
+- `internal/handlers/*_test.go`
 
 ## 📚 API Documentation
 
-API documentation is automatically generated using Swagger.
-
-1. Generate documentation:
-   ```bash
-   make swag
-   ```
-
-2. Access Swagger UI:
-   ```
-   http://localhost:8080/swagger/index.html
-   ```
+API documentation is currently under development. The API follows RESTful principles with JSON responses.
 
 ## 🔐 API Security
 
-The API uses multiple security mechanisms:
+The API uses rate limiting and API key authentication for admin operations.
 
-### Public Endpoints
-- `/api/v1/sukuks` - List all Sukuks
-- `/api/v1/sukuks/:id` - Get Sukuk details
-- `/api/v1/wallet/:address` - Get wallet information
+### Public Endpoints (No Authentication)
 - `/health` - Health check endpoint
+- `/api/v1/companies` - List all companies
+- `/api/v1/companies/:id` - Get company details
+- `/api/v1/companies/:id/sukuks` - Get company's Sukuk series
+- `/api/v1/sukuks` - List all Sukuk series
+- `/api/v1/sukuks/:id` - Get Sukuk details
+- `/api/v1/portfolio/:address` - Get investor portfolio
+- `/api/v1/investments` - List investments
+- `/api/v1/yield-claims` - List yield claims
+- `/api/v1/redemptions` - List redemptions
 
-### Protected Endpoints (API Key Required)
-- `/api/v1/events/webhook` - Process blockchain events from indexer
-- `/api/v1/wallet/link-email` - Link email to wallet address
+### Protected Admin Endpoints (API Key Required)
+- `/api/v1/admin/companies` - Create/update companies
+- `/api/v1/admin/sukuks` - Create/update Sukuk series
+- `/api/v1/admin/events/webhook` - Process blockchain events from indexer
 
-Include API key in headers:
+Include API key in headers for admin endpoints:
 ```
 X-API-Key: <your-api-key>
 ```
@@ -228,34 +202,42 @@ X-API-Key: <your-api-key>
 See `.env.example` for all available configuration options. Key variables include:
 
 ### Application
+- `APP_NAME` - Application name
 - `APP_ENV` - Application environment (development, staging, production)
 - `APP_PORT` - Server port (default: 8080)
+- `APP_DEBUG` - Debug mode (true/false)
+- `APP_UPLOAD_DIR` - File upload directory
 
-### Database (Shared with Indexer)
+### Database
 - `DB_HOST` - PostgreSQL host
 - `DB_PORT` - PostgreSQL port
-- `DB_NAME` - Database name (shared with indexer)
+- `DB_NAME` - Database name
 - `DB_USER` - Database user
 - `DB_PASSWORD` - Database password
 
-### Blockchain
-- `CHAIN_ID` - Blockchain network ID
-- `RPC_ENDPOINT` - Blockchain RPC endpoint
-- `CONTRACT_ADDRESS` - Sukuk contract address
+### Blockchain (Base Testnet)
+- `BLOCKCHAIN_CHAIN_ID` - Chain ID (84532 for Base Testnet)
+- `BLOCKCHAIN_RPC_ENDPOINT` - Base Testnet RPC endpoint
+- `BLOCKCHAIN_CONTRACT_ADDRESS` - Your Sukuk contract address
 
-### Security
-- `API_KEY` - API key for protected endpoints
-- `RATE_LIMIT_PER_MIN` - Rate limit per minute
+### API Security
+- `API_API_KEY` - API key for protected admin endpoints
+- `API_RATE_LIMIT_PER_MIN` - Rate limit per minute
+- `API_ALLOWED_ORIGINS` - CORS allowed origins
+
+### Logging
+- `LOGGER_LEVEL` - Log level (debug, info, warn, error)
+- `LOGGER_FORMAT` - Log format (json, text)
 
 ## 🚦 Health Check
 
-The application provides health check endpoints:
+The application provides a comprehensive health check endpoint:
 
-- `GET /health` - Basic health check
-- `GET /health/detailed` - Detailed health check including:
-  - Database connectivity
-  - Blockchain node status
-  - Event processing status
+- `GET /health` - Complete health check including:
+  - Database connectivity and performance
+  - System resources (CPU, memory, goroutines)
+  - Application statistics
+  - File upload directory status
 
 ## 🤝 Contributing
 
@@ -266,14 +248,13 @@ The application provides health check endpoints:
 5. Open a Pull Request
 
 Please ensure:
-- All tests pass
-- Code is properly formatted (`make fmt`)
+- All tests pass (`make test`)
 - No linting errors (`make lint`)
 - Update documentation if needed
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is currently unlicensed.
 
 ## 🙏 Acknowledgments
 
