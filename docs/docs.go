@@ -57,22 +57,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Company created successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.CompanyResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid request data",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -118,29 +115,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Company updated successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.CompanyResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "404": {
                         "description": "Company not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -184,29 +177,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Logo uploaded successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.UploadResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid file or company ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "404": {
                         "description": "Company not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -281,22 +270,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Sukuk series created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.SukukResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -342,29 +334,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Sukuk series updated",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.SukukResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "404": {
                         "description": "Sukuk series not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -408,29 +402,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Prospectus uploaded",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.UploadResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "404": {
                         "description": "Sukuk series not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -605,15 +595,13 @@ const docTemplate = `{
                     "200": {
                         "description": "List of companies",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.CompanyResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -645,22 +633,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Company details",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.CompanyResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid company ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "404": {
                         "description": "Company not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -692,22 +677,19 @@ const docTemplate = `{
                     "200": {
                         "description": "List of company's Sukuk series",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.SukukResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid company ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -1153,21 +1135,31 @@ const docTemplate = `{
                         "description": "Status to filter by (active, paused, matured)",
                         "name": "status",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20)",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of Sukuk series",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.SukukResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -1199,22 +1191,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Sukuk series details",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.SukukResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "404": {
                         "description": "Sukuk series not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -1240,28 +1229,43 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20)",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of active investments",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.InvestmentResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk series not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -1293,15 +1297,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Sukuk series metrics",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.SystemResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk series not found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIResponse"
                         }
                     }
                 }
@@ -1501,6 +1509,49 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "internal_handlers.APIError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handlers.APIResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "$ref": "#/definitions/internal_handlers.APIError"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "internal_handlers.CompanyResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "models.Company or []models.Company"
+                },
+                "meta": {
+                    "$ref": "#/definitions/internal_handlers.Pagination"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "internal_handlers.CreateCompanyRequest": {
             "type": "object",
             "required": [
@@ -1576,6 +1627,69 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_handlers.InvestmentResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "models.Investment or []models.Investment"
+                },
+                "meta": {
+                    "$ref": "#/definitions/internal_handlers.Pagination"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "internal_handlers.Pagination": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "has_next": {
+                    "type": "boolean"
+                },
+                "has_previous": {
+                    "type": "boolean"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "per_page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_handlers.SukukResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "models.Sukuk or []models.Sukuk"
+                },
+                "meta": {
+                    "$ref": "#/definitions/internal_handlers.Pagination"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "internal_handlers.SystemResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "internal_handlers.UpdateCompanyRequest": {
             "type": "object",
             "properties": {
@@ -1618,6 +1732,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "total_supply": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handlers.UploadResponse": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "url": {
                     "type": "string"
                 }
             }

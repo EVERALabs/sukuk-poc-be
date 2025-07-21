@@ -46,14 +46,17 @@ type UpdateSukukRequest struct {
 // @Produce json
 // @Param company_id query string false "Company ID to filter by"
 // @Param status query string false "Status to filter by (active, paused, matured)"
-// @Success 200 {object} map[string]interface{} "List of Sukuk series"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Param page query int false "Page number (default: 1)"
+// @Param per_page query int false "Items per page (default: 20)"
+// @Success 200 {object} SukukResponse "List of Sukuk series"
+// @Failure 500 {object} APIResponse "Internal server error"
 // @Router /sukuks [get]
 func ListSukuk(c *gin.Context) {
 	var sukuks []models.Sukuk
+	var total int64
 
 	db := database.GetDB()
-	query := db.Preload("Company")
+	query := db.Model(&models.Sukuk{}).Preload("Company")
 
 	// Filter by company if provided
 	if companyID := c.Query("company_id"); companyID != "" {
@@ -65,20 +68,43 @@ func ListSukuk(c *gin.Context) {
 		query = query.Where("status = ?", status)
 	}
 
+	// Count total records before pagination
+	query.Count(&total)
+
+	// Pagination
+	page := 1
+	perPage := 20
+	if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p > 0 {
+		page = p
+	}
+	if pp, err := strconv.Atoi(c.DefaultQuery("per_page", "20")); err == nil && pp > 0 {
+		perPage = pp
+	}
+
+	offset := (page - 1) * perPage
+	query = query.Offset(offset).Limit(perPage)
+
 	if err := query.Find(&sukuks).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to fetch sukuk series",
-		})
+		InternalServerError(c, "Failed to fetch sukuk series")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":  sukuks,
-		"count": len(sukuks),
-		"meta": gin.H{
-			"total": len(sukuks),
-		},
-	})
+	totalPages := int(total) / perPage
+	if int(total)%perPage > 0 {
+		totalPages++
+	}
+
+	pagination := &Pagination{
+		Total:       int(total),
+		Count:       len(sukuks),
+		Page:        page,
+		PerPage:     perPage,
+		TotalPages:  totalPages,
+		HasNext:     page < totalPages,
+		HasPrevious: page > 1,
+	}
+
+	SendPaginatedResponse(c, sukuks, pagination)
 }
 
 // GetSukuk returns details of a specific Sukuk series
@@ -88,31 +114,25 @@ func ListSukuk(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Sukuk Series ID"
-// @Success 200 {object} map[string]interface{} "Sukuk series details"
-// @Failure 400 {object} map[string]interface{} "Invalid ID"
-// @Failure 404 {object} map[string]interface{} "Sukuk series not found"
+// @Success 200 {object} SukukResponse "Sukuk series details"
+// @Failure 400 {object} APIResponse "Invalid ID"
+// @Failure 404 {object} APIResponse "Sukuk series not found"
 // @Router /sukuks/{id} [get]
 func GetSukuk(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid sukuk series ID",
-		})
+		BadRequest(c, "Invalid sukuk series ID")
 		return
 	}
 
 	var sukuk models.Sukuk
 	db := database.GetDB()
 	if err := db.Preload("Company").Preload("Investments").Preload("Yields").Preload("Redemptions").First(&sukuk, uint(id)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Sukuk series not found",
-		})
+		NotFound(c, "Sukuk series not found")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": sukuk,
-	})
+	SendSuccess(c, http.StatusOK, sukuk, "")
 }
 
 // GetSukukMetrics returns performance metrics for a specific Sukuk series
@@ -122,19 +142,26 @@ func GetSukuk(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Sukuk Series ID"
-// @Success 200 {object} map[string]interface{} "Sukuk series metrics"
-// @Failure 400 {object} map[string]interface{} "Invalid ID"
+// @Success 200 {object} SystemResponse "Sukuk series metrics"
+// @Failure 400 {object} APIResponse "Invalid ID"
+// @Failure 404 {object} APIResponse "Sukuk series not found"
 // @Router /sukuks/{id}/metrics [get]
 func GetSukukMetrics(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid sukuk series ID",
-		})
+		BadRequest(c, "Invalid sukuk series ID")
 		return
 	}
 
 	db := database.GetDB()
+
+	// Check if sukuk exists
+	var exists bool
+	db.Model(&models.Sukuk{}).Where("id = ?", uint(id)).Select("1").Scan(&exists)
+	if !exists {
+		NotFound(c, "Sukuk series not found")
+		return
+	}
 
 	// Get total investors
 	var totalInvestors int64
@@ -150,14 +177,14 @@ func GetSukukMetrics(c *gin.Context) {
 	var pendingRedemptions int64
 	db.Model(&models.Redemption{}).Where("sukuk_id = ? AND status = ?", uint(id), "requested").Count(&pendingRedemptions)
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": gin.H{
-			"total_investors":     totalInvestors,
-			"total_investment":    totalInvestment,
-			"pending_yields":      pendingYields,
-			"pending_redemptions": pendingRedemptions,
-		},
-	})
+	metrics := gin.H{
+		"total_investors":     totalInvestors,
+		"total_investment":    totalInvestment,
+		"pending_yields":      pendingYields,
+		"pending_redemptions": pendingRedemptions,
+	}
+
+	SendSuccess(c, http.StatusOK, metrics, "")
 }
 
 // GetSukukHolders returns current holders of a specific Sukuk
@@ -167,32 +194,71 @@ func GetSukukMetrics(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Sukuk Series ID"
-// @Success 200 {object} map[string]interface{} "List of active investments"
-// @Failure 400 {object} map[string]interface{} "Invalid ID"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Param page query int false "Page number (default: 1)"
+// @Param per_page query int false "Items per page (default: 20)"
+// @Success 200 {object} InvestmentResponse "List of active investments"
+// @Failure 400 {object} APIResponse "Invalid ID"
+// @Failure 404 {object} APIResponse "Sukuk series not found"
+// @Failure 500 {object} APIResponse "Internal server error"
 // @Router /sukuks/{id}/holders [get]
 func GetSukukHolders(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid sukuk series ID",
-		})
+		BadRequest(c, "Invalid sukuk series ID")
+		return
+	}
+
+	// Check if sukuk exists
+	db := database.GetDB()
+	var exists bool
+	db.Model(&models.Sukuk{}).Where("id = ?", uint(id)).Select("1").Scan(&exists)
+	if !exists {
+		NotFound(c, "Sukuk series not found")
 		return
 	}
 
 	var investments []models.Investment
-	db := database.GetDB()
-	if err := db.Preload("Sukuk").Where("sukuk_id = ? AND status = ?", uint(id), "active").Find(&investments).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to fetch sukuk holders",
-		})
+	var total int64
+
+	query := db.Model(&models.Investment{}).Preload("Sukuk").Where("sukuk_id = ? AND status = ?", uint(id), "active")
+
+	// Count total records before pagination
+	query.Count(&total)
+
+	// Pagination
+	page := 1
+	perPage := 20
+	if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p > 0 {
+		page = p
+	}
+	if pp, err := strconv.Atoi(c.DefaultQuery("per_page", "20")); err == nil && pp > 0 {
+		perPage = pp
+	}
+
+	offset := (page - 1) * perPage
+	query = query.Offset(offset).Limit(perPage)
+
+	if err := query.Find(&investments).Error; err != nil {
+		InternalServerError(c, "Failed to fetch sukuk holders")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":  investments,
-		"count": len(investments),
-	})
+	totalPages := int(total) / perPage
+	if int(total)%perPage > 0 {
+		totalPages++
+	}
+
+	pagination := &Pagination{
+		Total:       int(total),
+		Count:       len(investments),
+		Page:        page,
+		PerPage:     perPage,
+		TotalPages:  totalPages,
+		HasNext:     page < totalPages,
+		HasPrevious: page > 1,
+	}
+
+	SendPaginatedResponse(c, investments, pagination)
 }
 
 // Admin Sukuk Management APIs
@@ -205,14 +271,15 @@ func GetSukukHolders(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body CreateSukukRequest true "Sukuk series data"
-// @Success 201 {object} map[string]interface{} "Sukuk series created"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Success 201 {object} SukukResponse "Sukuk series created"
+// @Failure 400 {object} APIResponse "Bad request"
+// @Failure 422 {object} APIResponse "Validation error"
+// @Failure 500 {object} APIResponse "Internal server error"
 // @Router /admin/sukuks [post]
 func CreateSukuk(c *gin.Context) {
 	var req CreateSukukRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ValidationError(c, err.Error())
 		return
 	}
 
@@ -220,9 +287,7 @@ func CreateSukuk(c *gin.Context) {
 	var company models.Company
 	db := database.GetDB()
 	if err := db.First(&company, req.CompanyID).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Company not found",
-		})
+		BadRequest(c, "Company not found")
 		return
 	}
 
@@ -248,19 +313,14 @@ func CreateSukuk(c *gin.Context) {
 	}
 
 	if err := db.Create(&sukuk).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to create sukuk series",
-		})
+		InternalServerError(c, "Failed to create sukuk series")
 		return
 	}
 
 	// Load with company data
 	db.Preload("Company").First(&sukuk, sukuk.ID)
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Sukuk series created - ready for smart contract deployment",
-		"data":    sukuk,
-	})
+	SendSuccess(c, http.StatusCreated, sukuk, "Sukuk series created - ready for smart contract deployment")
 }
 
 // UpdateSukuk updates existing Sukuk series off-chain data
@@ -272,32 +332,29 @@ func CreateSukuk(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param id path int true "Sukuk Series ID"
 // @Param request body UpdateSukukRequest true "Update data"
-// @Success 200 {object} map[string]interface{} "Sukuk series updated"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 404 {object} map[string]interface{} "Sukuk series not found"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Success 200 {object} SukukResponse "Sukuk series updated"
+// @Failure 400 {object} APIResponse "Bad request"
+// @Failure 404 {object} APIResponse "Sukuk series not found"
+// @Failure 422 {object} APIResponse "Validation error"
+// @Failure 500 {object} APIResponse "Internal server error"
 // @Router /admin/sukuks/{id} [put]
 func UpdateSukuk(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid sukuk series ID",
-		})
+		BadRequest(c, "Invalid sukuk series ID")
 		return
 	}
 
 	var req UpdateSukukRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ValidationError(c, err.Error())
 		return
 	}
 
 	var sukuk models.Sukuk
 	db := database.GetDB()
 	if err := db.First(&sukuk, uint(id)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Sukuk series not found",
-		})
+		NotFound(c, "Sukuk series not found")
 		return
 	}
 
@@ -322,19 +379,14 @@ func UpdateSukuk(c *gin.Context) {
 	}
 
 	if err := db.Save(&sukuk).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to update sukuk series",
-		})
+		InternalServerError(c, "Failed to update sukuk series")
 		return
 	}
 
 	// Load with company data
 	db.Preload("Company").First(&sukuk, sukuk.ID)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Sukuk series updated",
-		"data":    sukuk,
-	})
+	SendSuccess(c, http.StatusOK, sukuk, "Sukuk series updated")
 }
 
 // UploadProspectus handles PDF prospectus file upload
@@ -346,23 +398,21 @@ func UpdateSukuk(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param id path int true "Sukuk Series ID"
 // @Param file formData file true "PDF prospectus file"
-// @Success 200 {object} map[string]interface{} "Prospectus uploaded"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 404 {object} map[string]interface{} "Sukuk series not found"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Success 200 {object} UploadResponse "Prospectus uploaded"
+// @Failure 400 {object} APIResponse "Bad request"
+// @Failure 404 {object} APIResponse "Sukuk series not found"
+// @Failure 500 {object} APIResponse "Internal server error"
 // @Router /admin/sukuks/{id}/upload-prospectus [post]
 func UploadProspectus(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid sukuk series ID",
-		})
+		BadRequest(c, "Invalid sukuk series ID")
 		return
 	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No file provided"})
+		BadRequest(c, "No file provided")
 		return
 	}
 
@@ -370,9 +420,7 @@ func UploadProspectus(c *gin.Context) {
 	var sukuk models.Sukuk
 	db := database.GetDB()
 	if err := db.First(&sukuk, uint(id)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Sukuk series not found",
-		})
+		NotFound(c, "Sukuk series not found")
 		return
 	}
 
@@ -382,7 +430,7 @@ func UploadProspectus(c *gin.Context) {
 	// Save file with validation
 	filename, url, err := utils.SaveFile(file, config, strconv.FormatUint(id, 10))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		BadRequestWithDetails(c, "File upload failed", err.Error())
 		return
 	}
 
@@ -396,15 +444,16 @@ func UploadProspectus(c *gin.Context) {
 	if err := db.Save(&sukuk).Error; err != nil {
 		// Clean up uploaded file if database update fails
 		utils.DeleteFile(url)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to update prospectus URL",
-		})
+		InternalServerError(c, "Failed to update prospectus URL")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "Prospectus uploaded successfully",
-		"filename": filename,
-		"url":      sukuk.Prospectus,
-	})
+	uploadResponse := UploadResponse{
+		Success:  true,
+		Message:  "Prospectus uploaded successfully",
+		Filename: filename,
+		URL:      sukuk.Prospectus,
+	}
+
+	c.JSON(http.StatusOK, uploadResponse)
 }
