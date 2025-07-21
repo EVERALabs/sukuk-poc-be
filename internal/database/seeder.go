@@ -60,7 +60,7 @@ func SeedData(db *gorm.DB) error {
 	log.Printf("Created %d companies", len(companies))
 
 	// Create sample Sukuk series
-	sukukSeries := []models.SukukSeries{
+	sukuks := []models.Sukuk{
 		{
 			CompanyID:         companies[0].ID, // PLN
 			Name:              "PLN Green Energy Sukuk 2024-A",
@@ -74,7 +74,7 @@ func SeedData(db *gorm.DB) error {
 			PaymentFrequency:  4,                             // Quarterly
 			MinInvestment:     "1000000000000000000000000",   // 1M IDRX
 			MaxInvestment:     "100000000000000000000000000", // 100M IDRX
-			Status:            "active",
+			Status:            models.SukukStatusActive,
 			Prospectus:        "/uploads/prospectus/pln_green_energy_2024.pdf",
 			IsRedeemable:      true,
 		},
@@ -91,7 +91,7 @@ func SeedData(db *gorm.DB) error {
 			PaymentFrequency:  4,                            // Quarterly
 			MinInvestment:     "5000000000000000000000000",  // 5M IDRX
 			MaxInvestment:     "50000000000000000000000000", // 50M IDRX
-			Status:            "active",
+			Status:            models.SukukStatusActive,
 			Prospectus:        "/uploads/prospectus/antam_gold_mining_2024.pdf",
 			IsRedeemable:      true,
 		},
@@ -108,53 +108,53 @@ func SeedData(db *gorm.DB) error {
 			PaymentFrequency:  4,                            // Quarterly
 			MinInvestment:     "2000000000000000000000000",  // 2M IDRX
 			MaxInvestment:     "75000000000000000000000000", // 75M IDRX
-			Status:            "planned",                    // Not active yet
+			Status:            models.SukukStatusDraft,      // Not active yet
 			Prospectus:        "",
 			IsRedeemable:      true,
 		},
 	}
 
-	for i := range sukukSeries {
-		if err := db.Create(&sukukSeries[i]).Error; err != nil {
+	for i := range sukuks {
+		if err := db.Create(&sukuks[i]).Error; err != nil {
 			return err
 		}
 	}
-	log.Printf("Created %d sukuk series", len(sukukSeries))
+	log.Printf("Created %d sukuk series", len(sukuks))
 
 	// Create sample investments (for PLN and Antam series only)
 	investments := []models.Investment{
 		{
-			SukukSeriesID:   sukukSeries[0].ID, // PLN
-			InvestorAddress: "0xabc1234567890123456789012345678901234567",
-			InvestorEmail:   "investor1@example.com",
-			Amount:          "10000000000000000000000000", // 10M IDRX
-			TokenAmount:     "10000000000000000000000000", // 10M PLN24A tokens
-			Status:          "active",
-			TransactionHash: "0xdef1234567890123456789012345678901234567890123456789012345678901",
-			BlockNumber:     123456,
-			InvestmentDate:  time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC),
+			SukukID:          sukuks[0].ID, // PLN
+			InvestorAddress:  "0xabc1234567890123456789012345678901234567",
+			InvestmentAmount: "10000000000000000000000000", // 10M IDRX
+			TokenAmount:      "10000000000000000000000000", // 10M PLN24A tokens
+			TokenPrice:       "1000000000000000000",        // 1 IDRX per token
+			TxHash:           "0xdef1234567890123456789012345678901234567890123456789012345678901",
+			LogIndex:         0,
+			InvestmentDate:   time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC),
+			Status:           models.InvestmentStatusActive,
 		},
 		{
-			SukukSeriesID:   sukukSeries[0].ID, // PLN
-			InvestorAddress: "0xbcd2345678901234567890123456789012345678",
-			InvestorEmail:   "investor2@example.com",
-			Amount:          "25000000000000000000000000", // 25M IDRX
-			TokenAmount:     "25000000000000000000000000", // 25M PLN24A tokens
-			Status:          "active",
-			TransactionHash: "0xeef2345678901234567890123456789012345678901234567890123456789012",
-			BlockNumber:     123789,
-			InvestmentDate:  time.Date(2024, 2, 10, 14, 20, 0, 0, time.UTC),
+			SukukID:          sukuks[0].ID, // PLN
+			InvestorAddress:  "0xbcd2345678901234567890123456789012345678",
+			InvestmentAmount: "25000000000000000000000000", // 25M IDRX
+			TokenAmount:      "25000000000000000000000000", // 25M PLN24A tokens
+			TokenPrice:       "1000000000000000000",        // 1 IDRX per token
+			TxHash:           "0xeef2345678901234567890123456789012345678901234567890123456789012",
+			LogIndex:         1,
+			InvestmentDate:   time.Date(2024, 2, 10, 14, 20, 0, 0, time.UTC),
+			Status:           models.InvestmentStatusActive,
 		},
 		{
-			SukukSeriesID:   sukukSeries[1].ID, // Antam
-			InvestorAddress: "0xabc1234567890123456789012345678901234567",
-			InvestorEmail:   "investor1@example.com",
-			Amount:          "15000000000000000000000000", // 15M IDRX
-			TokenAmount:     "15000000000000000000000000", // 15M ANTM24B tokens
-			Status:          "active",
-			TransactionHash: "0xfff3456789012345678901234567890123456789012345678901234567890123",
-			BlockNumber:     124567,
-			InvestmentDate:  time.Date(2024, 3, 5, 9, 15, 0, 0, time.UTC),
+			SukukID:          sukuks[1].ID, // Antam
+			InvestorAddress:  "0xabc1234567890123456789012345678901234567",
+			InvestmentAmount: "15000000000000000000000000", // 15M IDRX
+			TokenAmount:      "15000000000000000000000000", // 15M ANTM24B tokens
+			TokenPrice:       "1000000000000000000",        // 1 IDRX per token
+			TxHash:           "0xfff3456789012345678901234567890123456789012345678901234567890123",
+			LogIndex:         0,
+			InvestmentDate:   time.Date(2024, 3, 5, 9, 15, 0, 0, time.UTC),
+			Status:           models.InvestmentStatusActive,
 		},
 	}
 
@@ -166,63 +166,65 @@ func SeedData(db *gorm.DB) error {
 	log.Printf("Created %d investments", len(investments))
 
 	// Create sample yield claims
-	yieldClaims := []models.YieldClaim{
+	yields := []models.Yield{
 		{
-			SukukSeriesID:   sukukSeries[0].ID, // PLN
-			InvestmentID:    investments[0].ID,
-			InvestorAddress: "0xabc1234567890123456789012345678901234567",
-			YieldAmount:     "212500000000000000000000", // ~2.125% quarterly yield
-			PeriodStart:     time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
-			PeriodEnd:       time.Date(2024, 3, 31, 23, 59, 59, 0, time.UTC),
-			Status:          "pending",
-			ExpiresAt:       time.Date(2024, 4, 30, 23, 59, 59, 0, time.UTC),
+			SukukID:          sukuks[0].ID, // PLN
+			InvestorAddress:  "0xabc1234567890123456789012345678901234567",
+			YieldAmount:      "212500000000000000000000", // ~2.125% quarterly yield
+			DistributionDate: time.Date(2024, 4, 1, 0, 0, 0, 0, time.UTC),
+			DistTxHash:       "0x1112345678901234567890123456789012345678901234567890123456789012",
+			DistLogIndex:     0,
+			PeriodStart:      time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			PeriodEnd:        time.Date(2024, 3, 31, 23, 59, 59, 0, time.UTC),
+			Status:           models.YieldStatusPending,
 		},
 		{
-			SukukSeriesID:   sukukSeries[1].ID, // Antam
-			InvestmentID:    investments[2].ID,
-			InvestorAddress: "0xabc1234567890123456789012345678901234567",
-			YieldAmount:     "337500000000000000000000", // ~2.25% quarterly yield
-			PeriodStart:     time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
-			PeriodEnd:       time.Date(2024, 3, 31, 23, 59, 59, 0, time.UTC),
-			Status:          "claimed",
-			TransactionHash: "0x1112345678901234567890123456789012345678901234567890123456789012",
-			BlockNumber:     125678,
-			ClaimedAt:       func() *time.Time { t := time.Date(2024, 4, 5, 11, 30, 0, 0, time.UTC); return &t }(),
-			ExpiresAt:       time.Date(2024, 4, 30, 23, 59, 59, 0, time.UTC),
+			SukukID:          sukuks[1].ID, // Antam
+			InvestorAddress:  "0xabc1234567890123456789012345678901234567",
+			YieldAmount:      "337500000000000000000000", // ~2.25% quarterly yield
+			DistributionDate: time.Date(2024, 4, 1, 0, 0, 0, 0, time.UTC),
+			ClaimDate:        func() *time.Time { t := time.Date(2024, 4, 5, 11, 30, 0, 0, time.UTC); return &t }(),
+			DistTxHash:       "0x2223456789012345678901234567890123456789012345678901234567890123",
+			DistLogIndex:     0,
+			ClaimTxHash:      "0x3334567890123456789012345678901234567890123456789012345678901234",
+			ClaimLogIndex:    func() *int { i := 0; return &i }(),
+			PeriodStart:      time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			PeriodEnd:        time.Date(2024, 3, 31, 23, 59, 59, 0, time.UTC),
+			Status:           models.YieldStatusClaimed,
 		},
 	}
 
-	for i := range yieldClaims {
-		if err := db.Create(&yieldClaims[i]).Error; err != nil {
+	for i := range yields {
+		if err := db.Create(&yields[i]).Error; err != nil {
 			return err
 		}
 	}
-	log.Printf("Created %d yield claims", len(yieldClaims))
+	log.Printf("Created %d yield claims", len(yields))
 
 	// Create sample redemption requests
 	redemptions := []models.Redemption{
 		{
-			SukukSeriesID:    sukukSeries[0].ID, // PLN
-			InvestmentID:     investments[1].ID,
+			SukukID:          sukuks[0].ID, // PLN
 			InvestorAddress:  "0xbcd2345678901234567890123456789012345678",
 			TokenAmount:      "5000000000000000000000000", // 5M tokens
 			RedemptionAmount: "5000000000000000000000000", // 5M IDRX
-			Status:           "requested",
-			RequestReason:    "Need liquidity for other investments",
-			RequestedAt:      time.Date(2024, 4, 10, 16, 45, 0, 0, time.UTC),
+			RequestTxHash:    "0x4445678901234567890123456789012345678901234567890123456789012345",
+			RequestLogIndex:  0,
+			RequestDate:      time.Date(2024, 4, 10, 16, 45, 0, 0, time.UTC),
+			Status:           models.RedemptionStatusRequested,
 		},
 		{
-			SukukSeriesID:    sukukSeries[1].ID, // Antam
-			InvestmentID:     investments[2].ID,
+			SukukID:          sukuks[1].ID, // Antam
 			InvestorAddress:  "0xabc1234567890123456789012345678901234567",
 			TokenAmount:      "7500000000000000000000000", // 7.5M tokens
 			RedemptionAmount: "7500000000000000000000000", // 7.5M IDRX
-			Status:           "approved",
-			RequestReason:    "Portfolio rebalancing",
-			ApprovalNotes:    "Approved for partial redemption",
-			TransactionHash:  "0x2223456789012345678901234567890123456789012345678901234567890123",
-			RequestedAt:      time.Date(2024, 3, 20, 10, 0, 0, 0, time.UTC),
-			ApprovedAt:       func() *time.Time { t := time.Date(2024, 3, 22, 14, 30, 0, 0, time.UTC); return &t }(),
+			RequestTxHash:    "0x5556789012345678901234567890123456789012345678901234567890123456",
+			RequestLogIndex:  0,
+			CompleteTxHash:   "0x6667890123456789012345678901234567890123456789012345678901234567",
+			CompleteLogIndex: func() *int { i := 0; return &i }(),
+			RequestDate:      time.Date(2024, 3, 20, 10, 0, 0, 0, time.UTC),
+			CompletedAt:      func() *time.Time { t := time.Date(2024, 3, 22, 14, 30, 0, 0, time.UTC); return &t }(),
+			Status:           models.RedemptionStatusCompleted,
 		},
 	}
 

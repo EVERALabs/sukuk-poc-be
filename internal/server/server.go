@@ -59,7 +59,7 @@ func (s *Server) setupRoutes() {
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Health check endpoint (no auth required)
-	s.router.GET("/health", handlers.Health)
+	s.router.GET("/health", handlers.GetHealthStatus)
 
 	// API v1 group with middleware
 	v1 := s.router.Group("/api/v1")
@@ -76,55 +76,78 @@ func (s *Server) setupRoutes() {
 		// Sukuk Series endpoints
 		sukuk := v1.Group("/sukuks")
 		{
-			sukuk.GET("", handlers.ListSukukSeries)
-			sukuk.GET("/:id", handlers.GetSukukSeries)
+			sukuk.GET("", handlers.ListSukuk)
+			sukuk.GET("/:id", handlers.GetSukuk)
 			sukuk.GET("/:id/metrics", handlers.GetSukukMetrics)
+			// TODO: Implement GetSukukMetricsWithBlockchain handler
+			// sukuk.GET("/:id/blockchain-metrics", handlers.GetSukukMetricsWithBlockchain)
 			sukuk.GET("/:id/holders", handlers.GetSukukHolders)
 		}
 
 		// Portfolio endpoints
-		v1.GET("/portfolio/:address", handlers.GetPortfolio)
-		v1.GET("/portfolio/:address/investments", handlers.GetInvestmentHistory)
-		v1.GET("/portfolio/:address/yields", handlers.GetYieldHistory)
+		// TODO: Implement GetPortfolio handler
+		// v1.GET("/portfolio/:address", handlers.GetPortfolio)
+		// TODO: Implement GetPortfolioWithBlockchainData handler
+		// v1.GET("/portfolio/:address/blockchain", handlers.GetPortfolioWithBlockchainData)
+		// Use existing investment portfolio handler
+		v1.GET("/portfolio/:address/investments", handlers.GetInvestmentPortfolio)
+		// TODO: Implement GetYieldHistory handler
+		// v1.GET("/portfolio/:address/yields", handlers.GetYieldHistory)
 		v1.GET("/portfolio/:address/yields/pending", handlers.GetPendingYields)
-		v1.GET("/portfolio/:address/redemptions", handlers.GetRedemptionHistory)
+		// TODO: Implement GetRedemptionHistory handler
+		// v1.GET("/portfolio/:address/redemptions", handlers.GetRedemptionHistory)
 
 		// Investment endpoints (read-only from blockchain events)
 		investments := v1.Group("/investments")
 		{
-			investments.GET("", handlers.GetInvestments)
-			investments.GET("/:id", handlers.GetInvestment)
+			investments.GET("", handlers.ListInvestments)
+			// TODO: Implement GetInvestment handler
+			// investments.GET("/:id", handlers.GetInvestment)
+			// TODO: Implement GetInvestmentWithBlockchainData handler
+			// investments.GET("/:id/blockchain", handlers.GetInvestmentWithBlockchainData)
 			investments.GET("/investor/:address", handlers.GetInvestmentsByInvestor)
-			investments.GET("/sukuk/:sukukId", handlers.GetInvestmentsBySukuk)
+			// TODO: Implement GetInvestmentsBySukuk handler
+			// investments.GET("/sukuk/:sukukId", handlers.GetInvestmentsBySukuk)
 		}
 
 		// Yield Claims endpoints
 		yields := v1.Group("/yield-claims")
 		{
-			yields.GET("", handlers.GetYieldClaims)
-			yields.GET("/:id", handlers.GetYieldClaim)
-			yields.GET("/investor/:address", handlers.GetYieldClaimsByInvestor)
-			yields.GET("/sukuk/:sukukId", handlers.GetYieldClaimsBySukuk)
+			yields.GET("", handlers.ListYields)
+			// TODO: Implement GetYieldClaim handler
+			// yields.GET("/:id", handlers.GetYieldClaim)
+			yields.GET("/investor/:address", handlers.GetYieldsByInvestor)
+			yields.GET("/sukuk/:sukukId", handlers.GetYieldsBySukuk)
 		}
 
 		// Redemption endpoints
 		redemptions := v1.Group("/redemptions")
 		{
-			redemptions.GET("", handlers.GetRedemptions)
-			redemptions.GET("/:id", handlers.GetRedemption)
+			redemptions.GET("", handlers.ListRedemptions)
+			// TODO: Implement GetRedemption handler
+			// redemptions.GET("/:id", handlers.GetRedemption)
 			redemptions.GET("/investor/:address", handlers.GetRedemptionsByInvestor)
 			redemptions.GET("/sukuk/:sukukId", handlers.GetRedemptionsBySukuk)
-			redemptions.POST("", handlers.CreateRedemption)
-			redemptions.PUT("/:id/approve", handlers.ApproveRedemption)
-			redemptions.PUT("/:id/reject", handlers.RejectRedemption)
+			// TODO: Implement CreateRedemption handler
+			// redemptions.POST("", handlers.CreateRedemption)
+			// TODO: Implement ApproveRedemption handler
+			// redemptions.PUT("/:id/approve", handlers.ApproveRedemption)
+			// TODO: Implement RejectRedemption handler
+			// redemptions.PUT("/:id/reject", handlers.RejectRedemption)
 		}
 
 		// Analytics endpoints
-		v1.GET("/analytics/overview", handlers.GetPlatformStats)
-		v1.GET("/analytics/vault/:seriesId", handlers.GetVaultBalance)
+		// TODO: Implement GetPlatformStats handler
+		// v1.GET("/analytics/overview", handlers.GetPlatformStats)
+		// TODO: Implement GetVaultBalance handler
+		// v1.GET("/analytics/vault/:seriesId", handlers.GetVaultBalance)
 
-		// Event endpoints
-		v1.GET("/events/:txHash", handlers.GetEventByTxHash)
+		// Blockchain data endpoints
+		// TODO: Implement blockchain endpoints when handlers are ready
+		// blockchain := v1.Group("/blockchain")
+		// {
+		//		blockchain.GET("/events/:txHash", handlers.GetBlockchainEventsByTxHash)
+		// }
 
 		// Protected endpoints (require API key)
 		protected := v1.Group("/admin")
@@ -136,12 +159,9 @@ func (s *Server) setupRoutes() {
 			protected.POST("/companies/:id/upload-logo", handlers.UploadCompanyLogo)
 
 			// Sukuk management
-			protected.POST("/sukuks", handlers.CreateSukukSeries)
-			protected.PUT("/sukuks/:id", handlers.UpdateSukukSeries)
+			protected.POST("/sukuks", handlers.CreateSukuk)
+			protected.PUT("/sukuks/:id", handlers.UpdateSukuk)
 			protected.POST("/sukuks/:id/upload-prospectus", handlers.UploadProspectus)
-
-			// Webhook for indexer
-			protected.POST("/events/webhook", handlers.ProcessEventWebhook)
 		}
 	}
 }

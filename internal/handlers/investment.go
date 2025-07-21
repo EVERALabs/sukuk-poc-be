@@ -2,34 +2,51 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
+	"strings"
 
 	"sukuk-be/internal/database"
 	"sukuk-be/internal/models"
+	"sukuk-be/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-// GetInvestments returns a list of all investments with optional filtering
-// @Summary List all investments
-// @Description Get a list of all investments with optional filtering by investor address and status
+// Investment APIs
+
+// ListInvestments returns investments with filtering
+// @Summary List investments
+// @Description Get a list of investments with optional filtering by investor, sukuk series, and status
 // @Tags Investments
 // @Accept json
 // @Produce json
-// @Param investor_address query string false "Investor wallet address to filter by"
-// @Param status query string false "Investment status to filter by (active, redeemed)"
-// @Success 200 {object} InvestmentListResponse "List of investments"
-// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Param investor_address query string false "Filter by investor address"
+// @Param sukuk_id query string false "Filter by sukuk ID"
+// @Param status query string false "Filter by investment status"
+// @Success 200 {object} map[string]interface{} "List of investments"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /investments [get]
-func GetInvestments(c *gin.Context) {
+func ListInvestments(c *gin.Context) {
 	var investments []models.Investment
 
 	db := database.GetDB()
-	query := db.Preload("SukukSeries").Preload("SukukSeries.Company")
+	query := db.Preload("Sukuk").Preload("Sukuk.Company")
 
 	// Filter by investor address if provided
 	if investorAddress := c.Query("investor_address"); investorAddress != "" {
-		query = query.Where("investor_address = ?", investorAddress)
+		// Validate and normalize address
+		if !utils.IsValidEthereumAddress(investorAddress) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid Ethereum address format",
+			})
+			return
+		}
+		normalizedAddress := utils.NormalizeAddress(investorAddress)
+		query = query.Where("investor_address = ?", normalizedAddress)
+	}
+
+	// Filter by sukuk if provided
+	if sukukID := c.Query("sukuk_id"); sukukID != "" {
+		query = query.Where("sukuk_id = ?", sukukID)
 	}
 
 	// Filter by status if provided
@@ -47,109 +64,178 @@ func GetInvestments(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"data":  investments,
 		"count": len(investments),
-	})
-}
-
-// GetInvestment returns details of a specific investment
-// @Summary Get investment details
-// @Description Get detailed information about a specific investment including Sukuk series and company data
-// @Tags Investments
-// @Accept json
-// @Produce json
-// @Param id path int true "Investment ID"
-// @Success 200 {object} InvestmentResponse "Investment details"
-// @Failure 400 {object} ErrorResponse "Invalid ID"
-// @Failure 404 {object} ErrorResponse "Investment not found"
-// @Router /investments/{id} [get]
-func GetInvestment(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid investment ID",
-		})
-		return
-	}
-
-	var investment models.Investment
-	db := database.GetDB()
-	if err := db.Preload("SukukSeries").Preload("SukukSeries.Company").First(&investment, uint(id)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Investment not found",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"data": investment,
+		"meta": gin.H{
+			"total": len(investments),
+		},
 	})
 }
 
 // GetInvestmentsByInvestor returns all investments for a specific investor
 // @Summary Get investments by investor
-// @Description Get all investments made by a specific wallet address
+// @Description Get all investments for a specific investor address
 // @Tags Investments
 // @Accept json
 // @Produce json
-// @Param address path string true "Investor wallet address"
-// @Success 200 {object} InvestmentListResponse "Investor's investments"
-// @Failure 400 {object} ErrorResponse "Invalid address"
-// @Failure 500 {object} ErrorResponse "Internal server error"
-// @Router /investments/investor/{address} [get]
+// @Param investor_address path string true "Investor Ethereum address"
+// @Success 200 {object} map[string]interface{} "List of investor's investments"
+// @Failure 400 {object} map[string]interface{} "Invalid address"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /investments/{investor_address} [get]
 func GetInvestmentsByInvestor(c *gin.Context) {
-	address := c.Param("address")
-	if address == "" {
+	investorAddress := c.Param("investor_address")
+
+	// Validate address format
+	if !utils.IsValidEthereumAddress(investorAddress) {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid investor address",
+			"error": "Invalid Ethereum address format",
 		})
 		return
 	}
 
+	normalizedAddress := utils.NormalizeAddress(investorAddress)
+
 	var investments []models.Investment
 	db := database.GetDB()
-	if err := db.Preload("SukukSeries").Preload("SukukSeries.Company").Where("investor_address = ?", address).Find(&investments).Error; err != nil {
+	if err := db.Preload("Sukuk").Preload("Sukuk.Company").Where("investor_address = ?", normalizedAddress).Find(&investments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to fetch investments",
+			"error": "Failed to fetch investor investments",
 		})
 		return
+	}
+
+	// Calculate portfolio summary
+	activeInvestments := 0
+	totalInvestmentValue := "0"
+	for _, investment := range investments {
+		if investment.Status == "active" {
+			activeInvestments++
+			// TODO: Add up investment amounts properly
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":  investments,
 		"count": len(investments),
+		"meta": gin.H{
+			"total":                 len(investments),
+			"active_investments":    activeInvestments,
+			"total_investment_value": totalInvestmentValue,
+		},
 	})
 }
 
-// GetInvestmentsBySukuk returns all investments for a specific Sukuk series
-// @Summary Get investments by Sukuk series
-// @Description Get all investments made in a specific Sukuk series
+// GetInvestmentPortfolio returns portfolio summary for an investor
+// @Summary Get investor portfolio summary
+// @Description Get portfolio summary including active investments, total value, and performance metrics
 // @Tags Investments
 // @Accept json
 // @Produce json
-// @Param sukukId path int true "Sukuk Series ID"
-// @Success 200 {object} InvestmentListResponse "Sukuk series investments"
-// @Failure 400 {object} ErrorResponse "Invalid ID"
-// @Failure 500 {object} ErrorResponse "Internal server error"
-// @Router /investments/sukuk/{sukukId} [get]
-func GetInvestmentsBySukuk(c *gin.Context) {
-	sukukID, err := strconv.ParseUint(c.Param("sukukId"), 10, 32)
-	if err != nil {
+// @Param investor_address path string true "Investor Ethereum address"
+// @Success 200 {object} map[string]interface{} "Portfolio summary"
+// @Failure 400 {object} map[string]interface{} "Invalid address"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /investments/{investor_address}/portfolio [get]
+func GetInvestmentPortfolio(c *gin.Context) {
+	investorAddress := c.Param("investor_address")
+
+	// Validate address format
+	if !utils.IsValidEthereumAddress(investorAddress) {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid sukuk series ID",
+			"error": "Invalid Ethereum address format",
 		})
 		return
 	}
 
+	normalizedAddress := utils.NormalizeAddress(investorAddress)
+	db := database.GetDB()
+
+	// Get investment summary
+	var activeInvestments int64
+	var totalInvestments int64
+	
+	db.Model(&models.Investment{}).Where("investor_address = ?", normalizedAddress).Count(&totalInvestments)
+	db.Model(&models.Investment{}).Where("investor_address = ? AND status = ?", normalizedAddress, "active").Count(&activeInvestments)
+
+	// Get yield summary
+	var totalYields int64
+	var claimedYields int64
+	
+	db.Model(&models.Yield{}).Where("investor_address = ?", normalizedAddress).Count(&totalYields)
+	db.Model(&models.Yield{}).Where("investor_address = ? AND status = ?", normalizedAddress, "claimed").Count(&claimedYields)
+
+	// Get redemption summary
+	var totalRedemptions int64
+	var completedRedemptions int64
+	
+	db.Model(&models.Redemption{}).Where("investor_address = ?", normalizedAddress).Count(&totalRedemptions)
+	db.Model(&models.Redemption{}).Where("investor_address = ? AND status = ?", normalizedAddress, "completed").Count(&completedRedemptions)
+
+	// Get recent activity (last 5 transactions)
+	var recentInvestments []models.Investment
+	db.Preload("Sukuk").Where("investor_address = ?", normalizedAddress).Order("created_at DESC").Limit(5).Find(&recentInvestments)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"summary": gin.H{
+				"total_investments":     totalInvestments,
+				"active_investments":    activeInvestments,
+				"total_yields":         totalYields,
+				"claimed_yields":       claimedYields,
+				"total_redemptions":    totalRedemptions,
+				"completed_redemptions": completedRedemptions,
+			},
+			"recent_activity": recentInvestments,
+		},
+	})
+}
+
+// GetInvestmentsByCompany returns all investments for sukuk series from a specific company
+// @Summary Get investments by company
+// @Description Get all investments for sukuk series issued by a specific company
+// @Tags Investments
+// @Accept json
+// @Produce json
+// @Param company_id path string true "Company ID"
+// @Success 200 {object} map[string]interface{} "List of company's investments"
+// @Failure 400 {object} map[string]interface{} "Invalid company ID"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /investments/company/{company_id} [get]
+func GetInvestmentsByCompany(c *gin.Context) {
+	companyID := c.Param("company_id")
+
 	var investments []models.Investment
 	db := database.GetDB()
-	if err := db.Preload("SukukSeries").Where("sukuk_series_id = ?", uint(sukukID)).Find(&investments).Error; err != nil {
+	
+	// Join with sukuks to filter by company
+	query := db.Preload("Sukuk").Preload("Sukuk.Company").
+		Joins("JOIN sukuks ON investments.sukuk_id = sukuks.id").
+		Where("sukuks.company_id = ?", companyID)
+
+	if err := query.Find(&investments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to fetch investments",
+			"error": "Failed to fetch company investments",
 		})
 		return
+	}
+
+	// Calculate company investment summary
+	activeInvestments := 0
+	uniqueInvestors := make(map[string]bool)
+	
+	for _, investment := range investments {
+		if investment.Status == "active" {
+			activeInvestments++
+		}
+		uniqueInvestors[strings.ToLower(investment.InvestorAddress)] = true
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":  investments,
 		"count": len(investments),
+		"meta": gin.H{
+			"total":             len(investments),
+			"active":           activeInvestments,
+			"unique_investors": len(uniqueInvestors),
+		},
 	})
 }

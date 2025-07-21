@@ -142,7 +142,7 @@ func createTestDatabase(t *testing.T, cfg *config.Config) {
 func CleanupTestEnvironment(t *testing.T, testCfg *TestConfig) {
 	if testCfg.DB != nil {
 		// Clean all tables
-		tables := []string{"events", "redemptions", "yield_claims", "investments", "sukuk_series", "companies"}
+		tables := []string{"events", "redemptions", "yield_claims", "investments", "sukuks", "companies"}
 		for _, table := range tables {
 			testCfg.DB.Exec(fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY CASCADE", table))
 		}
@@ -169,8 +169,8 @@ func CreateTestCompany(db *gorm.DB) *models.Company {
 }
 
 // CreateTestSukukSeries creates a test sukuk series
-func CreateTestSukukSeries(db *gorm.DB, companyID uint) *models.SukukSeries {
-	sukuk := &models.SukukSeries{
+func CreateTestSukukSeries(db *gorm.DB, companyID uint) *models.Sukuk {
+	sukuk := &models.Sukuk{
 		CompanyID:         companyID,
 		Name:              "Test Sukuk Series",
 		Symbol:            "TEST",
@@ -192,14 +192,13 @@ func CreateTestSukukSeries(db *gorm.DB, companyID uint) *models.SukukSeries {
 // CreateTestInvestment creates a test investment
 func CreateTestInvestment(db *gorm.DB, sukukID uint) *models.Investment {
 	investment := &models.Investment{
-		SukukSeriesID:   sukukID,
+		SukukID:         sukukID,
 		InvestorAddress: "0xabc1234567890123456789012345678901234567",
-		InvestorEmail:   "investor@test.com",
-		Amount:          "5000000000000000000000",
+		InvestmentAmount: "5000000000000000000000",
 		TokenAmount:     "5000000000000000000000",
 		Status:          models.InvestmentStatusActive,
-		TransactionHash: "0xdef1234567890123456789012345678901234567890123456789012345678901",
-		BlockNumber:     123456,
+		TxHash:          "0xdef1234567890123456789012345678901234567890123456789012345678901",
+		LogIndex:        123456,
 	}
 	db.Create(investment)
 	return investment

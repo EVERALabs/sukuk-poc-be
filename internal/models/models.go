@@ -6,10 +6,11 @@ package models
 func AllModels() []interface{} {
 	return []interface{}{
 		&Company{},
-		&SukukSeries{},
+		&Sukuk{},        // Renamed from SukukSeries
 		&Investment{},
-		&YieldClaim{},
+		&Yield{},        // Renamed from YieldClaim
 		&Redemption{},
-		&Event{},
+		&SystemState{},
+		// Removed &Event{} as we'll use indexer's blockchain.events table
 	}
 }
