@@ -1769,7 +1769,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "backend-sukuk.kadzu.dev",
 	BasePath:         "/api/v1",
-	Schemes:          []string{"http", "https"},
+	Schemes:          []string{"https", "http"},
 	Title:            "Sukuk POC Backend API",
 	Description:      "A Web3 backend for Sukuk (Islamic bonds) on Base Testnet, providing APIs for dApps and frontends while processing blockchain events from an indexer.",
 	InfoInstanceName: "swagger",

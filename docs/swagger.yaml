@@ -1168,8 +1168,8 @@ paths:
       tags:
       - Yields
 schemes:
-- http
 - https
+- http
 securityDefinitions:
   ApiKeyAuth:
     description: API key for accessing protected admin endpoints

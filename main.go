@@ -26,7 +26,7 @@ import (
 
 // @host      backend-sukuk.kadzu.dev
 // @BasePath  /api/v1
-// @schemes   http https
+// @schemes   https http
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
