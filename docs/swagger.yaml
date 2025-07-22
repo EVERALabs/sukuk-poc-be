@@ -1,6 +1,6 @@
 basePath: /api/v1
 definitions:
-  internal_handlers.APIError:
+  handlers.APIError:
     properties:
       code:
         type: integer
@@ -9,26 +9,26 @@ definitions:
       message:
         type: string
     type: object
-  internal_handlers.APIResponse:
+  handlers.APIResponse:
     properties:
       data: {}
       error:
-        $ref: '#/definitions/internal_handlers.APIError'
+        $ref: '#/definitions/handlers.APIError'
       message:
         type: string
       success:
         type: boolean
     type: object
-  internal_handlers.CompanyResponse:
+  handlers.CompanyResponse:
     properties:
       data:
         description: models.Company or []models.Company
       meta:
-        $ref: '#/definitions/internal_handlers.Pagination'
+        $ref: '#/definitions/handlers.Pagination'
       success:
         type: boolean
     type: object
-  internal_handlers.CreateCompanyRequest:
+  handlers.CreateCompanyRequest:
     properties:
       description:
         type: string
@@ -47,7 +47,7 @@ definitions:
     - name
     - wallet_address
     type: object
-  internal_handlers.CreateSukukRequest:
+  handlers.CreateSukukRequest:
     properties:
       company_id:
         type: integer
@@ -80,16 +80,16 @@ definitions:
     - total_supply
     - yield_rate
     type: object
-  internal_handlers.InvestmentResponse:
+  handlers.InvestmentResponse:
     properties:
       data:
         description: models.Investment or []models.Investment
       meta:
-        $ref: '#/definitions/internal_handlers.Pagination'
+        $ref: '#/definitions/handlers.Pagination'
       success:
         type: boolean
     type: object
-  internal_handlers.Pagination:
+  handlers.Pagination:
     properties:
       count:
         type: integer
@@ -106,22 +106,22 @@ definitions:
       total_pages:
         type: integer
     type: object
-  internal_handlers.SukukResponse:
+  handlers.SukukResponse:
     properties:
       data:
         description: models.Sukuk or []models.Sukuk
       meta:
-        $ref: '#/definitions/internal_handlers.Pagination'
+        $ref: '#/definitions/handlers.Pagination'
       success:
         type: boolean
     type: object
-  internal_handlers.SystemResponse:
+  handlers.SystemResponse:
     properties:
       data: {}
       success:
         type: boolean
     type: object
-  internal_handlers.UpdateCompanyRequest:
+  handlers.UpdateCompanyRequest:
     properties:
       description:
         type: string
@@ -136,7 +136,7 @@ definitions:
       website:
         type: string
     type: object
-  internal_handlers.UpdateSukukRequest:
+  handlers.UpdateSukukRequest:
     properties:
       description:
         type: string
@@ -151,7 +151,7 @@ definitions:
       total_supply:
         type: string
     type: object
-  internal_handlers.UploadResponse:
+  handlers.UploadResponse:
     properties:
       filename:
         type: string
@@ -162,7 +162,7 @@ definitions:
       url:
         type: string
     type: object
-host: localhost:8080
+host: backend-sukuk.kadzu.dev
 info:
   contact:
     email: support@sukuk-poc.com
@@ -188,22 +188,22 @@ paths:
         name: company
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.CreateCompanyRequest'
+          $ref: '#/definitions/handlers.CreateCompanyRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Company created successfully
           schema:
-            $ref: '#/definitions/internal_handlers.CompanyResponse'
+            $ref: '#/definitions/handlers.CompanyResponse'
         "400":
           description: Invalid request data
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       security:
       - ApiKeyAuth: []
       summary: Create a new company
@@ -225,26 +225,26 @@ paths:
         name: company
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.UpdateCompanyRequest'
+          $ref: '#/definitions/handlers.UpdateCompanyRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Company updated successfully
           schema:
-            $ref: '#/definitions/internal_handlers.CompanyResponse'
+            $ref: '#/definitions/handlers.CompanyResponse'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "404":
           description: Company not found
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       security:
       - ApiKeyAuth: []
       summary: Update company
@@ -272,19 +272,19 @@ paths:
         "200":
           description: Logo uploaded successfully
           schema:
-            $ref: '#/definitions/internal_handlers.UploadResponse'
+            $ref: '#/definitions/handlers.UploadResponse'
         "400":
           description: Invalid file or company ID
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "404":
           description: Company not found
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       security:
       - ApiKeyAuth: []
       summary: Upload company logo
@@ -325,26 +325,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.CreateSukukRequest'
+          $ref: '#/definitions/handlers.CreateSukukRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Sukuk series created
           schema:
-            $ref: '#/definitions/internal_handlers.SukukResponse'
+            $ref: '#/definitions/handlers.SukukResponse'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "422":
           description: Validation error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       security:
       - ApiKeyAuth: []
       summary: Create new Sukuk series
@@ -366,30 +366,30 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.UpdateSukukRequest'
+          $ref: '#/definitions/handlers.UpdateSukukRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Sukuk series updated
           schema:
-            $ref: '#/definitions/internal_handlers.SukukResponse'
+            $ref: '#/definitions/handlers.SukukResponse'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "404":
           description: Sukuk series not found
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "422":
           description: Validation error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       security:
       - ApiKeyAuth: []
       summary: Update Sukuk series
@@ -417,19 +417,19 @@ paths:
         "200":
           description: Prospectus uploaded
           schema:
-            $ref: '#/definitions/internal_handlers.UploadResponse'
+            $ref: '#/definitions/handlers.UploadResponse'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "404":
           description: Sukuk series not found
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       security:
       - ApiKeyAuth: []
       summary: Upload Sukuk prospectus
@@ -545,11 +545,11 @@ paths:
         "200":
           description: List of companies
           schema:
-            $ref: '#/definitions/internal_handlers.CompanyResponse'
+            $ref: '#/definitions/handlers.CompanyResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       summary: List all companies
       tags:
       - Companies
@@ -570,15 +570,15 @@ paths:
         "200":
           description: Company details
           schema:
-            $ref: '#/definitions/internal_handlers.CompanyResponse'
+            $ref: '#/definitions/handlers.CompanyResponse'
         "400":
           description: Invalid company ID
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "404":
           description: Company not found
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       summary: Get company details
       tags:
       - Companies
@@ -599,15 +599,15 @@ paths:
         "200":
           description: List of company's Sukuk series
           schema:
-            $ref: '#/definitions/internal_handlers.SukukResponse'
+            $ref: '#/definitions/handlers.SukukResponse'
         "400":
           description: Invalid company ID
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       summary: Get company's Sukuk series
       tags:
       - Companies
@@ -925,11 +925,11 @@ paths:
         "200":
           description: List of Sukuk series
           schema:
-            $ref: '#/definitions/internal_handlers.SukukResponse'
+            $ref: '#/definitions/handlers.SukukResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       summary: List all Sukuk series
       tags:
       - Sukuk Series
@@ -951,15 +951,15 @@ paths:
         "200":
           description: Sukuk series details
           schema:
-            $ref: '#/definitions/internal_handlers.SukukResponse'
+            $ref: '#/definitions/handlers.SukukResponse'
         "400":
           description: Invalid ID
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "404":
           description: Sukuk series not found
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       summary: Get Sukuk series details
       tags:
       - Sukuk Series
@@ -989,19 +989,19 @@ paths:
         "200":
           description: List of active investments
           schema:
-            $ref: '#/definitions/internal_handlers.InvestmentResponse'
+            $ref: '#/definitions/handlers.InvestmentResponse'
         "400":
           description: Invalid ID
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "404":
           description: Sukuk series not found
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       summary: Get Sukuk holders
       tags:
       - Sukuk Series
@@ -1023,15 +1023,15 @@ paths:
         "200":
           description: Sukuk series metrics
           schema:
-            $ref: '#/definitions/internal_handlers.SystemResponse'
+            $ref: '#/definitions/handlers.SystemResponse'
         "400":
           description: Invalid ID
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
         "404":
           description: Sukuk series not found
           schema:
-            $ref: '#/definitions/internal_handlers.APIResponse'
+            $ref: '#/definitions/handlers.APIResponse'
       summary: Get Sukuk series metrics
       tags:
       - Sukuk Series
@@ -1167,6 +1167,9 @@ paths:
       summary: Get yields by sukuk
       tags:
       - Yields
+schemes:
+- http
+- https
 securityDefinitions:
   ApiKeyAuth:
     description: API key for accessing protected admin endpoints

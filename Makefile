@@ -16,12 +16,12 @@ help: ## Show this help message
 build: ## Build the application
 	@echo "Building $(APP_NAME)..."
 	@mkdir -p $(BINARY_DIR)
-	@go build -o $(BINARY_DIR)/$(APP_NAME) cmd/server/main.go
+	@go build -o $(BINARY_DIR)/$(APP_NAME) main.go
 	@echo "Built $(APP_NAME) in $(BINARY_DIR)/"
 
 run: ## Run the application
 	@echo "Running $(APP_NAME)..."
-	@go run cmd/server/main.go
+	@go run main.go
 
 test: ## Run all tests
 	@echo "Running tests..."
@@ -65,7 +65,7 @@ seed: ## Seed database with sample data
 # Documentation commands
 swag: ## Generate Swagger documentation
 	@echo "Generating Swagger documentation..."
-	@$(HOME)/go/bin/swag init -g cmd/server/main.go -o docs --parseDependency --parseInternal
+	@$(HOME)/go/bin/swag init -g main.go -o docs --parseDependency --parseInternal
 	@echo "Swagger documentation generated in docs/"
 
 docs: swag ## Generate and serve documentation locally

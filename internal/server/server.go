@@ -36,13 +36,21 @@ func New(cfg *config.Config) *Server {
 
 	// CORS middleware
 	corsConfig := cors.Config{
-		AllowOrigins:     cfg.API.AllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-API-Key"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}
+	
+	// Check if we should allow all origins
+	if len(cfg.API.AllowedOrigins) == 1 && cfg.API.AllowedOrigins[0] == "*" {
+		corsConfig.AllowAllOrigins = true
+		corsConfig.AllowCredentials = false // Cannot use credentials with AllowAllOrigins
+	} else {
+		corsConfig.AllowOrigins = cfg.API.AllowedOrigins
+	}
+	
 	router.Use(cors.New(corsConfig))
 
 	return &Server{
