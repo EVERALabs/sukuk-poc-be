@@ -1112,7 +1112,7 @@ const docTemplate = `{
         },
         "/sukuk-metadata": {
             "get": {
-                "description": "Get all sukuk metadata that are marked as ready",
+                "description": "Get all sukuk metadata with optional filtering by ready status. Use ready=true for sukuk with complete offchain metadata, ready=false for sukuk needing metadata updates, or no parameter for all sukuk.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1122,10 +1122,23 @@ const docTemplate = `{
                 "tags": [
                     "sukuk-metadata"
                 ],
-                "summary": "List ready sukuk metadata",
+                "summary": "List sukuk metadata",
+                "parameters": [
+                    {
+                        "enum": [
+                            "true",
+                            "false"
+                        ],
+                        "type": "string",
+                        "example": "true",
+                        "description": "Filter by metadata_ready status",
+                        "name": "ready",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of sukuk metadata",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1134,7 +1147,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1288,9 +1301,78 @@ const docTemplate = `{
                 }
             }
         },
+        "/sukuk-metadata/{id}": {
+            "put": {
+                "description": "Update existing sukuk metadata with offchain business information like tenor, imbal hasil, kuota nasional, etc. All fields are optional for partial updates. Onchain data (contract address, transaction hash, etc.) is preserved.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sukuk-metadata"
+                ],
+                "summary": "Update sukuk metadata with offchain business data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "example": 36,
+                        "description": "Sukuk metadata ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Offchain metadata to update",
+                        "name": "sukuk",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SukukMetadataUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated sukuk metadata with both onchain and offchain data",
+                        "schema": {
+                            "$ref": "#/definitions/models.SukukMetadataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload or ID format",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk metadata not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update sukuk metadata",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/sukuk-metadata/{id}/ready": {
             "put": {
-                "description": "Update sukuk metadata_ready flag to true",
+                "description": "Mark sukuk metadata as ready for public display. Only sukuk with metadata_ready=true will appear in filtered API responses. Use this after adding all required offchain metadata.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1303,7 +1385,8 @@ const docTemplate = `{
                 "summary": "Mark sukuk metadata as ready",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
+                        "example": 36,
                         "description": "Sukuk metadata ID",
                         "name": "id",
                         "in": "path",
@@ -1312,13 +1395,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Sukuk metadata marked as ready",
                         "schema": {
                             "$ref": "#/definitions/models.SukukMetadataResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid ID format",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1327,7 +1410,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Sukuk metadata not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1336,7 +1419,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Failed to update sukuk metadata",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2144,6 +2227,59 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SukukMetadataUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "imbal_hasil": {
+                    "type": "string"
+                },
+                "jatuh_tempo": {
+                    "type": "string"
+                },
+                "kuota_nasional": {
+                    "type": "number"
+                },
+                "kupon_pertama": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "maksimum_pembelian": {
+                    "type": "number"
+                },
+                "minimum_pembelian": {
+                    "type": "number"
+                },
+                "penerimaan_kupon": {
+                    "type": "string"
+                },
+                "periode_pembelian": {
+                    "description": "Ketentuan",
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "sukuk_deskripsi": {
+                    "type": "string"
+                },
+                "sukuk_title": {
+                    "description": "Basic Info",
+                    "type": "string"
+                },
+                "tanggal_bayar_kupon": {
+                    "type": "string"
+                },
+                "tenor": {
+                    "description": "Main Features",
+                    "type": "string"
+                },
+                "tipe_kupon": {
                     "type": "string"
                 }
             }

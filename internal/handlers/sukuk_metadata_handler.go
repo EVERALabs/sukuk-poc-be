@@ -13,13 +13,13 @@ import (
 
 // ListSukukMetadata returns all sukuk metadata with optional filtering
 // @Summary List sukuk metadata
-// @Description Get all sukuk metadata, optionally filter by ready status
+// @Description Get all sukuk metadata with optional filtering by ready status. Use ready=true for sukuk with complete offchain metadata, ready=false for sukuk needing metadata updates, or no parameter for all sukuk.
 // @Tags sukuk-metadata
 // @Accept json
 // @Produce json
-// @Param ready query boolean false "Filter by metadata_ready status"
-// @Success 200 {array} models.SukukMetadataResponse
-// @Failure 500 {object} map[string]string
+// @Param ready query string false "Filter by metadata_ready status" Enums(true, false) Example(true)
+// @Success 200 {array} models.SukukMetadataResponse "List of sukuk metadata"
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /sukuk-metadata [get]
 func ListSukukMetadata(c *gin.Context) {
 	var sukukMetadata []models.SukukMetadata
@@ -129,17 +129,17 @@ func CreateSukukMetadata(c *gin.Context) {
 	c.JSON(http.StatusCreated, sukukMetadata.ToResponse())
 }
 
-// MarkSukukMetadataReady marks sukuk metadata as ready
+// MarkSukukMetadataReady marks sukuk metadata as ready for public display
 // @Summary Mark sukuk metadata as ready
-// @Description Update sukuk metadata_ready flag to true
+// @Description Mark sukuk metadata as ready for public display. Only sukuk with metadata_ready=true will appear in filtered API responses. Use this after adding all required offchain metadata.
 // @Tags sukuk-metadata
 // @Accept json
 // @Produce json
-// @Param id path string true "Sukuk metadata ID"
-// @Success 200 {object} models.SukukMetadataResponse
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Param id path int true "Sukuk metadata ID" Example(36)
+// @Success 200 {object} models.SukukMetadataResponse "Sukuk metadata marked as ready"
+// @Failure 400 {object} map[string]string "Invalid ID format"
+// @Failure 404 {object} map[string]string "Sukuk metadata not found"
+// @Failure 500 {object} map[string]string "Failed to update sukuk metadata"
 // @Router /sukuk-metadata/{id}/ready [put]
 func MarkSukukMetadataReady(c *gin.Context) {
 	// Get ID from path
@@ -184,17 +184,17 @@ func MarkSukukMetadataReady(c *gin.Context) {
 }
 
 // UpdateSukukMetadata updates sukuk metadata with offchain data
-// @Summary Update sukuk metadata
-// @Description Update existing sukuk metadata with offchain data
+// @Summary Update sukuk metadata with offchain business data
+// @Description Update existing sukuk metadata with offchain business information like tenor, imbal hasil, kuota nasional, etc. All fields are optional for partial updates. Onchain data (contract address, transaction hash, etc.) is preserved.
 // @Tags sukuk-metadata
 // @Accept json
 // @Produce json
-// @Param id path string true "Sukuk metadata ID"
-// @Param sukuk body models.SukukMetadataUpdateRequest true "Sukuk metadata updates"
-// @Success 200 {object} models.SukukMetadataResponse
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Param id path int true "Sukuk metadata ID" Example(36)
+// @Param sukuk body models.SukukMetadataUpdateRequest true "Offchain metadata to update"
+// @Success 200 {object} models.SukukMetadataResponse "Updated sukuk metadata with both onchain and offchain data"
+// @Failure 400 {object} map[string]string "Invalid request payload or ID format"
+// @Failure 404 {object} map[string]string "Sukuk metadata not found"
+// @Failure 500 {object} map[string]string "Failed to update sukuk metadata"
 // @Router /sukuk-metadata/{id} [put]
 func UpdateSukukMetadata(c *gin.Context) {
 	// Get ID from path

@@ -269,6 +269,42 @@ definitions:
       updated_at:
         type: string
     type: object
+  models.SukukMetadataUpdateRequest:
+    properties:
+      imbal_hasil:
+        type: string
+      jatuh_tempo:
+        type: string
+      kuota_nasional:
+        type: number
+      kupon_pertama:
+        type: string
+      logo_url:
+        type: string
+      maksimum_pembelian:
+        type: number
+      minimum_pembelian:
+        type: number
+      penerimaan_kupon:
+        type: string
+      periode_pembelian:
+        description: Ketentuan
+        type: string
+      status:
+        type: string
+      sukuk_deskripsi:
+        type: string
+      sukuk_title:
+        description: Basic Info
+        type: string
+      tanggal_bayar_kupon:
+        type: string
+      tenor:
+        description: Main Features
+        type: string
+      tipe_kupon:
+        type: string
+    type: object
 host: backend-sukuk.kadzu.dev
 info:
   contact:
@@ -1007,23 +1043,34 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all sukuk metadata that are marked as ready
+      description: Get all sukuk metadata with optional filtering by ready status.
+        Use ready=true for sukuk with complete offchain metadata, ready=false for
+        sukuk needing metadata updates, or no parameter for all sukuk.
+      parameters:
+      - description: Filter by metadata_ready status
+        enum:
+        - "true"
+        - "false"
+        example: "true"
+        in: query
+        name: ready
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of sukuk metadata
           schema:
             items:
               $ref: '#/definitions/models.SukukMetadataResponse'
             type: array
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: List ready sukuk metadata
+      summary: List sukuk metadata
       tags:
       - sukuk-metadata
     post:
@@ -1059,38 +1106,90 @@ paths:
       summary: Create sukuk metadata
       tags:
       - sukuk-metadata
-  /sukuk-metadata/{id}/ready:
+  /sukuk-metadata/{id}:
     put:
       consumes:
       - application/json
-      description: Update sukuk metadata_ready flag to true
+      description: Update existing sukuk metadata with offchain business information
+        like tenor, imbal hasil, kuota nasional, etc. All fields are optional for
+        partial updates. Onchain data (contract address, transaction hash, etc.) is
+        preserved.
       parameters:
       - description: Sukuk metadata ID
+        example: 36
         in: path
         name: id
         required: true
-        type: string
+        type: integer
+      - description: Offchain metadata to update
+        in: body
+        name: sukuk
+        required: true
+        schema:
+          $ref: '#/definitions/models.SukukMetadataUpdateRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Updated sukuk metadata with both onchain and offchain data
           schema:
             $ref: '#/definitions/models.SukukMetadataResponse'
         "400":
-          description: Bad Request
+          description: Invalid request payload or ID format
           schema:
             additionalProperties:
               type: string
             type: object
         "404":
-          description: Not Found
+          description: Sukuk metadata not found
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: Internal Server Error
+          description: Failed to update sukuk metadata
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update sukuk metadata with offchain business data
+      tags:
+      - sukuk-metadata
+  /sukuk-metadata/{id}/ready:
+    put:
+      consumes:
+      - application/json
+      description: Mark sukuk metadata as ready for public display. Only sukuk with
+        metadata_ready=true will appear in filtered API responses. Use this after
+        adding all required offchain metadata.
+      parameters:
+      - description: Sukuk metadata ID
+        example: 36
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sukuk metadata marked as ready
+          schema:
+            $ref: '#/definitions/models.SukukMetadataResponse'
+        "400":
+          description: Invalid ID format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Sukuk metadata not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update sukuk metadata
           schema:
             additionalProperties:
               type: string
