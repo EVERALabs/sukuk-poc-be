@@ -162,6 +162,113 @@ definitions:
       url:
         type: string
     type: object
+  models.SukukMetadataCreateRequest:
+    properties:
+      block_number:
+        type: integer
+      contract_address:
+        description: Onchain Data
+        type: string
+      imbal_hasil:
+        type: string
+      jatuh_tempo:
+        type: string
+      kuota_nasional:
+        type: number
+      kupon_pertama:
+        type: string
+      logo_url:
+        type: string
+      maksimum_pembelian:
+        type: number
+      minimum_pembelian:
+        type: number
+      owner_address:
+        type: string
+      penerimaan_kupon:
+        type: string
+      periode_pembelian:
+        description: Ketentuan
+        type: string
+      status:
+        type: string
+      sukuk_code:
+        description: Basic Info
+        type: string
+      sukuk_deskripsi:
+        type: string
+      sukuk_title:
+        type: string
+      tanggal_bayar_kupon:
+        type: string
+      tenor:
+        description: Main Features
+        type: string
+      tipe_kupon:
+        type: string
+      token_id:
+        type: integer
+      transaction_hash:
+        type: string
+    required:
+    - contract_address
+    - owner_address
+    - sukuk_code
+    - token_id
+    type: object
+  models.SukukMetadataResponse:
+    properties:
+      block_number:
+        type: integer
+      contract_address:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      imbal_hasil:
+        type: string
+      jatuh_tempo:
+        type: string
+      kuota_nasional:
+        type: number
+      kupon_pertama:
+        type: string
+      logo_url:
+        type: string
+      maksimum_pembelian:
+        type: number
+      metadata_ready:
+        type: boolean
+      minimum_pembelian:
+        type: number
+      owner_address:
+        type: string
+      penerimaan_kupon:
+        type: string
+      periode_pembelian:
+        type: string
+      status:
+        type: string
+      sukuk_code:
+        type: string
+      sukuk_deskripsi:
+        type: string
+      sukuk_title:
+        type: string
+      tanggal_bayar_kupon:
+        type: string
+      tenor:
+        type: string
+      tipe_kupon:
+        type: string
+      token_id:
+        type: integer
+      transaction_hash:
+        type: string
+      updated_at:
+        type: string
+    type: object
 host: backend-sukuk.kadzu.dev
 info:
   contact:
@@ -896,6 +1003,163 @@ paths:
       summary: Get redemptions by sukuk
       tags:
       - Redemptions
+  /sukuk-metadata:
+    get:
+      consumes:
+      - application/json
+      description: Get all sukuk metadata that are marked as ready
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.SukukMetadataResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List ready sukuk metadata
+      tags:
+      - sukuk-metadata
+    post:
+      consumes:
+      - application/json
+      description: Create new sukuk with onchain and offchain metadata
+      parameters:
+      - description: Sukuk metadata
+        in: body
+        name: sukuk
+        required: true
+        schema:
+          $ref: '#/definitions/models.SukukMetadataCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SukukMetadataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create sukuk metadata
+      tags:
+      - sukuk-metadata
+  /sukuk-metadata/{id}/ready:
+    put:
+      consumes:
+      - application/json
+      description: Update sukuk metadata_ready flag to true
+      parameters:
+      - description: Sukuk metadata ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SukukMetadataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Mark sukuk metadata as ready
+      tags:
+      - sukuk-metadata
+  /sukuk-metadata/sync:
+    post:
+      consumes:
+      - application/json
+      description: Manually sync metadata for a specific sukuk from indexer
+      parameters:
+      - description: Token ID
+        in: query
+        name: tokenId
+        required: true
+        type: integer
+      - description: Contract Address
+        in: query
+        name: contractAddress
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Trigger sukuk metadata sync
+      tags:
+      - sukuk-metadata
+  /sukuk-metadata/tables:
+    get:
+      consumes:
+      - application/json
+      description: Get all available sukuk creation tables from the indexer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List sukuk creation tables
+      tags:
+      - sukuk-metadata
   /sukuks:
     get:
       consumes:

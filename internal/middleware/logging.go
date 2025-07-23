@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"io"
+	"strings"
 	"time"
 
 	"sukuk-be/internal/logger"
@@ -96,7 +97,7 @@ func RequestLogger() gin.HandlerFunc {
 func isFileUpload(c *gin.Context) bool {
 	contentType := c.Request.Header.Get("Content-Type")
 	return contentType != "" && (contentType == "multipart/form-data" ||
-		contentType[:19] == "multipart/form-data")
+		strings.HasPrefix(contentType, "multipart/form-data"))
 }
 
 // ErrorLogger logs errors that occur during request processing

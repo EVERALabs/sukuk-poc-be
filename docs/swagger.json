@@ -1108,6 +1108,243 @@
                 }
             }
         },
+        "/sukuk-metadata": {
+            "get": {
+                "description": "Get all sukuk metadata that are marked as ready",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sukuk-metadata"
+                ],
+                "summary": "List ready sukuk metadata",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.SukukMetadataResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create new sukuk with onchain and offchain metadata",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sukuk-metadata"
+                ],
+                "summary": "Create sukuk metadata",
+                "parameters": [
+                    {
+                        "description": "Sukuk metadata",
+                        "name": "sukuk",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SukukMetadataCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.SukukMetadataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sukuk-metadata/sync": {
+            "post": {
+                "description": "Manually sync metadata for a specific sukuk from indexer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sukuk-metadata"
+                ],
+                "summary": "Trigger sukuk metadata sync",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Token ID",
+                        "name": "tokenId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Contract Address",
+                        "name": "contractAddress",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sukuk-metadata/tables": {
+            "get": {
+                "description": "Get all available sukuk creation tables from the indexer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sukuk-metadata"
+                ],
+                "summary": "List sukuk creation tables",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sukuk-metadata/{id}/ready": {
+            "put": {
+                "description": "Update sukuk metadata_ready flag to true",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sukuk-metadata"
+                ],
+                "summary": "Mark sukuk metadata as ready",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sukuk metadata ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SukukMetadataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/sukuks": {
             "get": {
                 "description": "Get a list of all Sukuk series with optional filtering by company and status",
@@ -1747,6 +1984,164 @@
                     "type": "boolean"
                 },
                 "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SukukMetadataCreateRequest": {
+            "type": "object",
+            "required": [
+                "contract_address",
+                "owner_address",
+                "sukuk_code",
+                "token_id"
+            ],
+            "properties": {
+                "block_number": {
+                    "type": "integer"
+                },
+                "contract_address": {
+                    "description": "Onchain Data",
+                    "type": "string"
+                },
+                "imbal_hasil": {
+                    "type": "string"
+                },
+                "jatuh_tempo": {
+                    "type": "string"
+                },
+                "kuota_nasional": {
+                    "type": "number"
+                },
+                "kupon_pertama": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "maksimum_pembelian": {
+                    "type": "number"
+                },
+                "minimum_pembelian": {
+                    "type": "number"
+                },
+                "owner_address": {
+                    "type": "string"
+                },
+                "penerimaan_kupon": {
+                    "type": "string"
+                },
+                "periode_pembelian": {
+                    "description": "Ketentuan",
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "sukuk_code": {
+                    "description": "Basic Info",
+                    "type": "string"
+                },
+                "sukuk_deskripsi": {
+                    "type": "string"
+                },
+                "sukuk_title": {
+                    "type": "string"
+                },
+                "tanggal_bayar_kupon": {
+                    "type": "string"
+                },
+                "tenor": {
+                    "description": "Main Features",
+                    "type": "string"
+                },
+                "tipe_kupon": {
+                    "type": "string"
+                },
+                "token_id": {
+                    "type": "integer"
+                },
+                "transaction_hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SukukMetadataResponse": {
+            "type": "object",
+            "properties": {
+                "block_number": {
+                    "type": "integer"
+                },
+                "contract_address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imbal_hasil": {
+                    "type": "string"
+                },
+                "jatuh_tempo": {
+                    "type": "string"
+                },
+                "kuota_nasional": {
+                    "type": "number"
+                },
+                "kupon_pertama": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "maksimum_pembelian": {
+                    "type": "number"
+                },
+                "metadata_ready": {
+                    "type": "boolean"
+                },
+                "minimum_pembelian": {
+                    "type": "number"
+                },
+                "owner_address": {
+                    "type": "string"
+                },
+                "penerimaan_kupon": {
+                    "type": "string"
+                },
+                "periode_pembelian": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "sukuk_code": {
+                    "type": "string"
+                },
+                "sukuk_deskripsi": {
+                    "type": "string"
+                },
+                "sukuk_title": {
+                    "type": "string"
+                },
+                "tanggal_bayar_kupon": {
+                    "type": "string"
+                },
+                "tenor": {
+                    "type": "string"
+                },
+                "tipe_kupon": {
+                    "type": "string"
+                },
+                "token_id": {
+                    "type": "integer"
+                },
+                "transaction_hash": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

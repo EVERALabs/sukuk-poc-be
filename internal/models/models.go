@@ -11,6 +11,7 @@ func AllModels() []interface{} {
 		&Yield{},        // Renamed from YieldClaim
 		&Redemption{},
 		&SystemState{},
+		&SukukMetadata{}, // New model for onchain + offchain metadata
 		// Removed &Event{} as we'll use indexer's blockchain.events table
 	}
 }

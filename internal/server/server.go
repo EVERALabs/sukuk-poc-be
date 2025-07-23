@@ -157,6 +157,17 @@ func (s *Server) setupRoutes() {
 		//		blockchain.GET("/events/:txHash", handlers.GetBlockchainEventsByTxHash)
 		// }
 
+		// Sukuk Metadata endpoints (no auth)
+		sukukMetadata := v1.Group("/sukuk-metadata")
+		{
+			sukukMetadata.GET("", handlers.ListSukukMetadata)
+			sukukMetadata.POST("", handlers.CreateSukukMetadata)
+			sukukMetadata.PUT("/:id", handlers.UpdateSukukMetadata)
+			sukukMetadata.PUT("/:id/ready", handlers.MarkSukukMetadataReady)
+			sukukMetadata.POST("/sync", handlers.TriggerSukukMetadataSync)
+			sukukMetadata.GET("/tables", handlers.ListSukukCreationTables)
+		}
+
 		// Protected endpoints (require API key)
 		protected := v1.Group("/admin")
 		protected.Use(middleware.APIKeyAuth(s.cfg.API.APIKey))
