@@ -161,11 +161,39 @@ func (s *Server) setupRoutes() {
 		sukukMetadata := v1.Group("/sukuk-metadata")
 		{
 			sukukMetadata.GET("", handlers.ListSukukMetadata)
+			sukukMetadata.GET("/:id", handlers.GetSukukMetadata)
 			sukukMetadata.POST("", handlers.CreateSukukMetadata)
 			sukukMetadata.PUT("/:id", handlers.UpdateSukukMetadata)
 			sukukMetadata.PUT("/:id/ready", handlers.MarkSukukMetadataReady)
 			sukukMetadata.POST("/sync", handlers.TriggerSukukMetadataSync)
 			sukukMetadata.GET("/tables", handlers.ListSukukCreationTables)
+		}
+
+		// Blockchain Events endpoints
+		events := v1.Group("/events")
+		{
+			// Manual event processing (for debugging/testing)
+			events.POST("/sukuk-purchased", handlers.ProcessSukukPurchasedEvent)
+			events.POST("/redemption-requested", handlers.ProcessRedemptionRequestedEvent)
+			
+			// Query unprocessed events
+			events.GET("/sukuk-purchased/unprocessed", handlers.GetUnprocessedSukukPurchases)
+			events.GET("/redemption-requested/unprocessed", handlers.GetUnprocessedRedemptionRequests)
+			
+			// Manual sync trigger
+			events.POST("/sync", handlers.TriggerEventSync)
+		}
+
+		// Transaction History endpoints
+		v1.GET("/transaction-history/:address", handlers.GetRiwayatByAddress)
+
+		// Owned Sukuk endpoints
+		v1.GET("/owned-sukuk/:address", handlers.GetSukukOwnedByAddress)
+
+		// Debug endpoints
+		debug := v1.Group("/debug")
+		{
+			debug.GET("/indexer", handlers.DebugIndexerConnection)
 		}
 
 		// Protected endpoints (require API key)

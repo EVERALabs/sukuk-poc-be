@@ -7,18 +7,19 @@ import (
 	"sukuk-be/internal/database"
 	"sukuk-be/internal/logger"
 	"sukuk-be/internal/models"
+	"sukuk-be/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-// ListSukukMetadata returns all sukuk metadata with optional filtering
-// @Summary List sukuk metadata
-// @Description Get all sukuk metadata with optional filtering by ready status. Use ready=true for sukuk with complete offchain metadata, ready=false for sukuk needing metadata updates, or no parameter for all sukuk.
+// ListSukukMetadata returns all sukuk metadata with latest activities
+// @Summary List sukuk metadata with activities
+// @Description Get all sukuk metadata with optional filtering by ready status and latest 10 blockchain activities
 // @Tags sukuk-metadata
 // @Accept json
 // @Produce json
 // @Param ready query string false "Filter by metadata_ready status" Enums(true, false) Example(true)
-// @Success 200 {array} models.SukukMetadataResponse "List of sukuk metadata"
+// @Success 200 {array} models.SukukMetadataListResponse "List of sukuk metadata with activities"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /sukuk-metadata [get]
 func ListSukukMetadata(c *gin.Context) {
@@ -44,13 +45,78 @@ func ListSukukMetadata(c *gin.Context) {
 		return
 	}
 
-	// Convert to response format
-	responses := make([]*models.SukukMetadataResponse, len(sukukMetadata))
+	// Initialize indexer query service
+	indexerService := services.NewIndexerQueryService()
+	
+	// Convert to response format with activities
+	responses := make([]models.SukukMetadataListResponse, len(sukukMetadata))
 	for i, sukuk := range sukukMetadata {
-		responses[i] = sukuk.ToResponse()
+		response := sukuk.ToListResponse()
+		
+		// Get latest 10 activities for this sukuk token directly from indexer
+		activities, err := indexerService.GetLatestActivities(sukuk.ContractAddress, 10)
+		if err != nil {
+			logger.WithError(err).Warn("Failed to fetch activities for sukuk:", sukuk.ContractAddress)
+			activities = []models.ActivityEvent{} // Set empty array if error
+		}
+		
+		response.LatestActivities = activities
+		responses[i] = response
 	}
 
 	c.JSON(http.StatusOK, responses)
+}
+
+// GetSukukMetadata returns a single sukuk metadata by ID with latest activities
+// @Summary Get sukuk metadata by ID
+// @Description Get a single sukuk metadata by ID with latest 10 blockchain activities
+// @Tags sukuk-metadata
+// @Accept json
+// @Produce json
+// @Param id path integer true "Sukuk metadata ID"
+// @Success 200 {object} models.SukukMetadataListResponse "Sukuk metadata with activities"
+// @Failure 400 {object} map[string]string "Invalid ID format"
+// @Failure 404 {object} map[string]string "Sukuk metadata not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /sukuk-metadata/{id} [get]
+func GetSukukMetadata(c *gin.Context) {
+	// Get ID from path
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid ID format",
+		})
+		return
+	}
+
+	// Find sukuk metadata
+	var sukukMetadata models.SukukMetadata
+	result := database.GetDB().First(&sukukMetadata, "id = ?", uint(id))
+	if result.Error != nil {
+		logger.WithError(result.Error).Error("Failed to fetch sukuk metadata")
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Sukuk metadata not found",
+		})
+		return
+	}
+
+	// Initialize indexer query service
+	indexerService := services.NewIndexerQueryService()
+	
+	// Convert to response format with activities
+	response := sukukMetadata.ToListResponse()
+	
+	// Get latest 10 activities for this sukuk token directly from indexer
+	activities, err := indexerService.GetLatestActivities(sukukMetadata.ContractAddress, 10)
+	if err != nil {
+		logger.WithError(err).Warn("Failed to fetch activities for sukuk:", sukukMetadata.ContractAddress)
+		activities = []models.ActivityEvent{} // Set empty array if error
+	}
+	
+	response.LatestActivities = activities
+
+	c.JSON(http.StatusOK, response)
 }
 
 // CreateSukukMetadata creates new sukuk metadata

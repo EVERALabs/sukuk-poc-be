@@ -12,6 +12,8 @@ func AllModels() []interface{} {
 		&Redemption{},
 		&SystemState{},
 		&SukukMetadata{}, // New model for onchain + offchain metadata
+		&SukukPurchased{}, // Blockchain event for sukuk purchases
+		&RedemptionRequested{}, // Blockchain event for redemption requests
 		// Removed &Event{} as we'll use indexer's blockchain.events table
 	}
 }
