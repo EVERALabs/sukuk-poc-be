@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"sukuk-be/internal/database"
 	"sukuk-be/internal/models"
 
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 type IndexerQueryService struct {
@@ -20,19 +19,10 @@ func NewIndexerQueryService() *IndexerQueryService {
 	return &IndexerQueryService{}
 }
 
-// ConnectToIndexer connects to the Ponder indexer database
+// ConnectToIndexer connects to the Ponder indexer database (same as main database)
 func (s *IndexerQueryService) ConnectToIndexer() error {
-	// Get indexer database URL from environment or config
-	indexerDBURL := "postgresql://postgres:postgres@localhost:5432/sukuk_poc_new" // Default from indexer .env
-	
-	db, err := gorm.Open(postgres.Open(indexerDBURL), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
-	})
-	if err != nil {
-		return fmt.Errorf("failed to connect to indexer database: %w", err)
-	}
-	
-	s.indexerDB = db
+	// Use the same database connection as the main application
+	s.indexerDB = database.GetDB()
 	return nil
 }
 

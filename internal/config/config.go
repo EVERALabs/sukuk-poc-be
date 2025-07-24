@@ -42,6 +42,15 @@ type DatabaseConfig struct {
 	ConnMaxLifetime time.Duration
 }
 
+type IndexerDatabaseConfig struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	DBName   string
+	SSLMode  string
+}
+
 type BlockchainConfig struct {
 	ChainID         int64  // Base Testnet: 84532
 	RPCEndpoint     string // Base Testnet RPC
