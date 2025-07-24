@@ -693,6 +693,247 @@
                 }
             }
         },
+        "/debug/indexer": {
+            "get": {
+                "description": "Test connection to indexer database and query sample data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Debug"
+                ],
+                "summary": "Debug indexer connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sukuk address to test",
+                        "name": "address",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Debug information",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/events/redemption-requested": {
+            "post": {
+                "description": "Process a single RedemptionRequested event from the blockchain",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blockchain Events"
+                ],
+                "summary": "Process a RedemptionRequested event",
+                "parameters": [
+                    {
+                        "description": "RedemptionRequested event data",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RedemptionRequested"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Event processed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Event already processed",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/events/redemption-requested/unprocessed": {
+            "get": {
+                "description": "Retrieve unprocessed RedemptionRequested events",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blockchain Events"
+                ],
+                "summary": "Get unprocessed RedemptionRequested events",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Number of events to retrieve",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of unprocessed events",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/events/sukuk-purchased": {
+            "post": {
+                "description": "Process a single SukukPurchased event from the blockchain",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blockchain Events"
+                ],
+                "summary": "Process a SukukPurchased event",
+                "parameters": [
+                    {
+                        "description": "SukukPurchased event data",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SukukPurchased"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Event processed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Event already processed",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/events/sukuk-purchased/unprocessed": {
+            "get": {
+                "description": "Retrieve unprocessed SukukPurchased events",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blockchain Events"
+                ],
+                "summary": "Get unprocessed SukukPurchased events",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Number of events to retrieve",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of unprocessed events",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/events/sync": {
+            "post": {
+                "description": "Manually trigger synchronization of blockchain events from the indexer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blockchain Events"
+                ],
+                "summary": "Trigger manual event sync",
+                "responses": {
+                    "200": {
+                        "description": "Sync completed",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Sync failed",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Get overall system health including database and sync status",
@@ -916,6 +1157,57 @@
                 }
             }
         },
+        "/owned-sukuk/{address}": {
+            "get": {
+                "description": "Get all sukuk metadata for sukuk tokens owned by a specific wallet address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "owned-sukuk"
+                ],
+                "summary": "Get sukuk owned by address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9\"",
+                        "description": "User wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Owned sukuk metadata",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.OwnedSukukResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/redemptions": {
             "get": {
                 "description": "Get a list of redemption requests with optional filtering by investor, sukuk series, and status",
@@ -1110,7 +1402,7 @@
         },
         "/sukuk-metadata": {
             "get": {
-                "description": "Get all sukuk metadata with optional filtering by ready status. Use ready=true for sukuk with complete offchain metadata, ready=false for sukuk needing metadata updates, or no parameter for all sukuk.",
+                "description": "Get all sukuk metadata with optional filtering by ready status and latest 10 blockchain activities",
                 "consumes": [
                     "application/json"
                 ],
@@ -1120,7 +1412,7 @@
                 "tags": [
                     "sukuk-metadata"
                 ],
-                "summary": "List sukuk metadata",
+                "summary": "List sukuk metadata with activities",
                 "parameters": [
                     {
                         "enum": [
@@ -1136,11 +1428,11 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of sukuk metadata",
+                        "description": "List of sukuk metadata with activities",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.SukukMetadataResponse"
+                                "$ref": "#/definitions/models.SukukMetadataListResponse"
                             }
                         }
                     },
@@ -1300,6 +1592,63 @@
             }
         },
         "/sukuk-metadata/{id}": {
+            "get": {
+                "description": "Get a single sukuk metadata by ID with latest 10 blockchain activities",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sukuk-metadata"
+                ],
+                "summary": "Get sukuk metadata by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sukuk metadata ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk metadata with activities",
+                        "schema": {
+                            "$ref": "#/definitions/models.SukukMetadataListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID format",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk metadata not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Update existing sukuk metadata with offchain business information like tenor, imbal hasil, kuota nasional, etc. All fields are optional for partial updates. Onchain data (contract address, transaction hash, etc.) is preserved.",
                 "consumes": [
@@ -1633,6 +1982,65 @@
                 }
             }
         },
+        "/transaction-history/{address}": {
+            "get": {
+                "description": "Get all blockchain activities (purchases and redemptions) for a specific user address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction-history"
+                ],
+                "summary": "Get transaction history by address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9\"",
+                        "description": "User wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "example": 20,
+                        "description": "Number of activities to retrieve",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaction history",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RiwayatResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address or limit",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/yields": {
             "get": {
                 "description": "Get a list of yield distributions and claims with optional filtering",
@@ -1959,6 +2367,23 @@
                 }
             }
         },
+        "handlers.OwnedSukukResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "sukuk": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SukukMetadataListResponse"
+                    }
+                },
+                "total_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "handlers.Pagination": {
             "type": "object",
             "properties": {
@@ -1981,6 +2406,23 @@
                     "type": "integer"
                 },
                 "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.RiwayatResponse": {
+            "type": "object",
+            "properties": {
+                "activities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ActivityEvent"
+                    }
+                },
+                "address": {
+                    "type": "string"
+                },
+                "total_count": {
                     "type": "integer"
                 }
             }
@@ -2071,6 +2513,79 @@
                 }
             }
         },
+        "models.ActivityEvent": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Buyer or User address",
+                    "type": "string"
+                },
+                "amount": {
+                    "description": "Token amount",
+                    "type": "string"
+                },
+                "sukuk_address": {
+                    "description": "Sukuk contract address",
+                    "type": "string"
+                },
+                "timestamp": {
+                    "description": "Event timestamp",
+                    "type": "string"
+                },
+                "tx_hash": {
+                    "description": "Transaction hash",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "\"purchase\" or \"redemption_request\"",
+                    "type": "string"
+                }
+            }
+        },
+        "models.RedemptionRequested": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "block_number": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "log_index": {
+                    "type": "integer"
+                },
+                "payment_token": {
+                    "type": "string"
+                },
+                "processed": {
+                    "type": "boolean"
+                },
+                "processed_at": {
+                    "type": "string"
+                },
+                "sukuk_address": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "tx_hash": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
         "models.SukukMetadataCreateRequest": {
             "type": "object",
             "required": [
@@ -2145,6 +2660,62 @@
                     "type": "integer"
                 },
                 "transaction_hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SukukMetadataListResponse": {
+            "type": "object",
+            "properties": {
+                "contract_address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imbal_hasil": {
+                    "type": "string"
+                },
+                "jatuh_tempo": {
+                    "type": "string"
+                },
+                "kuota_nasional": {
+                    "type": "number"
+                },
+                "latest_activities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ActivityEvent"
+                    }
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "metadata_ready": {
+                    "type": "boolean"
+                },
+                "minimum_pembelian": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "sukuk_code": {
+                    "type": "string"
+                },
+                "sukuk_deskripsi": {
+                    "type": "string"
+                },
+                "sukuk_title": {
+                    "type": "string"
+                },
+                "tenor": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -2278,6 +2849,50 @@
                     "type": "string"
                 },
                 "tipe_kupon": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SukukPurchased": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "block_number": {
+                    "type": "integer"
+                },
+                "buyer": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "log_index": {
+                    "type": "integer"
+                },
+                "payment_token": {
+                    "type": "string"
+                },
+                "processed": {
+                    "type": "boolean"
+                },
+                "processed_at": {
+                    "type": "string"
+                },
+                "sukuk_address": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "tx_hash": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

@@ -89,6 +89,17 @@ definitions:
       success:
         type: boolean
     type: object
+  handlers.OwnedSukukResponse:
+    properties:
+      address:
+        type: string
+      sukuk:
+        items:
+          $ref: '#/definitions/models.SukukMetadataListResponse'
+        type: array
+      total_count:
+        type: integer
+    type: object
   handlers.Pagination:
     properties:
       count:
@@ -104,6 +115,17 @@ definitions:
       total:
         type: integer
       total_pages:
+        type: integer
+    type: object
+  handlers.RiwayatResponse:
+    properties:
+      activities:
+        items:
+          $ref: '#/definitions/models.ActivityEvent'
+        type: array
+      address:
+        type: string
+      total_count:
         type: integer
     type: object
   handlers.SukukResponse:
@@ -162,6 +184,56 @@ definitions:
       url:
         type: string
     type: object
+  models.ActivityEvent:
+    properties:
+      address:
+        description: Buyer or User address
+        type: string
+      amount:
+        description: Token amount
+        type: string
+      sukuk_address:
+        description: Sukuk contract address
+        type: string
+      timestamp:
+        description: Event timestamp
+        type: string
+      tx_hash:
+        description: Transaction hash
+        type: string
+      type:
+        description: '"purchase" or "redemption_request"'
+        type: string
+    type: object
+  models.RedemptionRequested:
+    properties:
+      amount:
+        type: string
+      block_number:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      log_index:
+        type: integer
+      payment_token:
+        type: string
+      processed:
+        type: boolean
+      processed_at:
+        type: string
+      sukuk_address:
+        type: string
+      timestamp:
+        type: string
+      tx_hash:
+        type: string
+      updated_at:
+        type: string
+      user:
+        type: string
+    type: object
   models.SukukMetadataCreateRequest:
     properties:
       block_number:
@@ -215,6 +287,43 @@ definitions:
     - owner_address
     - sukuk_code
     - token_id
+    type: object
+  models.SukukMetadataListResponse:
+    properties:
+      contract_address:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      imbal_hasil:
+        type: string
+      jatuh_tempo:
+        type: string
+      kuota_nasional:
+        type: number
+      latest_activities:
+        items:
+          $ref: '#/definitions/models.ActivityEvent'
+        type: array
+      logo_url:
+        type: string
+      metadata_ready:
+        type: boolean
+      minimum_pembelian:
+        type: number
+      status:
+        type: string
+      sukuk_code:
+        type: string
+      sukuk_deskripsi:
+        type: string
+      sukuk_title:
+        type: string
+      tenor:
+        type: string
+      updated_at:
+        type: string
     type: object
   models.SukukMetadataResponse:
     properties:
@@ -303,6 +412,35 @@ definitions:
         description: Main Features
         type: string
       tipe_kupon:
+        type: string
+    type: object
+  models.SukukPurchased:
+    properties:
+      amount:
+        type: string
+      block_number:
+        type: integer
+      buyer:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      log_index:
+        type: integer
+      payment_token:
+        type: string
+      processed:
+        type: boolean
+      processed_at:
+        type: string
+      sukuk_address:
+        type: string
+      timestamp:
+        type: string
+      tx_hash:
+        type: string
+      updated_at:
         type: string
     type: object
 host: backend-sukuk.kadzu.dev
@@ -754,6 +892,165 @@ paths:
       summary: Get company's Sukuk series
       tags:
       - Companies
+  /debug/indexer:
+    get:
+      consumes:
+      - application/json
+      description: Test connection to indexer database and query sample data
+      parameters:
+      - description: Sukuk address to test
+        in: query
+        name: address
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Debug information
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Debug indexer connection
+      tags:
+      - Debug
+  /events/redemption-requested:
+    post:
+      consumes:
+      - application/json
+      description: Process a single RedemptionRequested event from the blockchain
+      parameters:
+      - description: RedemptionRequested event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.RedemptionRequested'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Event processed successfully
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "409":
+          description: Event already processed
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+      summary: Process a RedemptionRequested event
+      tags:
+      - Blockchain Events
+  /events/redemption-requested/unprocessed:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve unprocessed RedemptionRequested events
+      parameters:
+      - default: 100
+        description: Number of events to retrieve
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of unprocessed events
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+      summary: Get unprocessed RedemptionRequested events
+      tags:
+      - Blockchain Events
+  /events/sukuk-purchased:
+    post:
+      consumes:
+      - application/json
+      description: Process a single SukukPurchased event from the blockchain
+      parameters:
+      - description: SukukPurchased event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.SukukPurchased'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Event processed successfully
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "409":
+          description: Event already processed
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+      summary: Process a SukukPurchased event
+      tags:
+      - Blockchain Events
+  /events/sukuk-purchased/unprocessed:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve unprocessed SukukPurchased events
+      parameters:
+      - default: 100
+        description: Number of events to retrieve
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of unprocessed events
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+      summary: Get unprocessed SukukPurchased events
+      tags:
+      - Blockchain Events
+  /events/sync:
+    post:
+      consumes:
+      - application/json
+      description: Manually trigger synchronization of blockchain events from the
+        indexer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sync completed
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+        "500":
+          description: Sync failed
+          schema:
+            $ref: '#/definitions/handlers.APIResponse'
+      summary: Trigger manual event sync
+      tags:
+      - Blockchain Events
   /health:
     get:
       consumes:
@@ -907,6 +1204,41 @@ paths:
       summary: Get investments by company
       tags:
       - Investments
+  /owned-sukuk/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get all sukuk metadata for sukuk tokens owned by a specific wallet
+        address
+      parameters:
+      - description: User wallet address
+        example: '"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9"'
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Owned sukuk metadata
+          schema:
+            $ref: '#/definitions/handlers.OwnedSukukResponse'
+        "400":
+          description: Invalid address
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get sukuk owned by address
+      tags:
+      - owned-sukuk
   /redemptions:
     get:
       consumes:
@@ -1043,9 +1375,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all sukuk metadata with optional filtering by ready status.
-        Use ready=true for sukuk with complete offchain metadata, ready=false for
-        sukuk needing metadata updates, or no parameter for all sukuk.
+      description: Get all sukuk metadata with optional filtering by ready status
+        and latest 10 blockchain activities
       parameters:
       - description: Filter by metadata_ready status
         enum:
@@ -1059,10 +1390,10 @@ paths:
       - application/json
       responses:
         "200":
-          description: List of sukuk metadata
+          description: List of sukuk metadata with activities
           schema:
             items:
-              $ref: '#/definitions/models.SukukMetadataResponse'
+              $ref: '#/definitions/models.SukukMetadataListResponse'
             type: array
         "500":
           description: Internal server error
@@ -1070,7 +1401,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: List sukuk metadata
+      summary: List sukuk metadata with activities
       tags:
       - sukuk-metadata
     post:
@@ -1107,6 +1438,44 @@ paths:
       tags:
       - sukuk-metadata
   /sukuk-metadata/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a single sukuk metadata by ID with latest 10 blockchain activities
+      parameters:
+      - description: Sukuk metadata ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sukuk metadata with activities
+          schema:
+            $ref: '#/definitions/models.SukukMetadataListResponse'
+        "400":
+          description: Invalid ID format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Sukuk metadata not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get sukuk metadata by ID
+      tags:
+      - sukuk-metadata
     put:
       consumes:
       - application/json
@@ -1398,6 +1767,47 @@ paths:
       summary: Get Sukuk series metrics
       tags:
       - Sukuk Series
+  /transaction-history/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get all blockchain activities (purchases and redemptions) for a
+        specific user address
+      parameters:
+      - description: User wallet address
+        example: '"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9"'
+        in: path
+        name: address
+        required: true
+        type: string
+      - default: 50
+        description: Number of activities to retrieve
+        example: 20
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transaction history
+          schema:
+            $ref: '#/definitions/handlers.RiwayatResponse'
+        "400":
+          description: Invalid address or limit
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get transaction history by address
+      tags:
+      - transaction-history
   /yields:
     get:
       consumes:
