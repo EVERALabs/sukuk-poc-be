@@ -33,6 +33,12 @@ definitions:
       sukuk_address:
         description: Sukuk contract address
         type: string
+      sukuk_code:
+        description: Sukuk symbol/code (e.g., "SITI")
+        type: string
+      sukuk_title:
+        description: Sukuk name/title
+        type: string
       timestamp:
         description: Event timestamp
         type: string
@@ -103,6 +109,107 @@ definitions:
       total_sukuk_count:
         type: integer
       total_yield_claimed:
+        type: string
+    type: object
+  models.RedemptionListResponse:
+    properties:
+      redemptions:
+        items:
+          $ref: '#/definitions/models.RedemptionRequest'
+        type: array
+      status_counts:
+        additionalProperties:
+          type: integer
+        description: 'requested: 5, approved: 2, etc.'
+        type: object
+      total_count:
+        type: integer
+    type: object
+  models.RedemptionRequest:
+    properties:
+      amount:
+        type: string
+      approval_block:
+        type: integer
+      approval_id:
+        type: string
+      approval_time:
+        type: string
+      approval_tx_hash:
+        type: string
+      approved_amount:
+        type: string
+      can_approve:
+        type: boolean
+      metadata:
+        allOf:
+        - $ref: '#/definitions/models.SukukMetadata'
+        description: Metadata for UI/Business Logic
+      payment_token:
+        type: string
+      request_block:
+        type: integer
+      request_id:
+        description: Request Information
+        type: string
+      request_time:
+        type: string
+      request_tx_hash:
+        type: string
+      requires_manager_auth:
+        type: boolean
+      status:
+        allOf:
+        - $ref: '#/definitions/models.RedemptionStatus'
+        description: Status and Approval Information
+      sukuk_address:
+        type: string
+      total_supply:
+        type: string
+      user:
+        type: string
+    type: object
+  models.RedemptionStatsResponse:
+    properties:
+      approved_requests:
+        type: integer
+      by_sukuk:
+        additionalProperties:
+          $ref: '#/definitions/models.RedemptionSukukStats'
+        description: By Sukuk breakdown
+        type: object
+      pending_requests:
+        type: integer
+      total_approved_amount:
+        type: string
+      total_requested_amount:
+        type: string
+      total_requests:
+        type: integer
+    type: object
+  models.RedemptionStatus:
+    enum:
+    - requested
+    - approved
+    - rejected
+    - completed
+    type: string
+    x-enum-varnames:
+    - RedemptionStatusRequested
+    - RedemptionStatusApproved
+    - RedemptionStatusRejected
+    - RedemptionStatusCompleted
+  models.RedemptionSukukStats:
+    properties:
+      approved_amount:
+        type: string
+      request_count:
+        type: integer
+      requested_amount:
+        type: string
+      sukuk_address:
+        type: string
+      sukuk_code:
         type: string
     type: object
   models.SukukHolding:
@@ -777,6 +884,179 @@ paths:
       summary: Get user portfolio
       tags:
       - portfolio
+  /redemptions:
+    get:
+      consumes:
+      - application/json
+      description: Get all redemption requests with their approval status, supports
+        pagination
+      parameters:
+      - default: 50
+        description: Number of redemptions to return
+        in: query
+        maximum: 200
+        minimum: 1
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of redemptions to skip
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: Filter by status
+        enum:
+        - requested
+        - approved
+        - rejected
+        - completed
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of redemptions with status
+          schema:
+            $ref: '#/definitions/models.RedemptionListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all redemptions
+      tags:
+      - redemptions
+  /redemptions/{request_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific redemption request
+      parameters:
+      - description: Redemption request ID
+        in: path
+        name: request_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Redemption details
+          schema:
+            $ref: '#/definitions/models.RedemptionRequest'
+        "400":
+          description: Invalid request ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Redemption not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get redemption by ID
+      tags:
+      - redemptions
+  /redemptions/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get comprehensive statistics about all redemptions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Redemption statistics
+          schema:
+            $ref: '#/definitions/models.RedemptionStatsResponse'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get redemption statistics
+      tags:
+      - redemptions
+  /redemptions/sukuk/{sukuk_address}:
+    get:
+      consumes:
+      - application/json
+      description: Get all redemption requests and approvals for a specific sukuk
+      parameters:
+      - description: Sukuk contract address
+        example: '"0x02ba44871BD555d6ebD541e2820796F9b88cBF75"'
+        in: path
+        name: sukuk_address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sukuk's redemptions
+          schema:
+            $ref: '#/definitions/models.RedemptionListResponse'
+        "400":
+          description: Invalid sukuk address
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get sukuk redemptions
+      tags:
+      - redemptions
+  /redemptions/user/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get all redemption requests and approvals for a specific user
+      parameters:
+      - description: User wallet address
+        example: '"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9"'
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User's redemptions
+          schema:
+            $ref: '#/definitions/models.RedemptionListResponse'
+        "400":
+          description: Invalid address
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user redemptions
+      tags:
+      - redemptions
   /sukuk-metadata:
     get:
       consumes:

@@ -118,7 +118,13 @@ func (s *IndexerQueryService) GetLatestActivities(sukukAddress string, limit int
 		activities = activities[:limit]
 	}
 
-	return activities, nil
+	// Enrich activities with sukuk metadata
+	enrichedActivities, err := s.enrichActivitiesWithSukukMetadata(activities)
+	if err != nil {
+		return nil, fmt.Errorf("failed to enrich activities with sukuk metadata: %w", err)
+	}
+
+	return enrichedActivities, nil
 }
 
 // GetSukukPurchases gets purchase events for a specific sukuk
@@ -265,7 +271,13 @@ func (s *IndexerQueryService) GetActivitiesByAddress(userAddress string, limit i
 		activities = activities[:limit]
 	}
 
-	return activities, nil
+	// Enrich activities with sukuk metadata
+	enrichedActivities, err := s.enrichActivitiesWithSukukMetadata(activities)
+	if err != nil {
+		return nil, fmt.Errorf("failed to enrich activities with sukuk metadata: %w", err)
+	}
+
+	return enrichedActivities, nil
 }
 
 // GetSukukOwnedByAddress gets unique sukuk addresses that a user has purchased
@@ -295,6 +307,50 @@ func (s *IndexerQueryService) GetSukukOwnedByAddress(userAddress string) ([]stri
 	}
 
 	return sukukAddresses, nil
+}
+
+// enrichActivitiesWithSukukMetadata enriches activities with sukuk metadata (code and title)
+func (s *IndexerQueryService) enrichActivitiesWithSukukMetadata(activities []models.ActivityEvent) ([]models.ActivityEvent, error) {
+	if len(activities) == 0 {
+		return activities, nil
+	}
+
+	// Extract unique sukuk addresses
+	sukukAddressMap := make(map[string]bool)
+	for _, activity := range activities {
+		sukukAddressMap[activity.SukukAddress] = true
+	}
+
+	// Convert to slice for batch query
+	sukukAddresses := make([]string, 0, len(sukukAddressMap))
+	for address := range sukukAddressMap {
+		sukukAddresses = append(sukukAddresses, address)
+	}
+
+	// Batch fetch sukuk metadata
+	var sukukMetadata []models.SukukMetadata
+	err := s.indexerDB.Where("contract_address IN ?", sukukAddresses).Find(&sukukMetadata).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch sukuk metadata: %w", err)
+	}
+
+	// Create lookup map for quick access
+	metadataMap := make(map[string]models.SukukMetadata)
+	for _, metadata := range sukukMetadata {
+		metadataMap[metadata.ContractAddress] = metadata
+	}
+
+	// Enrich activities with metadata
+	enrichedActivities := make([]models.ActivityEvent, len(activities))
+	for i, activity := range activities {
+		enrichedActivities[i] = activity
+		if metadata, exists := metadataMap[activity.SukukAddress]; exists {
+			enrichedActivities[i].SukukCode = metadata.SukukCode
+			enrichedActivities[i].SukukTitle = metadata.SukukTitle
+		}
+	}
+
+	return enrichedActivities, nil
 }
 
 // Data structures for indexer events (matching Ponder schema)

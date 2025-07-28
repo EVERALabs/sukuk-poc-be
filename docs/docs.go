@@ -439,6 +439,262 @@ const docTemplate = `{
                 }
             }
         },
+        "/redemptions": {
+            "get": {
+                "description": "Get all redemption requests with their approval status, supports pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "redemptions"
+                ],
+                "summary": "Get all redemptions",
+                "parameters": [
+                    {
+                        "maximum": 200,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Number of redemptions to return",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Number of redemptions to skip",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "requested",
+                            "approved",
+                            "rejected",
+                            "completed"
+                        ],
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of redemptions with status",
+                        "schema": {
+                            "$ref": "#/definitions/models.RedemptionListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/stats": {
+            "get": {
+                "description": "Get comprehensive statistics about all redemptions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "redemptions"
+                ],
+                "summary": "Get redemption statistics",
+                "responses": {
+                    "200": {
+                        "description": "Redemption statistics",
+                        "schema": {
+                            "$ref": "#/definitions/models.RedemptionStatsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/sukuk/{sukuk_address}": {
+            "get": {
+                "description": "Get all redemption requests and approvals for a specific sukuk",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "redemptions"
+                ],
+                "summary": "Get sukuk redemptions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"0x02ba44871BD555d6ebD541e2820796F9b88cBF75\"",
+                        "description": "Sukuk contract address",
+                        "name": "sukuk_address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk's redemptions",
+                        "schema": {
+                            "$ref": "#/definitions/models.RedemptionListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid sukuk address",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/user/{address}": {
+            "get": {
+                "description": "Get all redemption requests and approvals for a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "redemptions"
+                ],
+                "summary": "Get user redemptions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9\"",
+                        "description": "User wallet address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User's redemptions",
+                        "schema": {
+                            "$ref": "#/definitions/models.RedemptionListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid address",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/redemptions/{request_id}": {
+            "get": {
+                "description": "Get detailed information about a specific redemption request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "redemptions"
+                ],
+                "summary": "Get redemption by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Redemption request ID",
+                        "name": "request_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redemption details",
+                        "schema": {
+                            "$ref": "#/definitions/models.RedemptionRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Redemption not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/sukuk-metadata": {
             "get": {
                 "description": "Get all sukuk metadata with optional filtering by ready status and latest 10 blockchain activities",
@@ -1095,6 +1351,14 @@ const docTemplate = `{
                     "description": "Sukuk contract address",
                     "type": "string"
                 },
+                "sukuk_code": {
+                    "description": "Sukuk symbol/code (e.g., \"SITI\")",
+                    "type": "string"
+                },
+                "sukuk_title": {
+                    "description": "Sukuk name/title",
+                    "type": "string"
+                },
                 "timestamp": {
                     "description": "Event timestamp",
                     "type": "string"
@@ -1198,6 +1462,159 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "total_yield_claimed": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RedemptionListResponse": {
+            "type": "object",
+            "properties": {
+                "redemptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.RedemptionRequest"
+                    }
+                },
+                "status_counts": {
+                    "description": "requested: 5, approved: 2, etc.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "total_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.RedemptionRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "approval_block": {
+                    "type": "integer"
+                },
+                "approval_id": {
+                    "type": "string"
+                },
+                "approval_time": {
+                    "type": "string"
+                },
+                "approval_tx_hash": {
+                    "type": "string"
+                },
+                "approved_amount": {
+                    "type": "string"
+                },
+                "can_approve": {
+                    "type": "boolean"
+                },
+                "metadata": {
+                    "description": "Metadata for UI/Business Logic",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.SukukMetadata"
+                        }
+                    ]
+                },
+                "payment_token": {
+                    "type": "string"
+                },
+                "request_block": {
+                    "type": "integer"
+                },
+                "request_id": {
+                    "description": "Request Information",
+                    "type": "string"
+                },
+                "request_time": {
+                    "type": "string"
+                },
+                "request_tx_hash": {
+                    "type": "string"
+                },
+                "requires_manager_auth": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "description": "Status and Approval Information",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.RedemptionStatus"
+                        }
+                    ]
+                },
+                "sukuk_address": {
+                    "type": "string"
+                },
+                "total_supply": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RedemptionStatsResponse": {
+            "type": "object",
+            "properties": {
+                "approved_requests": {
+                    "type": "integer"
+                },
+                "by_sukuk": {
+                    "description": "By Sukuk breakdown",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/models.RedemptionSukukStats"
+                    }
+                },
+                "pending_requests": {
+                    "type": "integer"
+                },
+                "total_approved_amount": {
+                    "type": "string"
+                },
+                "total_requested_amount": {
+                    "type": "string"
+                },
+                "total_requests": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.RedemptionStatus": {
+            "type": "string",
+            "enum": [
+                "requested",
+                "approved",
+                "rejected",
+                "completed"
+            ],
+            "x-enum-varnames": [
+                "RedemptionStatusRequested",
+                "RedemptionStatusApproved",
+                "RedemptionStatusRejected",
+                "RedemptionStatusCompleted"
+            ]
+        },
+        "models.RedemptionSukukStats": {
+            "type": "object",
+            "properties": {
+                "approved_amount": {
+                    "type": "string"
+                },
+                "request_count": {
+                    "type": "integer"
+                },
+                "requested_amount": {
+                    "type": "string"
+                },
+                "sukuk_address": {
+                    "type": "string"
+                },
+                "sukuk_code": {
                     "type": "string"
                 }
             }

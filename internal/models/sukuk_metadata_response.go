@@ -18,6 +18,8 @@ type ActivityEvent struct {
 	TxHash       string    `json:"tx_hash"`       // Transaction hash
 	Timestamp    time.Time `json:"timestamp"`     // Event timestamp
 	SukukAddress string    `json:"sukuk_address"` // Sukuk contract address
+	SukukCode    string    `json:"sukuk_code"`    // Sukuk symbol/code (e.g., "SITI")
+	SukukTitle   string    `json:"sukuk_title"`   // Sukuk name/title
 }
 
 // SukukMetadataListResponse represents the response for listing sukuk metadata with activities

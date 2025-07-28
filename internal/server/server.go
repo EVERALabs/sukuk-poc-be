@@ -97,6 +97,13 @@ func (s *Server) setupRoutes() {
 		v1.GET("/yield-claims/:address", handlers.GetYieldClaims)
 		v1.GET("/yield-distributions/:sukuk_address", handlers.GetYieldDistributions)
 
+		// Redemption endpoints
+		v1.GET("/redemptions", handlers.GetAllRedemptions)
+		v1.GET("/redemptions/stats", handlers.GetRedemptionStats)
+		v1.GET("/redemptions/user/:address", handlers.GetRedemptionsByUser)
+		v1.GET("/redemptions/sukuk/:sukuk_address", handlers.GetRedemptionsBySukuk)
+		v1.GET("/redemptions/:request_id", handlers.GetRedemptionByID)
+
 		// Debug endpoints (optional - remove in production)
 		debug := v1.Group("/debug")
 		{
