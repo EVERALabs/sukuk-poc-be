@@ -2,28 +2,37 @@ package services
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"sukuk-be/internal/database"
 	"sukuk-be/internal/models"
+	"sukuk-be/internal/utils"
 
 	"gorm.io/gorm"
 )
 
 type IndexerQueryService struct {
-	indexerDB *gorm.DB
+	indexerDB    *gorm.DB
+	tableService *IndexerTableService
 }
 
 // NewIndexerQueryService creates a new service to query indexer database
 func NewIndexerQueryService() *IndexerQueryService {
-	return &IndexerQueryService{}
+	return &IndexerQueryService{
+		tableService: NewIndexerTableService(),
+	}
 }
 
 // ConnectToIndexer connects to the Ponder indexer database (same as main database)
 func (s *IndexerQueryService) ConnectToIndexer() error {
 	// Use the same database connection as the main application
 	s.indexerDB = database.GetDB()
-	return nil
+	// Also initialize the table service
+	if s.tableService == nil {
+		s.tableService = NewIndexerTableService()
+	}
+	return s.tableService.ConnectToIndexer()
 }
 
 // GetLatestActivities queries the indexer database directly for latest activities
@@ -40,26 +49,37 @@ func (s *IndexerQueryService) GetLatestActivities(sukukAddress string, limit int
 
 	var activities []models.ActivityEvent
 
+	// Get latest table names using dynamic discovery
+	purchaseTable, err := s.tableService.GetLatestTableForEvent("sukuk_purchase")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find sukuk_purchase table: %w", err)
+	}
+
+	redemptionTable, err := s.tableService.GetLatestTableForEvent("redemption_request")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find redemption_request table: %w", err)
+	}
+
 	// Query sukuk_purchase table directly from indexer
 	var purchases []IndexerSukukPurchase
-	err := s.indexerDB.Table("sukuk_purchase").
+	err = s.indexerDB.Table(purchaseTable).
 		Where("sukuk_address = ?", sukukAddress).
 		Order("timestamp DESC").
 		Limit(limit).
 		Find(&purchases).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to query sukuk purchases: %w", err)
+		return nil, fmt.Errorf("failed to query sukuk purchases from %s: %w", purchaseTable, err)
 	}
 
 	// Query redemption_request table directly from indexer
 	var redemptions []IndexerRedemptionRequest
-	err = s.indexerDB.Table("redemption_request").
+	err = s.indexerDB.Table(redemptionTable).
 		Where("sukuk_address = ?", sukukAddress).
 		Order("timestamp DESC").
 		Limit(limit).
 		Find(&redemptions).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to query redemption requests: %w", err)
+		return nil, fmt.Errorf("failed to query redemption requests from %s: %w", redemptionTable, err)
 	}
 
 	// Convert to ActivityEvent and merge
@@ -109,8 +129,14 @@ func (s *IndexerQueryService) GetSukukPurchases(sukukAddress string, limit int) 
 		}
 	}
 
+	// Get latest table name using dynamic discovery
+	purchaseTable, err := s.tableService.GetLatestTableForEvent("sukuk_purchase")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find sukuk_purchase table: %w", err)
+	}
+
 	var purchases []IndexerSukukPurchase
-	query := s.indexerDB.Table("sukuk_purchase").
+	query := s.indexerDB.Table(purchaseTable).
 		Order("timestamp DESC")
 
 	if sukukAddress != "" {
@@ -121,7 +147,7 @@ func (s *IndexerQueryService) GetSukukPurchases(sukukAddress string, limit int) 
 		query = query.Limit(limit)
 	}
 
-	err := query.Find(&purchases).Error
+	err = query.Find(&purchases).Error
 	return purchases, err
 }
 
@@ -133,8 +159,14 @@ func (s *IndexerQueryService) GetRedemptionRequests(sukukAddress string, limit i
 		}
 	}
 
+	// Get latest table name using dynamic discovery
+	redemptionTable, err := s.tableService.GetLatestTableForEvent("redemption_request")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find redemption_request table: %w", err)
+	}
+
 	var redemptions []IndexerRedemptionRequest
-	query := s.indexerDB.Table("redemption_request").
+	query := s.indexerDB.Table(redemptionTable).
 		Order("timestamp DESC")
 
 	if sukukAddress != "" {
@@ -145,7 +177,7 @@ func (s *IndexerQueryService) GetRedemptionRequests(sukukAddress string, limit i
 		query = query.Limit(limit)
 	}
 
-	err := query.Find(&redemptions).Error
+	err = query.Find(&redemptions).Error
 	return redemptions, err
 }
 
@@ -163,26 +195,37 @@ func (s *IndexerQueryService) GetActivitiesByAddress(userAddress string, limit i
 
 	var activities []models.ActivityEvent
 
+	// Get latest table names using dynamic discovery
+	purchaseTable, err := s.tableService.GetLatestTableForEvent("sukuk_purchase")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find sukuk_purchase table: %w", err)
+	}
+
+	redemptionTable, err := s.tableService.GetLatestTableForEvent("redemption_request")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find redemption_request table: %w", err)
+	}
+
 	// Query sukuk_purchase table for user's purchases
 	var purchases []IndexerSukukPurchase
-	err := s.indexerDB.Table("sukuk_purchase").
+	err = s.indexerDB.Table(purchaseTable).
 		Where("buyer = ?", userAddress).
 		Order("timestamp DESC").
 		Limit(limit).
 		Find(&purchases).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to query user purchases: %w", err)
+		return nil, fmt.Errorf("failed to query user purchases from %s: %w", purchaseTable, err)
 	}
 
 	// Query redemption_request table for user's redemptions
 	var redemptions []IndexerRedemptionRequest
-	err = s.indexerDB.Table("redemption_request").
+	err = s.indexerDB.Table(redemptionTable).
 		Where("user = ?", userAddress).
 		Order("timestamp DESC").
 		Limit(limit).
 		Find(&redemptions).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to query user redemptions: %w", err)
+		return nil, fmt.Errorf("failed to query user redemptions from %s: %w", redemptionTable, err)
 	}
 
 	// Convert purchases to ActivityEvent
@@ -233,16 +276,22 @@ func (s *IndexerQueryService) GetSukukOwnedByAddress(userAddress string) ([]stri
 		}
 	}
 
+	// Get latest table name using dynamic discovery
+	purchaseTable, err := s.tableService.GetLatestTableForEvent("sukuk_purchase")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find sukuk_purchase table: %w", err)
+	}
+
 	var sukukAddresses []string
 	
 	// Query for distinct sukuk addresses from purchases
-	err := s.indexerDB.Table("sukuk_purchase").
+	err = s.indexerDB.Table(purchaseTable).
 		Select("DISTINCT sukuk_address").
 		Where("buyer = ?", userAddress).
 		Pluck("sukuk_address", &sukukAddresses).Error
 	
 	if err != nil {
-		return nil, fmt.Errorf("failed to query owned sukuk addresses: %w", err)
+		return nil, fmt.Errorf("failed to query owned sukuk addresses from %s: %w", purchaseTable, err)
 	}
 
 	return sukukAddresses, nil
@@ -266,7 +315,507 @@ type IndexerRedemptionRequest struct {
 	SukukAddress string `gorm:"column:sukuk_address"`
 	Amount       string `gorm:"column:amount"`
 	PaymentToken string `gorm:"column:payment_token"`
+	TotalSupply  string `gorm:"column:total_supply"`
 	BlockNumber  int64  `gorm:"column:block_number"`
 	TxHash       string `gorm:"column:tx_hash"`
 	Timestamp    int64  `gorm:"column:timestamp"`
+}
+
+type IndexerRedemptionApproval struct {
+	ID           string `gorm:"column:id"`
+	User         string `gorm:"column:user"`
+	SukukAddress string `gorm:"column:sukuk_address"`
+	Amount       string `gorm:"column:amount"`
+	TotalSupply  string `gorm:"column:total_supply"`
+	BlockNumber  int64  `gorm:"column:block_number"`
+	TxHash       string `gorm:"column:tx_hash"`
+	Timestamp    int64  `gorm:"column:timestamp"`
+}
+
+// Additional indexer event structures for yield and portfolio management
+type IndexerYieldDistributed struct {
+	ID             string `gorm:"column:id"`
+	SukukAddress   string `gorm:"column:sukuk_address"`
+	DistributionId int64  `gorm:"column:distribution_id"`
+	PaymentToken   string `gorm:"column:payment_token"`
+	Amount         string `gorm:"column:amount"`
+	Timestamp      int64  `gorm:"column:timestamp"`
+	BlockNumber    int64  `gorm:"column:block_number"`
+	TxHash         string `gorm:"column:tx_hash"`
+}
+
+type IndexerYieldClaimed struct {
+	ID             string `gorm:"column:id"`
+	User           string `gorm:"column:user"`
+	SukukAddress   string `gorm:"column:sukuk_address"`
+	DistributionId int64  `gorm:"column:distribution_id"`
+	Amount         string `gorm:"column:amount"`
+	Timestamp      int64  `gorm:"column:timestamp"`
+	BlockNumber    int64  `gorm:"column:block_number"`
+	TxHash         string `gorm:"column:tx_hash"`
+}
+
+type IndexerSnapshotTaken struct {
+	ID            string `gorm:"column:id"`
+	SukukAddress  string `gorm:"column:sukuk_address"`
+	SnapshotId    int64  `gorm:"column:snapshot_id"`
+	TotalSupply   string `gorm:"column:total_supply"`
+	HolderCount   int64  `gorm:"column:holder_count"`
+	EligibleCount int64  `gorm:"column:eligible_count"`
+	Timestamp     int64  `gorm:"column:timestamp"`
+	BlockNumber   int64  `gorm:"column:block_number"`
+	TxHash        string `gorm:"column:tx_hash"`
+}
+
+type IndexerHolderUpdated struct {
+	ID           string `gorm:"column:id"`
+	SukukAddress string `gorm:"column:sukuk_address"`
+	Holder       string `gorm:"column:holder"`
+	Balance      string `gorm:"column:new_balance"`
+	Timestamp    int64  `gorm:"column:timestamp"`
+	BlockNumber  int64  `gorm:"column:block_number"`
+	TxHash       string `gorm:"column:tx_hash"`
+}
+
+// Portfolio and yield calculation methods
+
+// GetUserPortfolio calculates user's portfolio with holdings and claimable yields
+func (s *IndexerQueryService) GetUserPortfolio(userAddress string) (*UserPortfolio, error) {
+	if s.indexerDB == nil {
+		if err := s.ConnectToIndexer(); err != nil {
+			return nil, err
+		}
+	}
+
+	portfolio := &UserPortfolio{
+		Address:  userAddress,
+		Holdings: []SukukHolding{},
+	}
+
+	// Get all sukuk addresses owned by user
+	sukukAddresses, err := s.GetSukukOwnedByAddress(userAddress)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get owned sukuk: %w", err)
+	}
+
+	// For each sukuk, calculate holdings and claimable yields
+	for _, sukukAddr := range sukukAddresses {
+		holding, err := s.GetSukukHolding(userAddress, sukukAddr)
+		if err != nil {
+			// Log error but continue with other sukuk
+			continue
+		}
+		if holding != nil {
+			portfolio.Holdings = append(portfolio.Holdings, *holding)
+		}
+	}
+
+	return portfolio, nil
+}
+
+// GetSukukHolding calculates user's holding and claimable yield for a specific sukuk
+func (s *IndexerQueryService) GetSukukHolding(userAddress, sukukAddress string) (*SukukHolding, error) {
+	// Get current balance from holder_update table
+	balance, err := s.GetCurrentBalance(userAddress, sukukAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	if balance == "0" {
+		return nil, nil // User doesn't hold this sukuk anymore
+	}
+
+	// Get claimable yield
+	claimableYield, err := s.GetClaimableYield(userAddress, sukukAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	holding := &SukukHolding{
+		SukukAddress:   sukukAddress,
+		Balance:        balance,
+		ClaimableYield: claimableYield,
+	}
+
+	return holding, nil
+}
+
+// GetCurrentBalance gets user's current balance for a sukuk from holder_update table
+func (s *IndexerQueryService) GetCurrentBalance(userAddress, sukukAddress string) (string, error) {
+	holderTable, err := s.tableService.GetLatestTableForEvent("holder_update")
+	if err != nil {
+		return "0", fmt.Errorf("failed to find holder_update table: %w", err)
+	}
+
+	var holder IndexerHolderUpdated
+	err = s.indexerDB.Table(holderTable).
+		Where("holder = ? AND sukuk_address = ?", userAddress, sukukAddress).
+		Order("timestamp DESC").
+		First(&holder).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return "0", nil
+		}
+		return "0", fmt.Errorf("failed to query current balance: %w", err)
+	}
+
+	return holder.Balance, nil
+}
+
+// GetClaimableYield calculates claimable yield by comparing distributed vs claimed
+func (s *IndexerQueryService) GetClaimableYield(userAddress, sukukAddress string) (string, error) {
+	mathUtil := utils.GlobalTokenMath
+	
+	// Get total yield distributed for this sukuk
+	totalDistributed, err := s.GetTotalYieldDistributed(sukukAddress)
+	if err != nil {
+		return "0", err
+	}
+
+	// Get total yield claimed by user for this sukuk  
+	totalClaimed, err := s.GetTotalYieldClaimed(userAddress, sukukAddress)
+	if err != nil {
+		return "0", err
+	}
+
+	// Get user's share percentage based on current holdings
+	// This is simplified - ideally should check balance at each distribution snapshot
+	sharePercentage, err := s.GetUserSharePercentage(userAddress, sukukAddress)
+	if err != nil {
+		return "0", err
+	}
+
+	// Calculate user's entitled yield = totalDistributed * sharePercentage
+	entitledYield, err := mathUtil.MultiplyTokenAmount(totalDistributed, sharePercentage)
+	if err != nil {
+		return "0", fmt.Errorf("failed to calculate entitled yield: %w", err)
+	}
+
+	// Calculate claimable = entitledYield - totalClaimed
+	claimableYield, err := mathUtil.SubtractTokenAmounts(entitledYield, totalClaimed)
+	if err != nil {
+		return "0", fmt.Errorf("failed to calculate claimable yield: %w", err)
+	}
+
+	return claimableYield, nil
+}
+
+// GetTotalYieldDistributed gets total yield distributed for a sukuk
+func (s *IndexerQueryService) GetTotalYieldDistributed(sukukAddress string) (string, error) {
+	yieldTable, err := s.tableService.GetLatestTableForEvent("yield_distributed")
+	if err != nil {
+		return "0", fmt.Errorf("failed to find yield_distributed table: %w", err)
+	}
+
+	var yields []IndexerYieldDistributed
+	err = s.indexerDB.Table(yieldTable).
+		Where("sukuk_address = ?", sukukAddress).
+		Find(&yields).Error
+
+	if err != nil {
+		return "0", fmt.Errorf("failed to query yield distributions: %w", err)
+	}
+
+	// Sum all distributed amounts using proper BigInt math
+	mathUtil := utils.GlobalTokenMath
+	total := "0"
+	
+	for _, y := range yields {
+		newTotal, err := mathUtil.AddTokenAmounts(total, y.Amount)
+		if err != nil {
+			return "0", fmt.Errorf("failed to sum yield amounts: %w", err)
+		}
+		total = newTotal
+	}
+
+	return total, nil
+}
+
+// GetTotalYieldClaimed gets total yield claimed by user for a sukuk
+func (s *IndexerQueryService) GetTotalYieldClaimed(userAddress, sukukAddress string) (string, error) {
+	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claimed")
+	if err != nil {
+		return "0", fmt.Errorf("failed to find yield_claimed table: %w", err)
+	}
+
+	var claims []IndexerYieldClaimed
+	err = s.indexerDB.Table(claimedTable).
+		Where("user = ? AND sukuk_address = ?", userAddress, sukukAddress).
+		Find(&claims).Error
+
+	if err != nil {
+		return "0", fmt.Errorf("failed to query yield claims: %w", err)
+	}
+
+	// Sum all claimed amounts using proper BigInt math
+	mathUtil := utils.GlobalTokenMath
+	total := "0"
+	
+	for _, c := range claims {
+		newTotal, err := mathUtil.AddTokenAmounts(total, c.Amount)
+		if err != nil {
+			return "0", fmt.Errorf("failed to sum claimed amounts: %w", err)
+		}
+		total = newTotal
+	}
+
+	return total, nil
+}
+
+// GetUserSharePercentage calculates user's ownership percentage of a sukuk
+func (s *IndexerQueryService) GetUserSharePercentage(userAddress, sukukAddress string) (float64, error) {
+	mathUtil := utils.GlobalTokenMath
+	
+	// Get user's current balance
+	userBalance, err := s.GetCurrentBalance(userAddress, sukukAddress)
+	if err != nil {
+		return 0, err
+	}
+
+	// If user has no balance, share is 0%
+	if mathUtil.IsZero(userBalance) {
+		return 0.0, nil
+	}
+
+	// Get total supply from latest redemption request (which includes totalSupply)
+	// or snapshot table which also tracks totalSupply
+	totalSupply, err := s.getTotalSupplyFromSnapshot(sukukAddress)
+	if err != nil {
+		// Fallback: try to get from redemption events
+		totalSupply, err = s.getTotalSupplyFromRedemption(sukukAddress)
+		if err != nil {
+			return 0, fmt.Errorf("failed to get total supply: %w", err)
+		}
+	}
+
+	// Calculate percentage: userBalance / totalSupply
+	percentage, err := mathUtil.CalculatePercentage(userBalance, totalSupply)
+	if err != nil {
+		return 0, fmt.Errorf("failed to calculate percentage: %w", err)
+	}
+
+	return percentage, nil
+}
+
+// GetYieldDistributions gets yield distribution events for a sukuk
+func (s *IndexerQueryService) GetYieldDistributions(sukukAddress string, limit int) ([]IndexerYieldDistributed, error) {
+	yieldTable, err := s.tableService.GetLatestTableForEvent("yield_distributed")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find yield_distributed table: %w", err)
+	}
+
+	var yields []IndexerYieldDistributed
+	query := s.indexerDB.Table(yieldTable).
+		Order("timestamp DESC")
+
+	if sukukAddress != "" {
+		query = query.Where("sukuk_address = ?", sukukAddress)
+	}
+
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+
+	err = query.Find(&yields).Error
+	return yields, err
+}
+
+// GetYieldClaims gets yield claim events for a user/sukuk
+func (s *IndexerQueryService) GetYieldClaims(userAddress, sukukAddress string, limit int) ([]IndexerYieldClaimed, error) {
+	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claimed")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find yield_claimed table: %w", err)
+	}
+
+	var claims []IndexerYieldClaimed
+	query := s.indexerDB.Table(claimedTable).
+		Order("timestamp DESC")
+
+	if userAddress != "" {
+		query = query.Where("user = ?", userAddress)
+	}
+
+	if sukukAddress != "" {
+		query = query.Where("sukuk_address = ?", sukukAddress)
+	}
+
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+
+	err = query.Find(&claims).Error
+	return claims, err
+}
+
+// getTotalSupplyFromSnapshot gets total supply from snapshot table
+func (s *IndexerQueryService) getTotalSupplyFromSnapshot(sukukAddress string) (string, error) {
+	snapshotTable, err := s.tableService.GetLatestTableForEvent("snapshot")
+	if err != nil {
+		return "0", fmt.Errorf("failed to find snapshot table: %w", err)
+	}
+
+	var snapshot struct {
+		TotalSupply string `gorm:"column:total_supply"`
+	}
+
+	err = s.indexerDB.Table(snapshotTable).
+		Where("sukuk_address = ?", sukukAddress).
+		Order("timestamp DESC").
+		First(&snapshot).Error
+
+	if err != nil {
+		return "0", fmt.Errorf("failed to get total supply from snapshot: %w", err)
+	}
+
+	return snapshot.TotalSupply, nil
+}
+
+// getTotalSupplyFromRedemption gets total supply from latest redemption request
+func (s *IndexerQueryService) getTotalSupplyFromRedemption(sukukAddress string) (string, error) {
+	redemptionTable, err := s.tableService.GetLatestTableForEvent("redemption_request")
+	if err != nil {
+		return "0", fmt.Errorf("failed to find redemption_request table: %w", err)
+	}
+
+	var redemption struct {
+		TotalSupply string `gorm:"column:total_supply"`
+	}
+
+	err = s.indexerDB.Table(redemptionTable).
+		Where("sukuk_address = ?", sukukAddress).
+		Order("timestamp DESC").
+		First(&redemption).Error
+
+	if err != nil {
+		return "0", fmt.Errorf("failed to get total supply from redemption: %w", err)
+	}
+
+	return redemption.TotalSupply, nil
+}
+
+// GetUserTransactionHistory gets all transactions for a user efficiently with database-level filtering and sorting
+func (s *IndexerQueryService) GetUserTransactionHistory(userAddress string, limit int) ([]models.TransactionEvent, error) {
+	if s.indexerDB == nil {
+		if err := s.ConnectToIndexer(); err != nil {
+			return nil, err
+		}
+	}
+
+	allTransactions := make([]models.TransactionEvent, 0)
+
+	// Get purchases with database filtering
+	purchaseTable, err := s.tableService.GetLatestTableForEvent("sukuk_purchase")
+	if err == nil {
+		var purchases []IndexerSukukPurchase
+		err = s.indexerDB.Table(purchaseTable).
+			Where("buyer = ?", userAddress).
+			Order("timestamp DESC").
+			Limit(limit).
+			Find(&purchases).Error
+
+		if err == nil {
+			for _, p := range purchases {
+				allTransactions = append(allTransactions, models.TransactionEvent{
+					Type:         "purchase",
+					SukukAddress: p.SukukAddress,
+					Amount:       p.Amount,
+					TxHash:       p.TxHash,
+					Timestamp:    time.Unix(p.Timestamp, 0),
+					BlockNumber:  p.BlockNumber,
+					Status:       "confirmed",
+					Details: map[string]interface{}{
+						"payment_token": p.PaymentToken,
+						"buyer":         p.Buyer,
+					},
+				})
+			}
+		}
+	}
+
+	// Get redemption requests with database filtering
+	redemptionTable, err := s.tableService.GetLatestTableForEvent("redemption_request")
+	if err == nil {
+		var redemptions []IndexerRedemptionRequest
+		err = s.indexerDB.Table(redemptionTable).
+			Where("user = ?", userAddress).
+			Order("timestamp DESC").
+			Limit(limit).
+			Find(&redemptions).Error
+
+		if err == nil {
+			for _, r := range redemptions {
+				allTransactions = append(allTransactions, models.TransactionEvent{
+					Type:         "redemption_request",
+					SukukAddress: r.SukukAddress,
+					Amount:       r.Amount,
+					TxHash:       r.TxHash,
+					Timestamp:    time.Unix(r.Timestamp, 0),
+					BlockNumber:  r.BlockNumber,
+					Status:       "confirmed",
+					Details: map[string]interface{}{
+						"payment_token": r.PaymentToken,
+						"user":          r.User,
+					},
+				})
+			}
+		}
+	}
+
+	// Get yield claims with database filtering
+	yieldTable, err := s.tableService.GetLatestTableForEvent("yield_claimed")
+	if err == nil {
+		var claims []IndexerYieldClaimed
+		err = s.indexerDB.Table(yieldTable).
+			Where("user = ?", userAddress).
+			Order("timestamp DESC").
+			Limit(limit).
+			Find(&claims).Error
+
+		if err == nil {
+			for _, y := range claims {
+				allTransactions = append(allTransactions, models.TransactionEvent{
+					Type:         "yield_claim",
+					SukukAddress: y.SukukAddress,
+					Amount:       y.Amount,
+					TxHash:       y.TxHash,
+					Timestamp:    time.Unix(y.Timestamp, 0),
+					BlockNumber:  y.BlockNumber,
+					Status:       "confirmed",
+					Details: map[string]interface{}{
+						"user": y.User,
+					},
+				})
+			}
+		}
+	}
+
+	// Sort by timestamp descending using Go's sort package (more efficient than bubble sort)
+	sort.Slice(allTransactions, func(i, j int) bool {
+		return allTransactions[i].Timestamp.After(allTransactions[j].Timestamp)
+	})
+
+	// Apply final limit
+	if len(allTransactions) > limit {
+		allTransactions = allTransactions[:limit]
+	}
+
+	return allTransactions, nil
+}
+
+// GetAvailableTables returns all available indexer tables with their event types
+func (s *IndexerQueryService) GetAvailableTables() (map[string]string, error) {
+	return s.tableService.GetAllLatestTables()
+}
+
+// Portfolio calculation result structures
+type UserPortfolio struct {
+	Address  string         `json:"address"`
+	Holdings []SukukHolding `json:"holdings"`
+}
+
+type SukukHolding struct {
+	SukukAddress   string `json:"sukuk_address"`
+	Balance        string `json:"balance"`
+	ClaimableYield string `json:"claimable_yield"`
 }

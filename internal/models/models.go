@@ -5,15 +5,10 @@ package models
 // AllModels returns a slice of all models for migrations
 func AllModels() []interface{} {
 	return []interface{}{
-		&Company{},
-		&Sukuk{},        // Renamed from SukukSeries
-		&Investment{},
-		&Yield{},        // Renamed from YieldClaim
-		&Redemption{},
 		&SystemState{},
-		&SukukMetadata{}, // New model for onchain + offchain metadata
+		&SukukMetadata{}, // Model for onchain + offchain metadata
 		&SukukPurchased{}, // Blockchain event for sukuk purchases
 		&RedemptionRequested{}, // Blockchain event for redemption requests
-		// Removed &Event{} as we'll use indexer's blockchain.events table
+		// Only keeping essential models for indexer data + metadata
 	}
 }

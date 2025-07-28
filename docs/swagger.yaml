@@ -1,94 +1,5 @@
 basePath: /api/v1
 definitions:
-  handlers.APIError:
-    properties:
-      code:
-        type: integer
-      details:
-        type: string
-      message:
-        type: string
-    type: object
-  handlers.APIResponse:
-    properties:
-      data: {}
-      error:
-        $ref: '#/definitions/handlers.APIError'
-      message:
-        type: string
-      success:
-        type: boolean
-    type: object
-  handlers.CompanyResponse:
-    properties:
-      data:
-        description: models.Company or []models.Company
-      meta:
-        $ref: '#/definitions/handlers.Pagination'
-      success:
-        type: boolean
-    type: object
-  handlers.CreateCompanyRequest:
-    properties:
-      description:
-        type: string
-      email:
-        type: string
-      industry:
-        type: string
-      name:
-        type: string
-      wallet_address:
-        type: string
-      website:
-        type: string
-    required:
-    - email
-    - name
-    - wallet_address
-    type: object
-  handlers.CreateSukukRequest:
-    properties:
-      company_id:
-        type: integer
-      description:
-        type: string
-      is_redeemable:
-        type: boolean
-      maturity_date:
-        type: string
-      max_investment:
-        type: string
-      min_investment:
-        type: string
-      name:
-        type: string
-      payment_frequency:
-        type: integer
-      symbol:
-        type: string
-      total_supply:
-        type: string
-      yield_rate:
-        type: number
-    required:
-    - company_id
-    - maturity_date
-    - min_investment
-    - name
-    - symbol
-    - total_supply
-    - yield_rate
-    type: object
-  handlers.InvestmentResponse:
-    properties:
-      data:
-        description: models.Investment or []models.Investment
-      meta:
-        $ref: '#/definitions/handlers.Pagination'
-      success:
-        type: boolean
-    type: object
   handlers.OwnedSukukResponse:
     properties:
       address:
@@ -98,23 +9,6 @@ definitions:
           $ref: '#/definitions/models.SukukMetadataListResponse'
         type: array
       total_count:
-        type: integer
-    type: object
-  handlers.Pagination:
-    properties:
-      count:
-        type: integer
-      has_next:
-        type: boolean
-      has_previous:
-        type: boolean
-      page:
-        type: integer
-      per_page:
-        type: integer
-      total:
-        type: integer
-      total_pages:
         type: integer
     type: object
   handlers.RiwayatResponse:
@@ -127,62 +21,6 @@ definitions:
         type: string
       total_count:
         type: integer
-    type: object
-  handlers.SukukResponse:
-    properties:
-      data:
-        description: models.Sukuk or []models.Sukuk
-      meta:
-        $ref: '#/definitions/handlers.Pagination'
-      success:
-        type: boolean
-    type: object
-  handlers.SystemResponse:
-    properties:
-      data: {}
-      success:
-        type: boolean
-    type: object
-  handlers.UpdateCompanyRequest:
-    properties:
-      description:
-        type: string
-      email:
-        type: string
-      industry:
-        type: string
-      is_active:
-        type: boolean
-      name:
-        type: string
-      website:
-        type: string
-    type: object
-  handlers.UpdateSukukRequest:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-      outstanding_supply:
-        type: string
-      status:
-        type: string
-      token_address:
-        type: string
-      total_supply:
-        type: string
-    type: object
-  handlers.UploadResponse:
-    properties:
-      filename:
-        type: string
-      message:
-        type: string
-      success:
-        type: boolean
-      url:
-        type: string
     type: object
   models.ActivityEvent:
     properties:
@@ -205,33 +43,165 @@ definitions:
         description: '"purchase" or "redemption_request"'
         type: string
     type: object
-  models.RedemptionRequested:
+  models.IndexerTableInfo:
     properties:
-      amount:
+      event_type:
         type: string
-      block_number:
+      hash_prefix:
+        type: string
+      last_updated:
+        type: string
+      row_count:
         type: integer
-      created_at:
+      table_name:
         type: string
-      id:
+    type: object
+  models.IndexerTablesResponse:
+    properties:
+      available_events:
+        items:
+          type: string
+        type: array
+      latest_tables:
+        additionalProperties:
+          type: string
+        description: event_type -> table_name mapping
+        type: object
+      tables:
+        items:
+          $ref: '#/definitions/models.IndexerTableInfo'
+        type: array
+      total_tables:
         type: integer
-      log_index:
+    type: object
+  models.PortfolioResponse:
+    properties:
+      address:
+        type: string
+      holdings:
+        items:
+          $ref: '#/definitions/models.SukukHolding'
+        type: array
+      summary:
+        $ref: '#/definitions/models.PortfolioSummary'
+      total_holdings:
         type: integer
-      payment_token:
+      total_value:
+        description: Total portfolio value in USD/base currency
         type: string
-      processed:
-        type: boolean
-      processed_at:
+    type: object
+  models.PortfolioSummary:
+    properties:
+      active_sukuk_count:
+        description: Sukuk with non-zero balance
+        type: integer
+      matured_sukuk_count:
+        description: Sukuk that have matured
+        type: integer
+      total_claimable_yield:
         type: string
+      total_sukuk_count:
+        type: integer
+      total_yield_claimed:
+        type: string
+    type: object
+  models.SukukHolding:
+    properties:
+      balance:
+        description: Current token balance
+        type: string
+      claimable_yield:
+        description: Available yield to claim
+        type: string
+      last_activity:
+        description: Last purchase/redemption
+        type: string
+      metadata:
+        allOf:
+        - $ref: '#/definitions/models.SukukMetadata'
+        description: Sukuk details
       sukuk_address:
         type: string
-      timestamp:
+      total_yield_claimed:
+        description: Total yield claimed historically
         type: string
-      tx_hash:
+      yield_history:
+        description: Recent yield distributions
+        items:
+          $ref: '#/definitions/models.YieldDistribution'
+        type: array
+    type: object
+  models.SukukMetadata:
+    properties:
+      block_number:
+        type: integer
+      contract_address:
+        description: Onchain Data
+        type: string
+      created_at:
+        description: Timestamps
+        type: string
+      id:
+        description: Primary Key
+        type: integer
+      imbal_hasil:
+        description: 6.55% / Tahun
+        type: string
+      jatuh_tempo:
+        description: 10 Jun 2030
+        type: string
+      kuota_nasional:
+        description: Rp7,000,000,000,000
+        type: number
+      kupon_pertama:
+        description: 11 Agustus 2025
+        type: string
+      logo_url:
+        description: Logo link
+        type: string
+      maksimum_pembelian:
+        description: Rp10,000,000,000
+        type: number
+      metadata_ready:
+        description: Metadata Status
+        type: boolean
+      minimum_pembelian:
+        description: Rp1,000,000
+        type: number
+      owner_address:
+        type: string
+      penerimaan_kupon:
+        description: Bulanan
+        type: string
+      periode_pembelian:
+        description: Ketentuan SR022-T5
+        type: string
+      status:
+        description: Berlangsung
+        type: string
+      sukuk_code:
+        description: Basic Info
+        type: string
+      sukuk_deskripsi:
+        description: Description
+        type: string
+      sukuk_title:
+        description: Sukuk Ritel
+        type: string
+      tanggal_bayar_kupon:
+        description: 10 Setiap Bulan
+        type: string
+      tenor:
+        description: Main Features
+        type: string
+      tipe_kupon:
+        description: Fixed Rate
+        type: string
+      token_id:
+        type: integer
+      transaction_hash:
         type: string
       updated_at:
-        type: string
-      user:
         type: string
     type: object
   models.SukukMetadataCreateRequest:
@@ -290,6 +260,8 @@ definitions:
     type: object
   models.SukukMetadataListResponse:
     properties:
+      block_number:
+        type: integer
       contract_address:
         type: string
       created_at:
@@ -302,16 +274,26 @@ definitions:
         type: string
       kuota_nasional:
         type: number
+      kupon_pertama:
+        type: string
       latest_activities:
         items:
           $ref: '#/definitions/models.ActivityEvent'
         type: array
       logo_url:
         type: string
+      maksimum_pembelian:
+        type: number
       metadata_ready:
         type: boolean
       minimum_pembelian:
         type: number
+      owner_address:
+        type: string
+      penerimaan_kupon:
+        type: string
+      periode_pembelian:
+        type: string
       status:
         type: string
       sukuk_code:
@@ -320,7 +302,15 @@ definitions:
         type: string
       sukuk_title:
         type: string
+      tanggal_bayar_kupon:
+        type: string
       tenor:
+        type: string
+      tipe_kupon:
+        type: string
+      token_id:
+        type: integer
+      transaction_hash:
         type: string
       updated_at:
         type: string
@@ -414,25 +404,18 @@ definitions:
       tipe_kupon:
         type: string
     type: object
-  models.SukukPurchased:
+  models.TransactionEvent:
     properties:
       amount:
         type: string
       block_number:
         type: integer
-      buyer:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: integer
-      log_index:
-        type: integer
-      payment_token:
-        type: string
-      processed:
-        type: boolean
-      processed_at:
+      details:
+        additionalProperties: true
+        description: Additional event-specific data
+        type: object
+      status:
+        description: '"pending", "confirmed", "failed"'
         type: string
       sukuk_address:
         type: string
@@ -440,7 +423,63 @@ definitions:
         type: string
       tx_hash:
         type: string
-      updated_at:
+      type:
+        description: '"purchase", "redemption", "yield_claim", "yield_distribution"'
+        type: string
+    type: object
+  models.TransactionHistoryResponse:
+    properties:
+      address:
+        type: string
+      total_count:
+        type: integer
+      transactions:
+        items:
+          $ref: '#/definitions/models.TransactionEvent'
+        type: array
+    type: object
+  models.YieldClaimDetail:
+    properties:
+      claimable_amount:
+        type: string
+      distribution_count:
+        type: integer
+      last_distribution:
+        type: string
+      metadata:
+        $ref: '#/definitions/models.SukukMetadata'
+      sukuk_address:
+        type: string
+      user_balance:
+        type: string
+    type: object
+  models.YieldClaimsResponse:
+    properties:
+      address:
+        type: string
+      claims:
+        items:
+          $ref: '#/definitions/models.YieldClaimDetail'
+        type: array
+      total_amount:
+        description: Total claimable across all sukuk
+        type: string
+      total_claims:
+        type: integer
+    type: object
+  models.YieldDistribution:
+    properties:
+      amount:
+        type: string
+      block_number:
+        type: integer
+      id:
+        type: string
+      sukuk_address:
+        type: string
+      timestamp:
+        type: string
+      tx_hash:
         type: string
     type: object
 host: backend-sukuk.kadzu.dev
@@ -458,264 +497,6 @@ info:
   title: Sukuk POC Backend API
   version: "1.0"
 paths:
-  /admin/companies:
-    post:
-      consumes:
-      - application/json
-      description: Create a new partner company (Admin only)
-      parameters:
-      - description: Company data
-        in: body
-        name: company
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.CreateCompanyRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Company created successfully
-          schema:
-            $ref: '#/definitions/handlers.CompanyResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Create a new company
-      tags:
-      - Admin
-  /admin/companies/{id}:
-    put:
-      consumes:
-      - application/json
-      description: Update company details (Admin only)
-      parameters:
-      - description: Company ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Updated company data
-        in: body
-        name: company
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.UpdateCompanyRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Company updated successfully
-          schema:
-            $ref: '#/definitions/handlers.CompanyResponse'
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "404":
-          description: Company not found
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Update company
-      tags:
-      - Admin
-  /admin/companies/{id}/upload-logo:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload logo image for a company (Admin only)
-      parameters:
-      - description: Company ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Logo image file (PNG, JPG, JPEG, max 5MB)
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Logo uploaded successfully
-          schema:
-            $ref: '#/definitions/handlers.UploadResponse'
-        "400":
-          description: Invalid file or company ID
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "404":
-          description: Company not found
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Upload company logo
-      tags:
-      - Admin
-  /admin/redemptions/pending:
-    get:
-      consumes:
-      - application/json
-      description: Get all pending redemption requests across all sukuk series (Admin
-        only)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of pending redemptions
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get pending redemptions
-      tags:
-      - Admin
-  /admin/sukuks:
-    post:
-      consumes:
-      - application/json
-      description: Create a new Sukuk series with off-chain data (admin only)
-      parameters:
-      - description: Sukuk series data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.CreateSukukRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Sukuk series created
-          schema:
-            $ref: '#/definitions/handlers.SukukResponse'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "422":
-          description: Validation error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Create new Sukuk series
-      tags:
-      - Sukuk Management
-  /admin/sukuks/{id}:
-    put:
-      consumes:
-      - application/json
-      description: Update existing Sukuk series off-chain data (admin only)
-      parameters:
-      - description: Sukuk Series ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Update data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.UpdateSukukRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Sukuk series updated
-          schema:
-            $ref: '#/definitions/handlers.SukukResponse'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "404":
-          description: Sukuk series not found
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "422":
-          description: Validation error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Update Sukuk series
-      tags:
-      - Sukuk Management
-  /admin/sukuks/{id}/upload-prospectus:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload PDF prospectus file for a Sukuk series (admin only)
-      parameters:
-      - description: Sukuk Series ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: PDF prospectus file
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Prospectus uploaded
-          schema:
-            $ref: '#/definitions/handlers.UploadResponse'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "404":
-          description: Sukuk series not found
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Upload Sukuk prospectus
-      tags:
-      - Sukuk Management
   /admin/system/force-sync:
     post:
       consumes:
@@ -763,135 +544,6 @@ paths:
       summary: Get blockchain sync status
       tags:
       - Admin
-  /admin/yields/distributions:
-    get:
-      consumes:
-      - application/json
-      description: Get yield distribution summary grouped by distribution date (Admin
-        only)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Yield distribution summary
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get yield distributions
-      tags:
-      - Admin
-  /admin/yields/pending:
-    get:
-      consumes:
-      - application/json
-      description: Get all pending yield claims across all sukuk series (Admin only)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of pending yields
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get pending yields
-      tags:
-      - Admin
-  /companies:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of all active companies
-      parameters:
-      - description: Filter by industry sector
-        in: query
-        name: sector
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of companies
-          schema:
-            $ref: '#/definitions/handlers.CompanyResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: List all companies
-      tags:
-      - Companies
-  /companies/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get details of a specific company including its Sukuk series
-      parameters:
-      - description: Company ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Company details
-          schema:
-            $ref: '#/definitions/handlers.CompanyResponse'
-        "400":
-          description: Invalid company ID
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "404":
-          description: Company not found
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Get company details
-      tags:
-      - Companies
-  /companies/{id}/sukuks:
-    get:
-      consumes:
-      - application/json
-      description: Get all Sukuk series for a specific company
-      parameters:
-      - description: Company ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of company's Sukuk series
-          schema:
-            $ref: '#/definitions/handlers.SukukResponse'
-        "400":
-          description: Invalid company ID
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Get company's Sukuk series
-      tags:
-      - Companies
   /debug/indexer:
     get:
       consumes:
@@ -913,144 +565,127 @@ paths:
       summary: Debug indexer connection
       tags:
       - Debug
-  /events/redemption-requested:
-    post:
-      consumes:
-      - application/json
-      description: Process a single RedemptionRequested event from the blockchain
-      parameters:
-      - description: RedemptionRequested event data
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/models.RedemptionRequested'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Event processed successfully
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "409":
-          description: Event already processed
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Process a RedemptionRequested event
-      tags:
-      - Blockchain Events
-  /events/redemption-requested/unprocessed:
+  /debug/indexer-tables:
     get:
       consumes:
       - application/json
-      description: Retrieve unprocessed RedemptionRequested events
-      parameters:
-      - default: 100
-        description: Number of events to retrieve
-        in: query
-        name: limit
-        type: integer
+      description: Get all discovered hash-prefixed indexer tables with metadata and
+        row counts
       produces:
       - application/json
       responses:
         "200":
-          description: List of unprocessed events
+          description: Discovered indexer tables
           schema:
-            $ref: '#/definitions/handlers.APIResponse'
+            $ref: '#/definitions/models.IndexerTablesResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Get unprocessed RedemptionRequested events
+            additionalProperties:
+              type: string
+            type: object
+      summary: List indexer tables
       tags:
-      - Blockchain Events
-  /events/sukuk-purchased:
-    post:
-      consumes:
-      - application/json
-      description: Process a single SukukPurchased event from the blockchain
-      parameters:
-      - description: SukukPurchased event data
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/models.SukukPurchased'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Event processed successfully
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "409":
-          description: Event already processed
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Process a SukukPurchased event
-      tags:
-      - Blockchain Events
-  /events/sukuk-purchased/unprocessed:
+      - debug
+  /debug/indexer-tables/{table_name}:
     get:
       consumes:
       - application/json
-      description: Retrieve unprocessed SukukPurchased events
+      description: Get detailed information about a specific indexer table including
+        column structure
       parameters:
-      - default: 100
-        description: Number of events to retrieve
-        in: query
-        name: limit
-        type: integer
+      - description: Table name
+        example: '"f243__sukuk_purchase"'
+        in: path
+        name: table_name
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: List of unprocessed events
+          description: Table details
           schema:
-            $ref: '#/definitions/handlers.APIResponse'
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid table name
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Table not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Get unprocessed SukukPurchased events
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get table details
       tags:
-      - Blockchain Events
-  /events/sync:
-    post:
+      - debug
+  /debug/indexer-tables/prefix/{hash_prefix}:
+    get:
       consumes:
       - application/json
-      description: Manually trigger synchronization of blockchain events from the
-        indexer
+      description: Get all tables that share the same hash prefix (deployment)
+      parameters:
+      - description: Hash prefix
+        example: '"f243"'
+        in: path
+        name: hash_prefix
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Sync completed
+          description: Tables with hash prefix
           schema:
-            $ref: '#/definitions/handlers.APIResponse'
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid hash prefix
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
-          description: Sync failed
+          description: Internal server error
           schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Trigger manual event sync
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get tables by hash prefix
       tags:
-      - Blockchain Events
+      - debug
+  /debug/indexer-tables/validate:
+    get:
+      consumes:
+      - application/json
+      description: Validate that all discovered indexer tables have expected columns
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Validation results
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Validate indexer tables
+      tags:
+      - debug
   /health:
     get:
       consumes:
@@ -1072,138 +707,6 @@ paths:
       summary: Get system health
       tags:
       - System
-  /investments:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of investments with optional filtering by investor,
-        sukuk series, and status
-      parameters:
-      - description: Filter by investor address
-        in: query
-        name: investor_address
-        type: string
-      - description: Filter by sukuk ID
-        in: query
-        name: sukuk_id
-        type: string
-      - description: Filter by investment status
-        in: query
-        name: status
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of investments
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: List investments
-      tags:
-      - Investments
-  /investments/{investor_address}:
-    get:
-      consumes:
-      - application/json
-      description: Get all investments for a specific investor address
-      parameters:
-      - description: Investor Ethereum address
-        in: path
-        name: investor_address
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of investor's investments
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid address
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get investments by investor
-      tags:
-      - Investments
-  /investments/{investor_address}/portfolio:
-    get:
-      consumes:
-      - application/json
-      description: Get portfolio summary including active investments, total value,
-        and performance metrics
-      parameters:
-      - description: Investor Ethereum address
-        in: path
-        name: investor_address
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Portfolio summary
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid address
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get investor portfolio summary
-      tags:
-      - Investments
-  /investments/company/{company_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get all investments for sukuk series issued by a specific company
-      parameters:
-      - description: Company ID
-        in: path
-        name: company_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of company's investments
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid company ID
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get investments by company
-      tags:
-      - Investments
   /owned-sukuk/{address}:
     get:
       consumes:
@@ -1239,138 +742,41 @@ paths:
       summary: Get sukuk owned by address
       tags:
       - owned-sukuk
-  /redemptions:
+  /portfolio/{address}:
     get:
       consumes:
       - application/json
-      description: Get a list of redemption requests with optional filtering by investor,
-        sukuk series, and status
+      description: Get complete portfolio showing all sukuk holdings with current
+        balances and claimable yields
       parameters:
-      - description: Filter by investor address
-        in: query
-        name: investor_address
-        type: string
-      - description: Filter by sukuk ID
-        in: query
-        name: sukuk_id
-        type: string
-      - description: Filter by redemption status
-        in: query
-        name: status
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of redemptions
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: List redemptions
-      tags:
-      - Redemptions
-  /redemptions/{investor_address}:
-    get:
-      consumes:
-      - application/json
-      description: Get redemption history for a specific investor address
-      parameters:
-      - description: Investor Ethereum address
+      - description: User wallet address
+        example: '"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9"'
         in: path
-        name: investor_address
+        name: address
         required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: List of investor's redemptions
+          description: User portfolio with holdings
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.PortfolioResponse'
         "400":
           description: Invalid address
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
         "500":
           description: Internal server error
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Get redemptions by investor
+      summary: Get user portfolio
       tags:
-      - Redemptions
-  /redemptions/company/{company_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get all redemption requests for sukuk series issued by a specific
-        company
-      parameters:
-      - description: Company ID
-        in: path
-        name: company_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of company's redemptions
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid company ID
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get redemptions by company
-      tags:
-      - Redemptions
-  /redemptions/sukuk/{sukuk_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get all redemption requests for a specific sukuk series
-      parameters:
-      - description: Sukuk ID
-        in: path
-        name: sukuk_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of sukuk's redemptions
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid sukuk ID
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get redemptions by sukuk
-      tags:
-      - Redemptions
+      - portfolio
   /sukuk-metadata:
     get:
       consumes:
@@ -1628,145 +1034,6 @@ paths:
       summary: List sukuk creation tables
       tags:
       - sukuk-metadata
-  /sukuks:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of all Sukuk series with optional filtering by company
-        and status
-      parameters:
-      - description: Company ID to filter by
-        in: query
-        name: company_id
-        type: string
-      - description: Status to filter by (active, paused, matured)
-        in: query
-        name: status
-        type: string
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: integer
-      - description: 'Items per page (default: 20)'
-        in: query
-        name: per_page
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of Sukuk series
-          schema:
-            $ref: '#/definitions/handlers.SukukResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: List all Sukuk series
-      tags:
-      - Sukuk Series
-  /sukuks/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get detailed information about a specific Sukuk series including
-        company, investments, yield claims, and redemptions
-      parameters:
-      - description: Sukuk Series ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Sukuk series details
-          schema:
-            $ref: '#/definitions/handlers.SukukResponse'
-        "400":
-          description: Invalid ID
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "404":
-          description: Sukuk series not found
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Get Sukuk series details
-      tags:
-      - Sukuk Series
-  /sukuks/{id}/holders:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of current active investors holding the specified Sukuk
-        series
-      parameters:
-      - description: Sukuk Series ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: integer
-      - description: 'Items per page (default: 20)'
-        in: query
-        name: per_page
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of active investments
-          schema:
-            $ref: '#/definitions/handlers.InvestmentResponse'
-        "400":
-          description: Invalid ID
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "404":
-          description: Sukuk series not found
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Get Sukuk holders
-      tags:
-      - Sukuk Series
-  /sukuks/{id}/metrics:
-    get:
-      consumes:
-      - application/json
-      description: Get performance metrics including total investors, investment amount,
-        pending yields, and redemptions
-      parameters:
-      - description: Sukuk Series ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Sukuk series metrics
-          schema:
-            $ref: '#/definitions/handlers.SystemResponse'
-        "400":
-          description: Invalid ID
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-        "404":
-          description: Sukuk series not found
-          schema:
-            $ref: '#/definitions/handlers.APIResponse'
-      summary: Get Sukuk series metrics
-      tags:
-      - Sukuk Series
   /transaction-history/{address}:
     get:
       consumes:
@@ -1808,138 +1075,121 @@ paths:
       summary: Get transaction history by address
       tags:
       - transaction-history
-  /yields:
+  /transactions/{address}:
     get:
       consumes:
       - application/json
-      description: Get a list of yield distributions and claims with optional filtering
+      description: Get complete transaction history including purchases, redemptions,
+        and yield claims
       parameters:
-      - description: Filter by investor address
-        in: query
-        name: investor_address
+      - description: User wallet address
+        example: '"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9"'
+        in: path
+        name: address
+        required: true
         type: string
-      - description: Filter by sukuk ID
+      - default: 50
+        description: Number of transactions to return
         in: query
-        name: sukuk_id
-        type: string
-      - description: Filter by claim status (pending, claimed)
-        in: query
-        name: status
-        type: string
+        maximum: 200
+        minimum: 1
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: List of yields
+          description: Transaction history
           schema:
-            additionalProperties: true
+            $ref: '#/definitions/models.TransactionHistoryResponse'
+        "400":
+          description: Invalid address or parameters
+          schema:
+            additionalProperties:
+              type: string
             type: object
         "500":
           description: Internal server error
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: List yields
+      summary: Get transaction history
       tags:
-      - Yields
-  /yields/{investor_address}:
+      - transactions
+  /yield-claims/{address}:
     get:
       consumes:
       - application/json
-      description: Get yield distribution and claim history for a specific investor
-        address
+      description: Get all available yield claims across user's sukuk holdings
       parameters:
-      - description: Investor Ethereum address
+      - description: User wallet address
+        example: '"0xf57093Ea18E5CfF6E7bB3bb770Ae9C492277A5a9"'
         in: path
-        name: investor_address
+        name: address
         required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: List of investor's yields
+          description: Available yield claims
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.YieldClaimsResponse'
         "400":
           description: Invalid address
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
         "500":
           description: Internal server error
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Get yields by investor
+      summary: Get available yield claims
       tags:
-      - Yields
-  /yields/company/{company_id}:
+      - portfolio
+  /yield-distributions/{sukuk_address}:
     get:
       consumes:
       - application/json
-      description: Get all yield distributions for sukuk series issued by a specific
-        company
+      description: Get yield distribution history for a specific sukuk
       parameters:
-      - description: Company ID
+      - description: Sukuk contract address
         in: path
-        name: company_id
+        name: sukuk_address
         required: true
         type: string
+      - default: 20
+        description: Number of distributions to return
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: List of company's yields
+          description: Yield distributions
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Invalid company ID
+          description: Invalid parameters
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
         "500":
           description: Internal server error
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Get yields by company
+      summary: Get yield distributions
       tags:
-      - Yields
-  /yields/sukuk/{sukuk_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get all yield distributions for a specific sukuk series
-      parameters:
-      - description: Sukuk ID
-        in: path
-        name: sukuk_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of sukuk's yields
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid sukuk ID
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get yields by sukuk
-      tags:
-      - Yields
+      - portfolio
 schemes:
 - https
 - http

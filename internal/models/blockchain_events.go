@@ -44,6 +44,7 @@ type RedemptionRequested struct {
 	SukukAddress  string         `gorm:"size:42;not null;index" json:"sukuk_address"`
 	Amount        string         `gorm:"size:78;not null" json:"amount"`
 	PaymentToken  string         `gorm:"size:42;not null" json:"payment_token"`
+	TotalSupply   string         `gorm:"size:78;not null" json:"total_supply"`
 	BlockNumber   uint64         `gorm:"not null;index" json:"block_number"`
 	TxHash        string         `gorm:"size:66;not null;index" json:"tx_hash"`
 	LogIndex      uint           `gorm:"not null" json:"log_index"`
@@ -65,6 +66,36 @@ func (rr *RedemptionRequested) BeforeCreate(tx *gorm.DB) error {
 	rr.User = normalizeAddress(rr.User)
 	rr.SukukAddress = normalizeAddress(rr.SukukAddress)
 	rr.PaymentToken = normalizeAddress(rr.PaymentToken)
+	return nil
+}
+
+// RedemptionApproved represents a redemption approval event from the blockchain
+type RedemptionApproved struct {
+	ID            uint           `gorm:"primaryKey" json:"id"`
+	User          string         `gorm:"size:42;not null;index" json:"user"`
+	SukukAddress  string         `gorm:"size:42;not null;index" json:"sukuk_address"`
+	Amount        string         `gorm:"size:78;not null" json:"amount"`
+	TotalSupply   string         `gorm:"size:78;not null" json:"total_supply"`
+	BlockNumber   uint64         `gorm:"not null;index" json:"block_number"`
+	TxHash        string         `gorm:"size:66;not null;index" json:"tx_hash"`
+	LogIndex      uint           `gorm:"not null" json:"log_index"`
+	Timestamp     time.Time      `gorm:"not null;index" json:"timestamp"`
+	Processed     bool           `gorm:"default:false;index" json:"processed"`
+	ProcessedAt   *time.Time     `json:"processed_at,omitempty"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// TableName returns the table name for RedemptionApproved model
+func (RedemptionApproved) TableName() string {
+	return "redemption_approved_events"
+}
+
+// BeforeCreate hook to normalize addresses
+func (ra *RedemptionApproved) BeforeCreate(tx *gorm.DB) error {
+	ra.User = normalizeAddress(ra.User)
+	ra.SukukAddress = normalizeAddress(ra.SukukAddress)
 	return nil
 }
 

@@ -92,21 +92,15 @@ func GetHealthStatus(c *gin.Context) {
 	}
 
 	// Get basic system stats
-	var companyCount int64
-	var sukukCount int64
-	var investmentCount int64
+	var sukukMetadataCount int64
 	
-	db.Model(&models.Company{}).Count(&companyCount)
-	db.Model(&models.Sukuk{}).Count(&sukukCount)
-	db.Model(&models.Investment{}).Count(&investmentCount)
+	db.Model(&models.SukukMetadata{}).Count(&sukukMetadataCount)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status": "healthy",
 		"data": gin.H{
-			"database":     "connected",
-			"companies":    companyCount,
-			"sukuks":       sukukCount,
-			"investments":  investmentCount,
+			"database":         "connected",
+			"sukuk_metadata":   sukukMetadataCount,
 		},
 	})
 }

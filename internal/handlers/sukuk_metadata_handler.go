@@ -57,7 +57,10 @@ func ListSukukMetadata(c *gin.Context) {
 		activities, err := indexerService.GetLatestActivities(sukuk.ContractAddress, 10)
 		if err != nil {
 			logger.WithError(err).Warn("Failed to fetch activities for sukuk:", sukuk.ContractAddress)
-			activities = []models.ActivityEvent{} // Set empty array if error
+			activities = make([]models.ActivityEvent, 0) // Set empty array if error
+		}
+		if activities == nil {
+			activities = make([]models.ActivityEvent, 0) // Ensure it's never null
 		}
 		
 		response.LatestActivities = activities
@@ -111,7 +114,10 @@ func GetSukukMetadata(c *gin.Context) {
 	activities, err := indexerService.GetLatestActivities(sukukMetadata.ContractAddress, 10)
 	if err != nil {
 		logger.WithError(err).Warn("Failed to fetch activities for sukuk:", sukukMetadata.ContractAddress)
-		activities = []models.ActivityEvent{} // Set empty array if error
+		activities = make([]models.ActivityEvent, 0) // Set empty array if error
+	}
+	if activities == nil {
+		activities = make([]models.ActivityEvent, 0) // Ensure it's never null
 	}
 	
 	response.LatestActivities = activities

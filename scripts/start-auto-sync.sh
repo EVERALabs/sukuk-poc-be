@@ -17,8 +17,8 @@ fi
 
 # Check if the indexer database is available
 echo "📡 Checking indexer database..."
-if ! psql postgresql://postgres:postgres@localhost:5432/sukuk_poc_new -c "SELECT 1" > /dev/null 2>&1; then
-    echo "❌ Indexer database 'sukuk_poc_new' not available"
+if ! psql postgresql://postgres:postgres@localhost:5432/sukuk_poc_v3 -c "SELECT 1" > /dev/null 2>&1; then
+    echo "❌ Indexer database 'sukuk_poc_v3' not available"
     echo "Please ensure the Ponder indexer is running and the database exists"
     exit 1
 fi
