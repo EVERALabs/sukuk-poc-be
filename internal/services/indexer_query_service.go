@@ -1051,3 +1051,133 @@ type SukukHolding struct {
 	Balance        string `json:"balance"`
 	ClaimableYield string `json:"claimable_yield"`
 }
+
+// GetSnapshots gets snapshot events for a sukuk
+func (s *IndexerQueryService) GetSnapshots(sukukAddress string, limit int) ([]models.SnapshotEvent, error) {
+	if s.indexerDB == nil {
+		if err := s.ConnectToIndexer(); err != nil {
+			return nil, err
+		}
+	}
+
+	if limit == 0 {
+		limit = 10
+	}
+
+	// Get latest table name using dynamic discovery
+	snapshotTable, err := s.tableService.GetLatestTableForEvent("snapshot")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find snapshot table: %w", err)
+	}
+
+	var snapshots []IndexerSnapshotTaken
+	err = s.indexerDB.Table(snapshotTable).
+		Where("sukuk_address = ?", sukukAddress).
+		Order("snapshot_id DESC").
+		Limit(limit).
+		Find(&snapshots).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to query snapshots from %s: %w", snapshotTable, err)
+	}
+
+	// Convert to SnapshotEvent
+	result := make([]models.SnapshotEvent, len(snapshots))
+	for i, snap := range snapshots {
+		result[i] = models.SnapshotEvent{
+			ID:           snap.ID,
+			SukukAddress: snap.SukukAddress,
+			SnapshotId:   fmt.Sprintf("%d", snap.SnapshotId),
+			TotalSupply:  snap.TotalSupply,
+			HolderCount:  snap.HolderCount,
+			EligibleCount: snap.EligibleCount,
+			Timestamp:    time.Unix(snap.Timestamp, 0),
+			TxHash:       snap.TxHash,
+			BlockNumber:  snap.BlockNumber,
+		}
+	}
+
+	return result, nil
+}
+
+// GetSnapshotById gets a specific snapshot by ID
+func (s *IndexerQueryService) GetSnapshotById(sukukAddress string, snapshotId int64) (*models.SnapshotEvent, error) {
+	if s.indexerDB == nil {
+		if err := s.ConnectToIndexer(); err != nil {
+			return nil, err
+		}
+	}
+
+	// Get latest table name using dynamic discovery
+	snapshotTable, err := s.tableService.GetLatestTableForEvent("snapshot")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find snapshot table: %w", err)
+	}
+
+	var snapshot IndexerSnapshotTaken
+	err = s.indexerDB.Table(snapshotTable).
+		Where("sukuk_address = ? AND snapshot_id = ?", sukukAddress, snapshotId).
+		First(&snapshot).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to query snapshot from %s: %w", snapshotTable, err)
+	}
+
+	result := &models.SnapshotEvent{
+		ID:           snapshot.ID,
+		SukukAddress: snapshot.SukukAddress,
+		SnapshotId:   fmt.Sprintf("%d", snapshot.SnapshotId),
+		TotalSupply:  snapshot.TotalSupply,
+		HolderCount:  snapshot.HolderCount,
+		EligibleCount: snapshot.EligibleCount,
+		Timestamp:    time.Unix(snapshot.Timestamp, 0),
+		TxHash:       snapshot.TxHash,
+		BlockNumber:  snapshot.BlockNumber,
+	}
+
+	return result, nil
+}
+
+// GetAllSnapshots gets snapshot events for all sukuk
+func (s *IndexerQueryService) GetAllSnapshots(limit int) ([]models.SnapshotEvent, error) {
+	if s.indexerDB == nil {
+		if err := s.ConnectToIndexer(); err != nil {
+			return nil, err
+		}
+	}
+
+	if limit == 0 {
+		limit = 50
+	}
+
+	// Get latest table name using dynamic discovery
+	snapshotTable, err := s.tableService.GetLatestTableForEvent("snapshot")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find snapshot table: %w", err)
+	}
+
+	var snapshots []IndexerSnapshotTaken
+	err = s.indexerDB.Table(snapshotTable).
+		Order("timestamp DESC").
+		Limit(limit).
+		Find(&snapshots).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to query snapshots from %s: %w", snapshotTable, err)
+	}
+
+	// Convert to SnapshotEvent
+	result := make([]models.SnapshotEvent, len(snapshots))
+	for i, snap := range snapshots {
+		result[i] = models.SnapshotEvent{
+			ID:           snap.ID,
+			SukukAddress: snap.SukukAddress,
+			SnapshotId:   fmt.Sprintf("%d", snap.SnapshotId),
+			TotalSupply:  snap.TotalSupply,
+			HolderCount:  snap.HolderCount,
+			EligibleCount: snap.EligibleCount,
+			Timestamp:    time.Unix(snap.Timestamp, 0),
+			TxHash:       snap.TxHash,
+			BlockNumber:  snap.BlockNumber,
+		}
+	}
+
+	return result, nil
+}

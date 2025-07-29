@@ -339,7 +339,7 @@ const docTemplate = `{
         },
         "/owned-sukuk/{address}": {
             "get": {
-                "description": "Get all sukuk metadata for sukuk tokens owned by a specific wallet address",
+                "description": "Get sukuk metadata for sukuk tokens owned by a specific wallet address. Only returns sukuk with metadata_ready=true by default.",
                 "consumes": [
                     "application/json"
                 ],
@@ -681,6 +681,46 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/snapshots": {
+            "get": {
+                "description": "Get balance snapshots for all sukuk tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Get all snapshots",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of snapshots to return (default: 50, max: 200)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All snapshots",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AllSnapshotsResponse"
                         }
                     },
                     "500": {
@@ -1132,6 +1172,78 @@ const docTemplate = `{
                 }
             }
         },
+        "/sukuk/{sukukAddress}/snapshots": {
+            "get": {
+                "description": "Get balance snapshots for a sukuk token used for yield distribution calculations",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Get sukuk snapshots",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"0x71D7C963E607eeDAfAA7Ef8f8c92bBb878090650\"",
+                        "description": "Sukuk contract address",
+                        "name": "sukukAddress",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of snapshots to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by specific snapshot ID",
+                        "name": "snapshot_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk snapshots",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SnapshotsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/transaction-history/{address}": {
             "get": {
                 "description": "Get all blockchain activities (purchases and redemptions) for a specific user address",
@@ -1362,6 +1474,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.AllSnapshotsResponse": {
+            "type": "object",
+            "properties": {
+                "snapshots": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SnapshotEvent"
+                    }
+                },
+                "total_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "handlers.OwnedSukukResponse": {
             "type": "object",
             "properties": {
@@ -1389,6 +1515,23 @@ const docTemplate = `{
                     }
                 },
                 "address": {
+                    "type": "string"
+                },
+                "total_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.SnapshotsResponse": {
+            "type": "object",
+            "properties": {
+                "snapshots": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SnapshotEvent"
+                    }
+                },
+                "sukuk_address": {
                     "type": "string"
                 },
                 "total_count": {
@@ -1675,6 +1818,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sukuk_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SnapshotEvent": {
+            "type": "object",
+            "properties": {
+                "block_number": {
+                    "type": "integer"
+                },
+                "eligible_count": {
+                    "type": "integer"
+                },
+                "holder_count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "snapshot_id": {
+                    "type": "string"
+                },
+                "sukuk_address": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "total_supply": {
+                    "type": "string"
+                },
+                "tx_hash": {
                     "type": "string"
                 }
             }

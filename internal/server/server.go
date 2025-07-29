@@ -97,6 +97,10 @@ func (s *Server) setupRoutes() {
 		v1.GET("/portfolio/:address", handlers.GetUserPortfolio)
 		v1.GET("/yield-claims/:address", handlers.GetYieldClaims)
 		v1.GET("/yield-distributions/:sukuk_address", handlers.GetYieldDistributions)
+		
+		// Snapshot endpoints
+		v1.GET("/snapshots", handlers.GetAllSnapshots)
+		v1.GET("/sukuk/:sukukAddress/snapshots", handlers.GetSukukSnapshots)
 
 		// Redemption endpoints
 		v1.GET("/redemptions", handlers.GetAllRedemptions)

@@ -153,6 +153,9 @@ type SnapshotEvent struct {
 	ID           string    `json:"id"`
 	SukukAddress string    `json:"sukuk_address"`
 	SnapshotId   string    `json:"snapshot_id"`
+	TotalSupply  string    `json:"total_supply"`
+	HolderCount  int64     `json:"holder_count"`
+	EligibleCount int64    `json:"eligible_count"`
 	Timestamp    time.Time `json:"timestamp"`
 	TxHash       string    `json:"tx_hash"`
 	BlockNumber  int64     `json:"block_number"`
