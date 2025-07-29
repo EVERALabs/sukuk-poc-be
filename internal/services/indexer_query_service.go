@@ -323,9 +323,9 @@ func (s *IndexerQueryService) GetUnclaimedDistributionIds(userAddress string, su
 		return nil, fmt.Errorf("failed to find yield_distributed table: %w", err)
 	}
 
-	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claimed")
+	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claim")
 	if err != nil {
-		return nil, fmt.Errorf("failed to find yield_claimed table: %w", err)
+		return nil, fmt.Errorf("failed to find yield_claim table: %w", err)
 	}
 
 	// Get all yield distributions for this sukuk
@@ -645,9 +645,9 @@ func (s *IndexerQueryService) GetTotalYieldDistributed(sukukAddress string) (str
 
 // GetTotalYieldClaimed gets total yield claimed by user for a sukuk
 func (s *IndexerQueryService) GetTotalYieldClaimed(userAddress, sukukAddress string) (string, error) {
-	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claimed")
+	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claim")
 	if err != nil {
-		return "0", fmt.Errorf("failed to find yield_claimed table: %w", err)
+		return "0", fmt.Errorf("failed to find yield_claim table: %w", err)
 	}
 
 	var claims []IndexerYieldClaimed
@@ -734,9 +734,9 @@ func (s *IndexerQueryService) GetYieldDistributions(sukukAddress string, limit i
 
 // GetYieldClaims gets yield claim events for a user/sukuk
 func (s *IndexerQueryService) GetYieldClaims(userAddress, sukukAddress string, limit int) ([]IndexerYieldClaimed, error) {
-	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claimed")
+	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claim")
 	if err != nil {
-		return nil, fmt.Errorf("failed to find yield_claimed table: %w", err)
+		return nil, fmt.Errorf("failed to find yield_claim table: %w", err)
 	}
 
 	var claims []IndexerYieldClaimed
@@ -874,7 +874,7 @@ func (s *IndexerQueryService) GetUserTransactionHistory(userAddress string, limi
 	}
 
 	// Get yield claims with database filtering
-	yieldTable, err := s.tableService.GetLatestTableForEvent("yield_claimed")
+	yieldTable, err := s.tableService.GetLatestTableForEvent("yield_claim")
 	if err == nil {
 		var claims []IndexerYieldClaimed
 		err = s.indexerDB.Table(yieldTable).

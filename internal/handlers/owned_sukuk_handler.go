@@ -13,7 +13,7 @@ import (
 
 // GetSukukOwnedByAddress returns sukuk metadata for all sukuk owned by a specific address
 // @Summary Get sukuk owned by address
-// @Description Get all sukuk metadata for sukuk tokens owned by a specific wallet address
+// @Description Get sukuk metadata for sukuk tokens owned by a specific wallet address. Only returns sukuk with metadata_ready=true by default.
 // @Tags owned-sukuk
 // @Accept json
 // @Produce json
@@ -56,9 +56,9 @@ func GetSukukOwnedByAddress(c *gin.Context) {
 		return
 	}
 
-	// Get sukuk metadata for these addresses
+	// Get sukuk metadata for these addresses (only metadata_ready = true by default)
 	var sukukMetadata []models.SukukMetadata
-	result := database.GetDB().Where("contract_address IN ?", sukukAddresses).Find(&sukukMetadata)
+	result := database.GetDB().Where("contract_address IN ?", sukukAddresses).Where("metadata_ready = ?", true).Find(&sukukMetadata)
 	if result.Error != nil {
 		logger.WithError(result.Error).Error("Failed to fetch sukuk metadata")
 		c.JSON(http.StatusInternalServerError, gin.H{
