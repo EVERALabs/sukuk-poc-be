@@ -67,7 +67,7 @@ func GetSukukOwnedByAddress(c *gin.Context) {
 		return
 	}
 
-	// Convert to response format with activities
+	// Convert to response format with activities and distributions
 	responses := make([]models.SukukMetadataListResponse, len(sukukMetadata))
 	for i, sukuk := range sukukMetadata {
 		response := sukuk.ToListResponse()
@@ -79,7 +79,15 @@ func GetSukukOwnedByAddress(c *gin.Context) {
 			activities = []models.ActivityEvent{} // Set empty array if error
 		}
 		
+		// Get available yield distributions for this user and sukuk
+		distributions, err := indexerService.GetAvailableDistributions(address, sukuk.ContractAddress)
+		if err != nil {
+			logger.WithError(err).Warn("Failed to fetch distributions for sukuk:", sukuk.ContractAddress)
+			distributions = []models.SukukYieldDistribution{} // Set empty array if error
+		}
+		
 		response.LatestActivities = activities
+		response.AvailableDistributions = distributions
 		responses[i] = response
 	}
 

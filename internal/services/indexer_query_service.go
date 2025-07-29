@@ -919,6 +919,127 @@ func (s *IndexerQueryService) GetAvailableTables() (map[string]string, error) {
 	return s.tableService.GetAllLatestTables()
 }
 
+// GetAvailableDistributions gets yield distributions for a sukuk with claim information for a specific user
+func (s *IndexerQueryService) GetAvailableDistributions(userAddress, sukukAddress string) ([]models.SukukYieldDistribution, error) {
+	// Always return an empty slice if there are any errors - don't fail the entire owned-sukuk response
+	emptyResult := []models.SukukYieldDistribution{}
+
+	if s.indexerDB == nil {
+		if err := s.ConnectToIndexer(); err != nil {
+			return emptyResult, nil // Return empty instead of error
+		}
+	}
+
+	// Get latest table names using dynamic discovery
+	distributionTable, err := s.tableService.GetLatestTableForEvent("yield_distribution")
+	if err != nil {
+		return emptyResult, nil // Return empty instead of error
+	}
+
+	claimTable, err := s.tableService.GetLatestTableForEvent("yield_claim")
+	if err != nil {
+		return emptyResult, nil // Return empty instead of error
+	}
+
+	// Get all yield distributions for this sukuk
+	var distributions []IndexerYieldDistributed
+	err = s.indexerDB.Table(distributionTable).
+		Where("sukuk_address = ?", sukukAddress).
+		Order("distribution_id ASC").
+		Find(&distributions).Error
+	if err != nil {
+		return emptyResult, nil // Return empty instead of error
+	}
+
+	// If no distributions found, return empty result
+	if len(distributions) == 0 {
+		return emptyResult, nil
+	}
+
+	// Get all yield claims by this user for this sukuk
+	var claims []IndexerYieldClaimed
+	err = s.indexerDB.Table(claimTable).
+		Where("user = ? AND sukuk_address = ?", userAddress, sukukAddress).
+		Find(&claims).Error
+	if err != nil {
+		return emptyResult, nil // Return empty instead of error
+	}
+
+	// Create a map of claimed amounts by distribution ID
+	claimedMap := make(map[int64]string)
+	for _, claim := range claims {
+		if existingAmount, exists := claimedMap[claim.DistributionId]; exists {
+			// Sum up multiple claims for the same distribution
+			mathUtil := utils.GlobalTokenMath
+			newTotal, err := mathUtil.AddTokenAmounts(existingAmount, claim.Amount)
+			if err != nil {
+				continue // Skip on error, log if needed
+			}
+			claimedMap[claim.DistributionId] = newTotal
+		} else {
+			claimedMap[claim.DistributionId] = claim.Amount
+		}
+	}
+
+	// Get user's current balance to calculate claimable amount
+	userBalance, err := s.GetCurrentBalance(userAddress, sukukAddress)
+	if err != nil {
+		userBalance = "0" // Default to 0 if error
+	}
+
+	// Get total supply to calculate user's share
+	totalSupply, err := s.getTotalSupplyFromSnapshot(sukukAddress)
+	if err != nil {
+		// Fallback to redemption data
+		totalSupply, err = s.getTotalSupplyFromRedemption(sukukAddress)
+		if err != nil {
+			totalSupply = "0" // Default to 0 if error
+		}
+	}
+
+	// Build result
+	result := make([]models.SukukYieldDistribution, len(distributions))
+	mathUtil := utils.GlobalTokenMath
+	
+	for i, dist := range distributions {
+		claimedAmount := "0"
+		if amount, exists := claimedMap[dist.DistributionId]; exists {
+			claimedAmount = amount
+		}
+
+		// Calculate user's claimable amount based on their share
+		userClaimableAmount := "0"
+		claimable := false
+		
+		if !mathUtil.IsZero(userBalance) && !mathUtil.IsZero(totalSupply) {
+			// Calculate user's percentage: userBalance / totalSupply
+			percentage, err := mathUtil.CalculatePercentage(userBalance, totalSupply)
+			if err == nil {
+				// Calculate user's entitled amount: distribution.Amount * percentage
+				entitledAmount, err := mathUtil.MultiplyTokenAmount(dist.Amount, percentage)
+				if err == nil {
+					// Calculate claimable: entitledAmount - claimedAmount
+					userClaimableAmount, err = mathUtil.SubtractTokenAmounts(entitledAmount, claimedAmount)
+					if err == nil && !mathUtil.IsZero(userClaimableAmount) {
+						claimable = true
+					}
+				}
+			}
+		}
+
+		result[i] = models.SukukYieldDistribution{
+			DistributionId:      dist.DistributionId,
+			Amount:              dist.Amount,
+			PaymentToken:        dist.PaymentToken,
+			Claimable:           claimable,
+			ClaimedAmount:       claimedAmount,
+			UserClaimableAmount: userClaimableAmount,
+		}
+	}
+
+	return result, nil
+}
+
 // Portfolio calculation result structures
 type UserPortfolio struct {
 	Address  string         `json:"address"`

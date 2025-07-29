@@ -22,64 +22,76 @@ type ActivityEvent struct {
 	SukukTitle   string    `json:"sukuk_title"`   // Sukuk name/title
 }
 
+// SukukYieldDistribution represents a yield distribution for a sukuk with claim information
+type SukukYieldDistribution struct {
+	DistributionId       int64  `json:"distribution_id"`
+	Amount               string `json:"amount"`                // Total distributed amount
+	PaymentToken         string `json:"payment_token"`         // Token address (e.g., IDRX)
+	Claimable            bool   `json:"claimable"`             // Whether user can claim this distribution
+	ClaimedAmount        string `json:"claimed_amount"`        // Amount user has already claimed
+	UserClaimableAmount  string `json:"user_claimable_amount"` // Amount user can claim based on holdings
+}
+
 // SukukMetadataListResponse represents the response for listing sukuk metadata with activities
 type SukukMetadataListResponse struct {
-	ID               uint            `json:"id"`
-	ContractAddress  string          `json:"contract_address"`
-	TokenID          int64           `json:"token_id"`
-	OwnerAddress     string          `json:"owner_address"`
-	TransactionHash  string          `json:"transaction_hash"`
-	BlockNumber      int64           `json:"block_number"`
-	SukukCode        string          `json:"sukuk_code"`
-	SukukTitle       string          `json:"sukuk_title"`
-	SukukDeskripsi   string          `json:"sukuk_deskripsi"`
-	Status           string          `json:"status"`
-	LogoURL          string          `json:"logo_url"`
-	Tenor            string          `json:"tenor"`
-	ImbalHasil       string          `json:"imbal_hasil"`
-	PeriodePembelian string          `json:"periode_pembelian"`
-	JatuhTempo       time.Time       `json:"jatuh_tempo"`
-	KuotaNasional    float64         `json:"kuota_nasional"`
-	PenerimaanKupon  string          `json:"penerimaan_kupon"`
-	MinimumPembelian float64         `json:"minimum_pembelian"`
-	TanggalBayarKupon string         `json:"tanggal_bayar_kupon"`
-	MaksimumPembelian float64        `json:"maksimum_pembelian"`
-	KuponPertama     time.Time       `json:"kupon_pertama"`
-	TipeKupon        string          `json:"tipe_kupon"`
-	MetadataReady    bool            `json:"metadata_ready"`
-	CreatedAt        time.Time       `json:"created_at"`
-	UpdatedAt        time.Time       `json:"updated_at"`
-	LatestActivities []ActivityEvent `json:"latest_activities"`
+	ID                     uint                `json:"id"`
+	ContractAddress        string              `json:"contract_address"`
+	TokenID                int64               `json:"token_id"`
+	OwnerAddress           string              `json:"owner_address"`
+	TransactionHash        string              `json:"transaction_hash"`
+	BlockNumber            int64               `json:"block_number"`
+	SukukCode              string              `json:"sukuk_code"`
+	SukukTitle             string              `json:"sukuk_title"`
+	SukukDeskripsi         string              `json:"sukuk_deskripsi"`
+	Status                 string              `json:"status"`
+	LogoURL                string              `json:"logo_url"`
+	Tenor                  string              `json:"tenor"`
+	ImbalHasil             string              `json:"imbal_hasil"`
+	PeriodePembelian       string              `json:"periode_pembelian"`
+	JatuhTempo             time.Time           `json:"jatuh_tempo"`
+	KuotaNasional          float64             `json:"kuota_nasional"`
+	PenerimaanKupon        string              `json:"penerimaan_kupon"`
+	MinimumPembelian       float64             `json:"minimum_pembelian"`
+	TanggalBayarKupon      string              `json:"tanggal_bayar_kupon"`
+	MaksimumPembelian      float64             `json:"maksimum_pembelian"`
+	KuponPertama           time.Time           `json:"kupon_pertama"`
+	TipeKupon              string              `json:"tipe_kupon"`
+	MetadataReady          bool                `json:"metadata_ready"`
+	CreatedAt              time.Time           `json:"created_at"`
+	UpdatedAt              time.Time           `json:"updated_at"`
+	LatestActivities       []ActivityEvent     `json:"latest_activities"`
+	AvailableDistributions []SukukYieldDistribution `json:"available_distributions"`
 }
 
 // ToListResponse converts SukukMetadata to SukukMetadataListResponse
 func (sm *SukukMetadata) ToListResponse() SukukMetadataListResponse {
 	return SukukMetadataListResponse{
-		ID:                sm.ID,
-		ContractAddress:   sm.ContractAddress,
-		TokenID:           sm.TokenID,
-		OwnerAddress:      sm.OwnerAddress,
-		TransactionHash:   sm.TransactionHash,
-		BlockNumber:       sm.BlockNumber,
-		SukukCode:         sm.SukukCode,
-		SukukTitle:        sm.SukukTitle,
-		SukukDeskripsi:    sm.SukukDeskripsi,
-		Status:            sm.Status,
-		LogoURL:           sm.LogoURL,
-		Tenor:             sm.Tenor,
-		ImbalHasil:        sm.ImbalHasil,
-		PeriodePembelian:  sm.PeriodePembelian,
-		JatuhTempo:        sm.JatuhTempo,
-		KuotaNasional:     sm.KuotaNasional,
-		PenerimaanKupon:   sm.PenerimaanKupon,
-		MinimumPembelian:  sm.MinimumPembelian,
-		TanggalBayarKupon: sm.TanggalBayarKupon,
-		MaksimumPembelian: sm.MaksimumPembelian,
-		KuponPertama:      sm.KuponPertama,
-		TipeKupon:         sm.TipeKupon,
-		MetadataReady:     sm.MetadataReady,
-		CreatedAt:         sm.CreatedAt,
-		UpdatedAt:         sm.UpdatedAt,
-		LatestActivities:  []ActivityEvent{}, // Will be populated by service
+		ID:                     sm.ID,
+		ContractAddress:        sm.ContractAddress,
+		TokenID:                sm.TokenID,
+		OwnerAddress:           sm.OwnerAddress,
+		TransactionHash:        sm.TransactionHash,
+		BlockNumber:            sm.BlockNumber,
+		SukukCode:              sm.SukukCode,
+		SukukTitle:             sm.SukukTitle,
+		SukukDeskripsi:         sm.SukukDeskripsi,
+		Status:                 sm.Status,
+		LogoURL:                sm.LogoURL,
+		Tenor:                  sm.Tenor,
+		ImbalHasil:             sm.ImbalHasil,
+		PeriodePembelian:       sm.PeriodePembelian,
+		JatuhTempo:             sm.JatuhTempo,
+		KuotaNasional:          sm.KuotaNasional,
+		PenerimaanKupon:        sm.PenerimaanKupon,
+		MinimumPembelian:       sm.MinimumPembelian,
+		TanggalBayarKupon:      sm.TanggalBayarKupon,
+		MaksimumPembelian:      sm.MaksimumPembelian,
+		KuponPertama:           sm.KuponPertama,
+		TipeKupon:              sm.TipeKupon,
+		MetadataReady:          sm.MetadataReady,
+		CreatedAt:              sm.CreatedAt,
+		UpdatedAt:              sm.UpdatedAt,
+		LatestActivities:       []ActivityEvent{}, // Will be populated by service
+		AvailableDistributions: []SukukYieldDistribution{}, // Will be populated by service
 	}
 }
