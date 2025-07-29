@@ -81,6 +81,7 @@ func (s *Server) setupRoutes() {
 			sukukMetadata.POST("", handlers.CreateSukukMetadata)
 			sukukMetadata.PUT("/:id", handlers.UpdateSukukMetadata)
 			sukukMetadata.PUT("/:id/ready", handlers.MarkSukukMetadataReady)
+			sukukMetadata.PUT("/:id/unready", handlers.MarkSukukMetadataUnready)
 			sukukMetadata.POST("/sync", handlers.TriggerSukukMetadataSync)
 			sukukMetadata.GET("/tables", handlers.ListSukukCreationTables)
 		}

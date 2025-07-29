@@ -17,13 +17,14 @@ type PortfolioResponse struct {
 
 // SukukHolding represents user's holding in a specific sukuk
 type SukukHolding struct {
-	SukukAddress     string               `json:"sukuk_address"`
-	Balance          string               `json:"balance"`                    // Current token balance
-	ClaimableYield   string               `json:"claimable_yield"`           // Available yield to claim
-	TotalYieldClaimed string              `json:"total_yield_claimed"`       // Total yield claimed historically
-	LastActivity     *time.Time           `json:"last_activity,omitempty"`   // Last purchase/redemption
-	Metadata         *SukukMetadata       `json:"metadata,omitempty"`        // Sukuk details
-	YieldHistory     []YieldDistribution  `json:"yield_history,omitempty"`   // Recent yield distributions
+	SukukAddress           string               `json:"sukuk_address"`
+	Balance                string               `json:"balance"`                    // Current token balance
+	ClaimableYield         string               `json:"claimable_yield"`           // Available yield to claim
+	TotalYieldClaimed      string               `json:"total_yield_claimed"`       // Total yield claimed historically
+	UnclaimedDistributions []int64              `json:"unclaimed_distribution_ids"` // Distribution IDs available for claiming
+	LastActivity           *time.Time           `json:"last_activity,omitempty"`   // Last purchase/redemption
+	Metadata               *SukukMetadata       `json:"metadata,omitempty"`        // Sukuk details
+	YieldHistory           []YieldDistribution  `json:"yield_history,omitempty"`   // Recent yield distributions
 }
 
 // PortfolioSummary provides aggregate portfolio statistics
@@ -45,22 +46,24 @@ type YieldClaimsResponse struct {
 
 // YieldClaimDetail represents claimable yield for a specific sukuk
 type YieldClaimDetail struct {
-	SukukAddress    string    `json:"sukuk_address"`
-	ClaimableAmount string    `json:"claimable_amount"`
-	LastDistribution *time.Time `json:"last_distribution,omitempty"`
-	DistributionCount int      `json:"distribution_count"`
-	UserBalance     string    `json:"user_balance"`
-	Metadata        *SukukMetadata `json:"metadata,omitempty"`
+	SukukAddress         string    `json:"sukuk_address"`
+	ClaimableAmount      string    `json:"claimable_amount"`
+	LastDistribution     *time.Time `json:"last_distribution,omitempty"`
+	DistributionCount    int       `json:"distribution_count"`
+	UserBalance          string    `json:"user_balance"`
+	UnclaimedDistributions []int64 `json:"unclaimed_distribution_ids"` // Distribution IDs available for claiming
+	Metadata             *SukukMetadata `json:"metadata,omitempty"`
 }
 
 // YieldDistribution represents a yield distribution event
 type YieldDistribution struct {
-	ID           string    `json:"id"`
-	SukukAddress string    `json:"sukuk_address"`
-	Amount       string    `json:"amount"`
-	Timestamp    time.Time `json:"timestamp"`
-	TxHash       string    `json:"tx_hash"`
-	BlockNumber  int64     `json:"block_number"`
+	ID             string    `json:"id"`
+	SukukAddress   string    `json:"sukuk_address"`
+	DistributionId int64     `json:"distribution_id"`  // Required for claiming yields
+	Amount         string    `json:"amount"`
+	Timestamp      time.Time `json:"timestamp"`
+	TxHash         string    `json:"tx_hash"`
+	BlockNumber    int64     `json:"block_number"`
 }
 
 // YieldClaim represents a yield claim event

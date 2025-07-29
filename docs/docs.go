@@ -1072,6 +1072,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/sukuk-metadata/{id}/unready": {
+            "put": {
+                "description": "Mark sukuk metadata as unready (metadata_ready=false). This removes it from public API responses filtered by ready=true. Useful for taking sukuk offline for maintenance or updates.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sukuk-metadata"
+                ],
+                "summary": "Mark sukuk metadata as unready",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "example": 36,
+                        "description": "Sukuk metadata ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukuk metadata marked as unready",
+                        "schema": {
+                            "$ref": "#/definitions/models.SukukMetadataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID format",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sukuk metadata not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update sukuk metadata",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/transaction-history/{address}": {
             "get": {
                 "description": "Get all blockchain activities (purchases and redemptions) for a specific user address",
@@ -1649,6 +1709,13 @@ const docTemplate = `{
                     "description": "Total yield claimed historically",
                     "type": "string"
                 },
+                "unclaimed_distribution_ids": {
+                    "description": "Distribution IDs available for claiming",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "yield_history": {
                     "description": "Recent yield distributions",
                     "type": "array",
@@ -2123,6 +2190,13 @@ const docTemplate = `{
                 "sukuk_address": {
                     "type": "string"
                 },
+                "unclaimed_distribution_ids": {
+                    "description": "Distribution IDs available for claiming",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "user_balance": {
                     "type": "string"
                 }
@@ -2156,6 +2230,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "block_number": {
+                    "type": "integer"
+                },
+                "distribution_id": {
+                    "description": "Required for claiming yields",
                     "type": "integer"
                 },
                 "id": {

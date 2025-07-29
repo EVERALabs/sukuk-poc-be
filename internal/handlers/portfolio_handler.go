@@ -93,14 +93,23 @@ func GetUserPortfolio(c *gin.Context) {
 			apiHolding.YieldHistory = make([]models.YieldDistribution, len(distributions))
 			for j, dist := range distributions {
 				apiHolding.YieldHistory[j] = models.YieldDistribution{
-					ID:           dist.ID,
-					SukukAddress: dist.SukukAddress,
-					Amount:       dist.Amount,
-					Timestamp:    time.Unix(dist.Timestamp, 0),
-					TxHash:       dist.TxHash,
-					BlockNumber:  dist.BlockNumber,
+					ID:             dist.ID,
+					SukukAddress:   dist.SukukAddress,
+					DistributionId: dist.DistributionId, // Include distribution ID
+					Amount:         dist.Amount,
+					Timestamp:      time.Unix(dist.Timestamp, 0),
+					TxHash:         dist.TxHash,
+					BlockNumber:    dist.BlockNumber,
 				}
 			}
+		}
+
+		// Get unclaimed distribution IDs for this user and sukuk
+		unclaimedIds, err := indexerService.GetUnclaimedDistributionIds(address, holding.SukukAddress)
+		if err == nil {
+			apiHolding.UnclaimedDistributions = unclaimedIds
+		} else {
+			apiHolding.UnclaimedDistributions = []int64{} // Ensure empty array instead of null
 		}
 
 		// Get total yield claimed by user for this sukuk
@@ -347,12 +356,13 @@ func GetYieldDistributions(c *gin.Context) {
 	apiDistributions := make([]models.YieldDistribution, len(distributions))
 	for i, dist := range distributions {
 		apiDistributions[i] = models.YieldDistribution{
-			ID:           dist.ID,
-			SukukAddress: dist.SukukAddress,
-			Amount:       dist.Amount,
-			Timestamp:    time.Unix(dist.Timestamp, 0),
-			TxHash:       dist.TxHash,
-			BlockNumber:  dist.BlockNumber,
+			ID:             dist.ID,
+			SukukAddress:   dist.SukukAddress,
+			DistributionId: dist.DistributionId, // Include distribution ID
+			Amount:         dist.Amount,
+			Timestamp:      time.Unix(dist.Timestamp, 0),
+			TxHash:         dist.TxHash,
+			BlockNumber:    dist.BlockNumber,
 		}
 	}
 

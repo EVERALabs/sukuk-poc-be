@@ -309,6 +309,61 @@ func (s *IndexerQueryService) GetSukukOwnedByAddress(userAddress string) ([]stri
 	return sukukAddresses, nil
 }
 
+// GetUnclaimedDistributionIds returns distribution IDs that a user can claim for a specific sukuk
+func (s *IndexerQueryService) GetUnclaimedDistributionIds(userAddress string, sukukAddress string) ([]int64, error) {
+	if s.indexerDB == nil {
+		if err := s.ConnectToIndexer(); err != nil {
+			return nil, err
+		}
+	}
+
+	// Get latest table names using dynamic discovery
+	distributedTable, err := s.tableService.GetLatestTableForEvent("yield_distributed")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find yield_distributed table: %w", err)
+	}
+
+	claimedTable, err := s.tableService.GetLatestTableForEvent("yield_claimed")
+	if err != nil {
+		return nil, fmt.Errorf("failed to find yield_claimed table: %w", err)
+	}
+
+	// Get all yield distributions for this sukuk
+	var distributions []IndexerYieldDistributed
+	err = s.indexerDB.Table(distributedTable).
+		Where("sukuk_address = ?", sukukAddress).
+		Order("distribution_id ASC").
+		Find(&distributions).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to query yield distributions from %s: %w", distributedTable, err)
+	}
+
+	// Get all yield claims by this user for this sukuk
+	var claims []IndexerYieldClaimed
+	err = s.indexerDB.Table(claimedTable).
+		Where("user = ? AND sukuk_address = ?", userAddress, sukukAddress).
+		Find(&claims).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to query yield claims from %s: %w", claimedTable, err)
+	}
+
+	// Create a map of claimed distribution IDs
+	claimedMap := make(map[int64]bool)
+	for _, claim := range claims {
+		claimedMap[claim.DistributionId] = true
+	}
+
+	// Filter out claimed distributions
+	var unclaimedIds []int64
+	for _, dist := range distributions {
+		if !claimedMap[dist.DistributionId] {
+			unclaimedIds = append(unclaimedIds, dist.DistributionId)
+		}
+	}
+
+	return unclaimedIds, nil
+}
+
 // enrichActivitiesWithSukukMetadata enriches activities with sukuk metadata (code and title)
 func (s *IndexerQueryService) enrichActivitiesWithSukukMetadata(activities []models.ActivityEvent) ([]models.ActivityEvent, error) {
 	if len(activities) == 0 {

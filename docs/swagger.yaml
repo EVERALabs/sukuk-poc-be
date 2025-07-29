@@ -232,6 +232,11 @@ definitions:
       total_yield_claimed:
         description: Total yield claimed historically
         type: string
+      unclaimed_distribution_ids:
+        description: Distribution IDs available for claiming
+        items:
+          type: integer
+        type: array
       yield_history:
         description: Recent yield distributions
         items:
@@ -557,6 +562,11 @@ definitions:
         $ref: '#/definitions/models.SukukMetadata'
       sukuk_address:
         type: string
+      unclaimed_distribution_ids:
+        description: Distribution IDs available for claiming
+        items:
+          type: integer
+        type: array
       user_balance:
         type: string
     type: object
@@ -579,6 +589,9 @@ definitions:
       amount:
         type: string
       block_number:
+        type: integer
+      distribution_id:
+        description: Required for claiming yields
         type: integer
       id:
         type: string
@@ -1250,6 +1263,48 @@ paths:
               type: string
             type: object
       summary: Mark sukuk metadata as ready
+      tags:
+      - sukuk-metadata
+  /sukuk-metadata/{id}/unready:
+    put:
+      consumes:
+      - application/json
+      description: Mark sukuk metadata as unready (metadata_ready=false). This removes
+        it from public API responses filtered by ready=true. Useful for taking sukuk
+        offline for maintenance or updates.
+      parameters:
+      - description: Sukuk metadata ID
+        example: 36
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sukuk metadata marked as unready
+          schema:
+            $ref: '#/definitions/models.SukukMetadataResponse'
+        "400":
+          description: Invalid ID format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Sukuk metadata not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update sukuk metadata
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Mark sukuk metadata as unready
       tags:
       - sukuk-metadata
   /sukuk-metadata/sync:

@@ -255,6 +255,60 @@ func MarkSukukMetadataReady(c *gin.Context) {
 	c.JSON(http.StatusOK, sukukMetadata.ToResponse())
 }
 
+// MarkSukukMetadataUnready marks sukuk metadata as unready (not ready for public display)
+// @Summary Mark sukuk metadata as unready
+// @Description Mark sukuk metadata as unready (metadata_ready=false). This removes it from public API responses filtered by ready=true. Useful for taking sukuk offline for maintenance or updates.
+// @Tags sukuk-metadata
+// @Accept json
+// @Produce json
+// @Param id path int true "Sukuk metadata ID" Example(36)
+// @Success 200 {object} models.SukukMetadataResponse "Sukuk metadata marked as unready"
+// @Failure 400 {object} map[string]string "Invalid ID format"
+// @Failure 404 {object} map[string]string "Sukuk metadata not found"
+// @Failure 500 {object} map[string]string "Failed to update sukuk metadata"
+// @Router /sukuk-metadata/{id}/unready [put]
+func MarkSukukMetadataUnready(c *gin.Context) {
+	// Get ID from path
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid ID format",
+		})
+		return
+	}
+
+	// Find sukuk metadata
+	var sukukMetadata models.SukukMetadata
+	result := database.GetDB().First(&sukukMetadata, "id = ?", uint(id))
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Sukuk metadata not found",
+		})
+		return
+	}
+
+	// Update metadata_ready flag to false
+	result = database.GetDB().Model(&sukukMetadata).Update("metadata_ready", false)
+	if result.Error != nil {
+		logger.WithError(result.Error).Error("Failed to update sukuk metadata")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to update sukuk metadata",
+		})
+		return
+	}
+
+	// Reload the updated model
+	database.GetDB().First(&sukukMetadata, "id = ?", uint(id))
+
+	logger.WithFields(map[string]interface{}{
+		"sukuk_code": sukukMetadata.SukukCode,
+		"id":         sukukMetadata.ID,
+	}).Info("Sukuk metadata marked as unready")
+
+	c.JSON(http.StatusOK, sukukMetadata.ToResponse())
+}
+
 // UpdateSukukMetadata updates sukuk metadata with offchain data
 // @Summary Update sukuk metadata with offchain business data
 // @Description Update existing sukuk metadata with offchain business information like tenor, imbal hasil, kuota nasional, etc. All fields are optional for partial updates. Onchain data (contract address, transaction hash, etc.) is preserved.
