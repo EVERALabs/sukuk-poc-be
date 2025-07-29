@@ -1906,6 +1906,12 @@ const docTemplate = `{
         "models.SukukMetadataListResponse": {
             "type": "object",
             "properties": {
+                "available_distributions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SukukYieldDistribution"
+                    }
+                },
                 "block_number": {
                     "type": "integer"
                 },
@@ -2118,6 +2124,34 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tipe_kupon": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SukukYieldDistribution": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Total distributed amount",
+                    "type": "string"
+                },
+                "claimable": {
+                    "description": "Whether user can claim this distribution",
+                    "type": "boolean"
+                },
+                "claimed_amount": {
+                    "description": "Amount user has already claimed",
+                    "type": "string"
+                },
+                "distribution_id": {
+                    "type": "integer"
+                },
+                "payment_token": {
+                    "description": "Token address (e.g., IDRX)",
+                    "type": "string"
+                },
+                "user_claimable_amount": {
+                    "description": "Amount user can claim based on holdings",
                     "type": "string"
                 }
             }

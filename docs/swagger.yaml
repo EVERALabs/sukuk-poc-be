@@ -372,6 +372,10 @@ definitions:
     type: object
   models.SukukMetadataListResponse:
     properties:
+      available_distributions:
+        items:
+          $ref: '#/definitions/models.SukukYieldDistribution'
+        type: array
       block_number:
         type: integer
       contract_address:
@@ -514,6 +518,26 @@ definitions:
         description: Main Features
         type: string
       tipe_kupon:
+        type: string
+    type: object
+  models.SukukYieldDistribution:
+    properties:
+      amount:
+        description: Total distributed amount
+        type: string
+      claimable:
+        description: Whether user can claim this distribution
+        type: boolean
+      claimed_amount:
+        description: Amount user has already claimed
+        type: string
+      distribution_id:
+        type: integer
+      payment_token:
+        description: Token address (e.g., IDRX)
+        type: string
+      user_claimable_amount:
+        description: Amount user can claim based on holdings
         type: string
     type: object
   models.TransactionEvent:
